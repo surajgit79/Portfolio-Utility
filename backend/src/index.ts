@@ -1,11 +1,18 @@
 import dotenv from "dotenv";
-import app from "./app";
-
 dotenv.config();
 
-const PORT = process.env.PORT;
+import app from "./app";
 
-app.listen(PORT, ()=>{
-    console.log(`Server running at port ${PORT}`);
-});
 
+const PORT = process.env.PORT || 3000;
+
+const start = async ()=>{
+    try {
+        await app.listen({port: Number(PORT)});
+    } catch (error) {
+        app.log.error(error);
+        process.exit(1);
+    }
+};
+
+start();
