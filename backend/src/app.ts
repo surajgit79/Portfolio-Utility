@@ -1,14 +1,22 @@
-import express from "express";
-import cors from "cors";
-import 'dotenv/config';
+import Fastify from "fastify";
+import cors from "@fastify/cors";
+import rateLimit from "@fastify/rate-limit";
+import helmet from "@fastify/helmet";
 
-const app = express();
+const app = Fastify({logger: true});
 
-app.use(cors());
-app.use(express.json());
+app.register(helmet);
+app.register(cors, {
+    origin: process.env.FRONTEND_URL || 'http://localhost:8081',
+    credentials: true
+});
+app.register(rateLimit, {
+    max: 100,
+    timeWindow: "1 minute"
+});
 
-app.get("/health", (_req, res)=>{
-    res.json({status : "ok"})
+app.get('/health',async ()=>{
+    return {status: "ok"};
 });
 
 export default app;
