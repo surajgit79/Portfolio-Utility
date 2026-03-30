@@ -8,6 +8,13 @@
       "when": 1774858311805,
       "tag": "0000_loving_hiroim",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1774879660114,
+      "tag": "0001_wide_hiroim",
+      "breakpoints": true
     }
   ]
 }

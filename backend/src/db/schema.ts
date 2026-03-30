@@ -5,6 +5,6 @@ export const users = pgTable("users", {
     email: text("email").notNull().unique(),
     password: text("password").notNull(),
     role: text("role", {enum:["admin", "teacher"]}).notNull().default("teacher"),
-    createdAt: timestamp("createdAt").defaultNow().notNull(),
-    updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
 })
