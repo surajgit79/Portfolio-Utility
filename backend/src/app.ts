@@ -15,8 +15,8 @@ app.register(rateLimit, {
     timeWindow: "1 minute"
 });
 
-app.get('/health',async=>{
+app.get('/health',async ()=>{
     return {status: "ok"};
-})
+});
 
 export default app;
