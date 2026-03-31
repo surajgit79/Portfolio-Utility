@@ -3,6 +3,7 @@ import cors from "@fastify/cors";
 import rateLimit from "@fastify/rate-limit";
 import helmet from "@fastify/helmet";
 import { authRoutes } from "./routes/auth.route";
+import { teacherRoutes } from "./routes/teacher.route";
 
 const app = Fastify({logger: true});
 
@@ -18,6 +19,7 @@ app.register(rateLimit, {
 });
 
 app.register(authRoutes, { prefix: "/api/auth" });
+app.register(teacherRoutes, {prefix: "/api/teachers"});
 
 app.get('/health',async ()=>{
     return {status: "ok"};
