@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:16
+    image: surajg4711/portfolio-utility-db:latest
     container_name: portfolio-utility-db
     restart: unless-stopped
     environment:
