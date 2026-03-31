@@ -4,8 +4,7 @@ import { users } from "../db/schema";
 import { eq } from "drizzle-orm";
 import { hashedPassword, comaprePassword } from "../utils/password";
 import { signToken } from "../utils/jwt";
-import { success } from "zod";
-import { tr } from "zod/v4/locales";
+import { generateId } from "../utils/idGenerator";
 
 export const register = async (
     request : FastifyRequest,
@@ -24,11 +23,13 @@ export const register = async (
     }
 
     const hashed = await hashedPassword(password);
+    const id = await generateId("users");
 
     const [user] = await db.insert(users).values({
+        id,
         email,
         password: hashed,
-        role
+        role,
     }).returning();
 
     const token = signToken({userId: user.id, role: user.role as "admin" | "teacher"});

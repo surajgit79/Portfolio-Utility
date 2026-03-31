@@ -4,6 +4,7 @@ import { users, teachers } from "../db/schema";
 import { eq } from "drizzle-orm";
 import { string, success } from "zod";
 import { id } from "zod/v4/locales";
+import { generateId } from "../utils/idGenerator";
 
 
 export const createTeacher = async (
@@ -38,8 +39,10 @@ export const createTeacher = async (
             message: "Users only with role 'teacher' can have a profile",
         })
     }
+    const id = await generateId("teachers");
 
     const [teacher] = await db.insert(teachers).values({
+        id,
         userId, 
         name, 
         address, 
