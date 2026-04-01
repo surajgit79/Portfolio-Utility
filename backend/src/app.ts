@@ -5,6 +5,7 @@ import helmet from "@fastify/helmet";
 import { authRoutes } from "./routes/auth.route";
 import { teacherRoutes } from "./routes/teacher.route";
 import { trainingEventRoutes } from "./routes/trainingEvent.route";
+import { trainingRecordsRoute } from "./routes/trainingRecords.routes";
 
 const app = Fastify({logger: true});
 
@@ -22,6 +23,8 @@ app.register(rateLimit, {
 app.register(authRoutes, { prefix: "/api/auth" });
 app.register(teacherRoutes, {prefix: "/api/teachers"});
 app.register(trainingEventRoutes, {prefix: "/api/training-events"});
+app.register(trainingRecordsRoute, {prefix: "/api/training-records"});
+
 
 app.get('/health',async ()=>{
     return {status: "ok"};

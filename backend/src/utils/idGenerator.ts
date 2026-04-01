@@ -73,7 +73,7 @@ export const generateCertificateNumber = async(
 
     const result = await db.execute(
         sql `SELECT certificate_number FROM training_records
-                WHERE certifictae_number LIKE ${pattern}
+                WHERE certificate_number LIKE ${pattern}
                 ORDER BY id DESC
                 LIMIT 1`
     );

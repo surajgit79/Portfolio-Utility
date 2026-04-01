@@ -9,7 +9,7 @@ export const createTrainingEvent = async(
     request: FastifyRequest,
     reply: FastifyReply
 )=>{
-    const { category, sector, phase, name, mentorsName, venue, description, startDate, duration,} = request.params as {
+    const { category, sector, phase, name, mentorsName, venue, description, startDate, duration,} = request.body as {
         category: "Activity-based Mathematics" | "Reading" | "Pre-School",
         sector: string;
         phase?: string;
@@ -90,7 +90,7 @@ export const updateTrainigEvent = async(
     request: FastifyRequest,
     reply: FastifyReply
 )=>{
-    const { id } = request.params as {id: string};
+    const { id } = request.body as {id: string};
 
     const [event] = await db.select().from(trainingEvents).where(eq(trainingEvents.id, id));
     if(!event){

@@ -50,4 +50,4 @@ export const trainingRecords = pgTable("training_records", {
   refPhotos: text("ref_photos"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}); 

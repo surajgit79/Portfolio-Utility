@@ -2,8 +2,6 @@ import { FastifyRequest, FastifyReply } from "fastify";
 import { db } from "../db/client";
 import { users, teachers } from "../db/schema";
 import { eq } from "drizzle-orm";
-import { string, success } from "zod";
-import { id } from "zod/v4/locales";
 import { generateId } from "../utils/idGenerator";
 
 
@@ -53,7 +51,7 @@ export const createTeacher = async (
         dob: new Date(dob)
     }).returning();
 
-    return reply.status(201).send({success: true, message: "Tecaher profile created successfully", data: teacher});
+    return reply.status(201).send({success: true, message: "Teacher profile created successfully", data: teacher});
 }
 
 export const getTeacher = async(
@@ -84,7 +82,7 @@ export const getTeacherById = async(
     const [teacher] = await db.select().from(teachers).where(eq(teachers.id, id));
 
     if(!teacher){
-        reply.status(404).send({success:false, message: "Teacher not found"});
+        return reply.status(404).send({success:false, message: "Teacher not found"});
     }
 
     return reply.send({
@@ -101,7 +99,7 @@ export const updateTeacher = async (
 )=>{
     const { id } = request.params as {id:string};
 
-    const { name, address, contact, email, gender, imageUrl, dob } = request.params as{
+    const { name, address, contact, email, gender, imageUrl, dob } = request.body as{
         name?: string,
         address?: string,
         contact?: string,
@@ -113,7 +111,7 @@ export const updateTeacher = async (
 
     const [existing] = await db.select().from(teachers).where(eq(teachers.id, id));
     if(!existing){
-        reply.status(404).send({ success:false, message: "Teacher records not found"});
+        return reply.status(404).send({ success:false, message: "Teacher records not found"});
     }
 
     const [ updated ] = await db.update(teachers).set({
