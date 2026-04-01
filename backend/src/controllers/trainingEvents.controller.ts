@@ -3,7 +3,6 @@ import { db } from "../db/client";
 import { trainingEvents } from "../db/schema";
 import { generateId } from "../utils/idGenerator";
 import { eq } from "drizzle-orm";
-import { success } from "zod";
 
 export const createTrainingEvent = async(
     request: FastifyRequest,
@@ -97,7 +96,7 @@ export const updateTrainigEvent = async(
         return reply.status(404).send({success:false, message: "Training Event not found"});
     }
 
-    const { category, sector, phase, name, mentorsName, venue, description, startDate, duration,} = request.params as {
+    const { category, sector, phase, name, mentorsName, venue, description, startDate, duration,} = request.body as {
         category?: "Activity-based Mathematics" | "Reading" | "Pre-School",
         sector?: string;
         phase?: string;

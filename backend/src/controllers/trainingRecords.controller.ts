@@ -1,10 +1,8 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-import { trainingEvents, trainingRecords } from "../db/schema";
+import { trainingEvents, trainingRecords, teachers } from "../db/schema";
 import { db } from "../db/client";
 import { eq } from "drizzle-orm";
 import { generateCertificateNumber, generateId } from "../utils/idGenerator";
-import { success } from "zod";
-import { request } from "node:http";
 
 export const createTrainingRecords = async (
     request: FastifyRequest,
@@ -22,6 +20,11 @@ export const createTrainingRecords = async (
     if(!event){
         return reply.status(404).send({success:false, message: "Training Event not found"});
     };
+
+    const [teacher] = await db.select().from(teachers).where(eq(teachers.id, teacherId));
+    if(!teacher){
+        return reply.status(404).send({success: false, message: "Teacher not found"});
+    }
 
     // check if the training records are already recorded
     const [exists] = await db.select().from(trainingRecords).where(eq(trainingRecords.teacherId, teacherId));
@@ -68,6 +71,12 @@ export const bulkCreateTrainingRecords = async(
     const skipped = [];
 
     for(const teacherId of teacherIds){
+        const [teacher] = await db.select().from(teachers).where(eq(teachers.id, teacherId));
+        if (!teacher) {
+        skipped.push(teacherId);
+        continue;
+        }
+        
         const [existing] = await db.select().from(trainingRecords).where(eq(trainingRecords.teacherId, teacherId));
         if(existing){
             skipped.push(existing);
