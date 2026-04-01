@@ -40,6 +40,48 @@ Portfolio-Utility/
 │   │   │   └── env.ts
 │   │   ├── controllers/
 │   │   │   ├── auth.controller.ts
+│   │   │   ├── teacher.controller.ts
+│   │   │   ├── trainingEvents.controller.ts
+│   │   │   └── trainingRecords.controller.ts
+│   │   ├── db/
+│   │   │   ├── client.ts
+│   │   │   └── schema.ts
+│   │   ├── middlewares/
+│   │   │   ├── requireAuth.ts
+│   │   │   └── requireRole.ts
+│   │   ├── routes/
+│   │   │   ├── auth.route.ts
+│   │   │   ├── teacher.route.ts
+│   │   │   ├── trainingEvent.route.ts
+│   │   │   └── trainingRecords.routes.ts
+│   │   ├── types/
+│   │   │   └── fastify.d.types.ts
+│   │   ├── utils/
+│   │   │   ├── idGenerator.ts
+│   │   │   ├── jwt.ts
+│   │   │   └── password.ts
+│   │   ├── app.ts
+│   │   └── index.ts
+│   ├── docker-compose.yml
+│   ├── drizzle.config.ts
+│   ├── .env.example
+│   ├── package.json
+│   └── tsconfig.json
+└── frontend/
+    ├── app/
+    ├── components/
+    ├── public/
+    ├── .env.example
+    ├── package.json
+    └── tsconfig.json
+```
+Portfolio-Utility/
+├── backend/
+│   ├── src/
+│   │   ├── config/
+│   │   │   └── env.ts
+│   │   ├── controllers/
+│   │   │   ├── auth.controller.ts
 │   │   │   └── teacher.controller.ts
 │   │   ├── db/
 │   │   │   ├── client.ts
@@ -109,32 +151,20 @@ POST   /api/teachers          → Create teacher profile (admin only)
 PATCH  /api/teachers/:id      → Update teacher profile (admin only)
 ```
 
-### Training
+### Training Events
 ```
-GET    /api/training/:teacherId   → Get training records (protected)
-POST   /api/training              → Add training record (admin only)
-PATCH  /api/training/:id          → Update training record (admin only)
-```
-
-### Career
-```
-GET    /api/career/:teacherId     → Get career records (protected)
-POST   /api/career                → Add career record (admin only)
-PATCH  /api/career/:id            → Update career record (admin only)
+GET    /api/training-events              → Get all training events (protected)
+GET    /api/training-events/:id         → Get training event by ID (protected)
+POST   /api/training-events              → Create training event (admin only)
+PATCH  /api/training-events/:id          → Update training event (admin only)
 ```
 
-### Events
+### Training Records
 ```
-GET    /api/events/:teacherId     → Get event records (protected)
-POST   /api/events                → Add event record (admin only)
-PATCH  /api/events/:id            → Update event record (admin only)
-```
-
-### Certificates
-```
-GET    /api/certificates/:id          → View certificate (protected)
-POST   /api/certificates              → Generate certificate (admin only)
-GET    /api/certificates/:id/download → Download certificate (protected)
+GET    /api/training-records/teacher/:teacherId       → Get records by teacher (protected)
+GET    /api/training-records/teacher/:trainingEventId → Get records by event (protected)
+POST   /api/training-records                          → Create training record (admin only)
+POST   /api/training-records/bulk                     → Bulk create records (admin only)
 ```
 
 ---
@@ -148,6 +178,11 @@ users
 teachers
   id, userId(FK), name, address, contact, email, gender, imageUrl, dob, createdAt, updatedAt
 
+training_events
+  id, category, sector, phase, name, mentorsName, venue, startDate, duration, description, createdAt, updatedAt
+
+training_records
+  id, teacherId(FK), trainingEventId(FK), rating, certificateNumber, refPhotos, createdAt, updatedAt
 ```
 
 ---
