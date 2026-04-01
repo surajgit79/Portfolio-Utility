@@ -2,6 +2,7 @@ import Fastify from "fastify";
 import cors from "@fastify/cors";
 import rateLimit from "@fastify/rate-limit";
 import helmet from "@fastify/helmet";
+import multipart from "@fastify/multipart";
 import { authRoutes } from "./routes/auth.route";
 import { teacherRoutes } from "./routes/teacher.route";
 import { trainingEventRoutes } from "./routes/trainingEvent.route";
@@ -18,6 +19,11 @@ app.register(cors, {
 app.register(rateLimit, {
     max: 100,
     timeWindow: "1 minute"
+});
+app.register(multipart, {
+    limits:{ 
+        fileSize: 5*1024*1024 // max 5MB
+    },
 });
 
 app.register(authRoutes, { prefix: "/api/auth" });
