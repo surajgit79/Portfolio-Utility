@@ -1,22 +1,26 @@
 import { FastifyInstance } from "fastify";
-import { createTeacher, updateTeacher, getTeacher, getTeacherById } from "../controllers/teacher.controller";
+import { createTeacher, getTeachers, getTeacherById, updateTeacher, deleteTeacher,} from "../controllers/teacher.controller";
 import { requireAuth } from "../middlewares/requireAuth";
 import { requireRole } from "../middlewares/requireRole";
 
 export async function teacherRoutes(app: FastifyInstance) {
-    // Admin + Teacher
-    app.get("/", getTeacher);
-    app.get("/:id", getTeacherById);
+  // Public routes
+  app.get("/", { handler: getTeachers });
+  app.get("/:id", { handler: getTeacherById });
 
-    //Admin only
-    app.post("/", {
-        preHandler: [requireAuth, requireRole("admin")],
-        handler: createTeacher
-    });
+  // Admin only
+  app.post("/", {
+    preHandler: [requireAuth, requireRole("admin")],
+    handler:    createTeacher,
+  });
 
-    app.patch("/:id", {
-        preHandler: [requireAuth, requireRole("admin")],
-        handler: updateTeacher
-    });
-};
+  app.patch("/:id", {
+    preHandler: [requireAuth, requireRole("admin")],
+    handler:    updateTeacher,
+  });
 
+  app.delete("/:id", {
+    preHandler: [requireAuth, requireRole("admin")],
+    handler:    deleteTeacher,
+  });
+}
