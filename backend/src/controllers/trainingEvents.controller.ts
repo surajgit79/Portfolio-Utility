@@ -46,7 +46,7 @@ export const getTrainingEvents = async(
     request: FastifyRequest,
     reply: FastifyReply
 ) =>{
-    const { category, sector } = request.params as{
+    const { category, sector } = request.query as{
         category?: string,
         sector?: string,
     };
@@ -56,6 +56,7 @@ export const getTrainingEvents = async(
     const filtered = result.filter((event)=>{
         if(category && event.category !== category) return false;
         if(sector && event.sector !== sector) return false;
+        return true;    
     });
 
     return reply.send({

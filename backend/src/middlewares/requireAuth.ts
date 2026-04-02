@@ -17,6 +17,6 @@ export const requireAuth = async (
         const payload = verifyToken(token);
         request.user = payload;
     } catch (error) {
-        reply.status(401).send({success: false, message: "Invalid or expired token"});
+        return reply.status(401).send({success: false, message: "Invalid or expired token"});
     }
 }

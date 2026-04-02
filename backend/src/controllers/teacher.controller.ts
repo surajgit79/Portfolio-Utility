@@ -1,143 +1,92 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-import { db } from "../db/client";
-import { users, teachers } from "../db/schema";
-import { eq } from "drizzle-orm";
-import { generateId } from "../utils/idGenerator";
-import { uploadSingleImage } from "../utils/upload";
-
+import { teacherService } from "../services/teacher.service";
+import { createTeacherSchema, updateTeacherSchema } from "../utils/validation";
 
 export const createTeacher = async (
-    request: FastifyRequest,
-    reply: FastifyReply
-) =>{
+  request: FastifyRequest,
+  reply: FastifyReply
+) => {
+  const body = createTeacherSchema.safeParse(request.body);
 
-    const {userId, name, address, contact, email, gender, dob} = request.body as{
-        userId: string,
-        name: string,
-        address: string,
-        contact: string,
-        email: string,
-        gender: "Male" | "Female" | "Others",
-        dob: string,
-    }
-
-    const existing = await db.select().from(teachers).where(eq(teachers.userId, userId));
-    if(existing.length>0){
-        return reply.status(409).send({success: false, message: "Teacher profile already exists for this user"});
-    }
-
-    const [user] = await db.select().from(users).where(eq(users.id, userId));
-    if(!user){
-        return reply.status(404).send({success:false, message: "User not found"});
-    }
-
-    if(user.role !== "teacher"){
-        return reply.status(400).send({
-            success: false,
-            message: "Users only with role 'teacher' can have a profile",
-        })
-    }
-    const id = await generateId("teachers");
-    let imageUrl: string | undefined;
-    if(request.isMultipart()){
-        const url = await uploadSingleImage(request, "portfolio-utility/tecahers");
-        if( url ) imageUrl = url;
-    }
-
-    const [teacher] = await db.insert(teachers).values({
-        id,
-        userId, 
-        name, 
-        address, 
-        contact, 
-        email, 
-        gender, 
-        imageUrl, 
-        dob: new Date(dob)
-    }).returning();
-
-    return reply.status(201).send({success: true, message: "Teacher profile created successfully", data: teacher});
-}
-
-export const getTeacher = async(
-    request: FastifyRequest,
-    reply: FastifyReply
-) =>{
-    const { search } = request.query as { search?: string};
-
-    const result = await db.select().from(teachers);
-
-    const filtered = search ? result.filter((t)=> 
-        t.name.toLowerCase().includes(search.toLowerCase()))
-    : result;
-
-    return reply.send({
-        success: true,
-        message: "Teachers fetched successfully",
-        data: filtered,
+  if (!body.success) {
+    return reply.status(400).send({
+      success: false,
+      message: "Validation failed",
+      errors:  body.error.flatten().fieldErrors,
     });
+  }
+
+  const teacher = await teacherService.create(body.data, request);
+
+  return reply.status(201).send({
+    success: true,
+    message: "Teacher profile created successfully",
+    data:    teacher,
+  });
 };
 
-export const getTeacherById = async(
-    request: FastifyRequest,
-    reply: FastifyReply
-)=>{
-    const { id } = request.params as { id: string};
+export const getTeachers = async (
+  request: FastifyRequest,
+  reply: FastifyReply
+) => {
+  const { search } = request.query as { search?: string };
+  const teachers   = await teacherService.getAll(search);
 
-    const [teacher] = await db.select().from(teachers).where(eq(teachers.id, id));
-
-    if(!teacher){
-        return reply.status(404).send({success:false, message: "Teacher not found"});
-    }
-
-    return reply.send({
-        success: true,
-        message: "Teacher records found",
-        data: teacher,
-    });
+  return reply.send({
+    success: true,
+    message: "Teachers fetched successfully",
+    data:    teachers,
+  });
 };
 
+export const getTeacherById = async (
+  request: FastifyRequest,
+  reply: FastifyReply
+) => {
+  const { id }    = request.params as { id: string };
+  const teacher   = await teacherService.getById(id);
+
+  return reply.send({
+    success: true,
+    message: "Teacher fetched successfully",
+    data:    teacher,
+  });
+};
 
 export const updateTeacher = async (
-    request: FastifyRequest,
-    reply: FastifyReply
-)=>{
-    const { id } = request.params as {id:string};
+  request: FastifyRequest,
+  reply: FastifyReply
+) => {
+  const { id } = request.params as { id: string };
 
-    const { name, address, contact, email, gender, dob } = request.body as{
-        name?: string,
-        address?: string,
-        contact?: string,
-        email?: string,
-        gender?: "Male" | "Female" | "Others",
-        dob?: string
-    }
+  const body = updateTeacherSchema.safeParse(request.body);
 
-    const [existing] = await db.select().from(teachers).where(eq(teachers.id, id));
-    if(!existing){
-        return reply.status(404).send({ success:false, message: "Teacher records not found"});
-    }
-
-    let imageUrl: string | undefined;
-    if(request.isMultipart()){
-        const url = await uploadSingleImage(request, "portfolio-utility/teachers");
-        if( url ) imageUrl = url;
-    }
-
-    const [ updated ] = await db.update(teachers).set({
-        ...(name && {name}),
-        ...(address && {address}),
-        ...(contact && {contact}),
-        ...(email && {email}),
-        ...(gender && {gender}),
-        ...(imageUrl && {imageUrl}),
-        ...(dob && {dob: new Date(dob)}),
-        updatedAt: new Date(),
-    }).where(eq(teachers.id, id)).returning();
-
-    return reply.send({
-        success: true, 
-        message: "Teachers' record Updated successfully", 
-        data: updated
+  if (!body.success) {
+    return reply.status(400).send({
+      success: false,
+      message: "Validation failed",
+      errors:  body.error.flatten().fieldErrors,
     });
-}
+  }
+
+  const teacher = await teacherService.update(id, body.data, request);
+
+  return reply.send({
+    success: true,
+    message: "Teacher updated successfully",
+    data:    teacher,
+  });
+};
+
+export const deleteTeacher = async (
+  request: FastifyRequest,
+  reply: FastifyReply
+) => {
+  const { id } = request.params as { id: string };
+  await teacherService.delete(id);
+
+  return reply.send({
+    success: true,
+    message: "Teacher deleted successfully",
+  });
+};

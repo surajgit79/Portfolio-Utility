@@ -51,3 +51,16 @@ export const trainingRecords = pgTable("training_records", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }); 
+
+export const careerRecords = pgTable("career_records",{
+    id: text("id").primaryKey(),
+    teacherId: text("teacher_id").notNull().references(()=>teachers.id, { onDelete: "cascade"}),
+    role: text("role").notNull(),
+    oraganization: text("organization").notNull(),
+    startDate: timestamp("start_date").notNull(),
+    endDate: timestamp("end_date"),
+    stillWorking: integer("still_working").notNull().default(0),
+    achievements: text("id"),
+    refContactDetail: text("ref_contact"),
+    createdAt: timestamp("created_at").defaultNow().notNull()
+});
