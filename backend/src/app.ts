@@ -7,6 +7,7 @@ import { authRoutes } from "./routes/auth.route";
 import { teacherRoutes } from "./routes/teacher.route";
 import { trainingEventRoutes } from "./routes/trainingEvent.route";
 import { trainingRecordsRoute } from "./routes/trainingRecords.routes";
+import { errorHandler } from "./utils/errorHandler";
 
 const app = Fastify({logger: true});
 
@@ -23,17 +24,18 @@ app.register(rateLimit, {
 app.register(multipart, {
     limits:{ 
         fileSize: 5*1024*1024 // max 5MB
-    },
+    },  
+});
+
+errorHandler(app);
+
+app.get('/health',async ()=>{
+    return {status: "ok"};
 });
 
 app.register(authRoutes, { prefix: "/api/auth" });
 app.register(teacherRoutes, {prefix: "/api/teachers"});
 app.register(trainingEventRoutes, {prefix: "/api/training-events"});
 app.register(trainingRecordsRoute, {prefix: "/api/training-records"});
-
-
-app.get('/health',async ()=>{
-    return {status: "ok"};
-});
 
 export default app;
