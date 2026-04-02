@@ -214,6 +214,55 @@ POST   /api/training-records/bulk                     → Bulk create records (a
 
 ---
 
+## ID Generation
+
+### Record IDs
+Format: `{PREFIX}-{YEAR}-{SEQUENCE}`
+- `PREFIX`: 3-letter code based on table (e.g., `USR` for users, `TCH` for teachers, `TRN` for training events, `TRC` for training records)
+- `YEAR`: Current year (4 digits)
+- `SEQUENCE`: Auto-incrementing 4-digit number, padded with zeros
+
+| Table | Prefix |
+|-------|--------|
+| users | USR |
+| teachers | TCH |
+| training_events | TRN |
+| training_records | TRC |
+| career_records | CAR |
+| event_records | EVT |
+
+**Example:** `TCH-2026-0001`, `TRC-2026-0001`
+
+### Certificate Numbers
+Format: `{CATEGORY}-{SECTOR}{PHASE?}-{YEAR}-{SEQUENCE}`
+
+| Category | Code |
+|----------|------|
+| Activity-based Mathematics | ABM |
+| Reading | RED |
+| Pre-primary | PRE |
+
+| Sector | Code |
+|--------|------|
+| Book 1 | B1 |
+| Book 2 | B2 |
+| Book 3 | B3 |
+| Phonics | PHO |
+| Guided Reading | GR |
+| Book-based Activities | BBA |
+| Writing Workshop | WW |
+
+| Phase | Code |
+|-------|------|
+| Phase 1 | P1 |
+| Phase 2 | P2 |
+
+**Examples:**
+- `ABM-B1P1-2026-0001` (Activity-based Mathematics, Book 1, Phase 1)
+- `RED-GR-2026-0001` (Reading, Guided Reading, no phase)
+
+---
+
 ## Database Schema
 
 ```
