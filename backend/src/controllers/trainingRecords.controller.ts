@@ -3,16 +3,16 @@ import { trainingEvents, trainingRecords, teachers } from "../db/schema";
 import { db } from "../db/client";
 import { eq } from "drizzle-orm";
 import { generateCertificateNumber, generateId } from "../utils/idGenerator";
+import { uploadMultipleImages, uploadSingleImage } from "../utils/upload";
 
 export const createTrainingRecords = async (
     request: FastifyRequest,
     reply: FastifyReply
 )=>{
-    const { teacherId, trainingEventId, rating, refPhotos} = request.body as {
+    const { teacherId, trainingEventId, rating} = request.body as {
         teacherId: string;
         trainingEventId: string;
         rating: number;
-        refPhotos: string;
     };
 
     // check if the training event exists or not
@@ -34,6 +34,11 @@ export const createTrainingRecords = async (
 
     const id = await generateId("training_records");
     const certificateNumber = await generateCertificateNumber(event.category, event.sector, event.phase ?? null);
+    let refPhotos: string | undefined;
+    if(request.isMultipart()){
+        const urls = await uploadMultipleImages(request, "portfolio-utility/training-records");
+        if(urls.length > 0) refPhotos = urls.join(",");
+    }
     
     const [record] = await db.insert(trainingRecords).values({
         id,
