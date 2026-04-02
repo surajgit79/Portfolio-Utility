@@ -19,6 +19,7 @@ A full-stack Teacher/Trainee Portfolio Management System that allows admins to m
 | Pino | Logging (built into Fastify) |
 | Docker | PostgreSQL containerization |
 | bcryptjs | Password hashing |
+| Cloudinary | Image upload & storage |
 
 ### Frontend
 | Tool | Purpose |
@@ -32,6 +33,50 @@ A full-stack Teacher/Trainee Portfolio Management System that allows admins to m
 
 ## Project Structure
 
+```
+Portfolio-Utility/
+├── backend/
+│   ├── src/
+│   │   ├── config/
+│   │   │   └── env.ts
+│   │   ├── controllers/
+│   │   │   ├── auth.controller.ts
+│   │   │   ├── teacher.controller.ts
+│   │   │   ├── trainingEvents.controller.ts
+│   │   │   └── trainingRecords.controller.ts
+│   │   ├── db/
+│   │   │   ├── client.ts
+│   │   │   └── schema.ts
+│   │   ├── middlewares/
+│   │   │   ├── requireAuth.ts
+│   │   │   └── requireRole.ts
+│   │   ├── routes/
+│   │   │   ├── auth.route.ts
+│   │   │   ├── teacher.route.ts
+│   │   │   ├── trainingEvent.route.ts
+│   │   │   └── trainingRecords.routes.ts
+│   │   ├── types/
+│   │   │   └── fastify.d.types.ts
+│   │   ├── utils/
+│   │   │   ├── cloudinary.ts
+│   │   │   ├── idGenerator.ts
+│   │   │   ├── jwt.ts
+│   │   │   ├── password.ts
+│   │   │   └── upload.ts
+│   │   ├── app.ts
+│   │   └── index.ts
+│   ├── docker-compose.yml
+│   ├── drizzle.config.ts
+│   ├── .env.example
+│   ├── package.json
+│   └── tsconfig.json
+└── frontend/
+    ├── app/
+    ├── components/
+    ├── public/
+    ├── .env.example
+    ├── package.json
+    └── tsconfig.json
 ```
 Portfolio-Utility/
 ├── backend/
@@ -219,6 +264,9 @@ DATABASE_URL=
 JWT_SECRET=
 JWT_EXPIRES_IN=
 FRONTEND_URL=
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
 ```
 
 **4. Start the database**
@@ -315,6 +363,9 @@ fix/cors-origin-error
 | JWT_SECRET | Secret key for JWT signing | random-long-string |
 | JWT_EXPIRES_IN | JWT expiry duration | 7d |
 | FRONTEND_URL | Allowed CORS origin | http://localhost:3001 |
+| CLOUDINARY_CLOUD_NAME | Cloudinary cloud name | your-cloud-name |
+| CLOUDINARY_API_KEY | Cloudinary API key | your-api-key |
+| CLOUDINARY_API_SECRET | Cloudinary API secret | your-api-secret |
 
 ### Frontend
 | Variable | Description | Example |
