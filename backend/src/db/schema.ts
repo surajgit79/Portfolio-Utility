@@ -1,7 +1,7 @@
-import { pgTable, uuid, text, timestamp, pgEnum, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, pgEnum, integer } from "drizzle-orm/pg-core";
 
 export const genderEnum = pgEnum("gender", ["Male", "Female", "Others"]);
-export const categoryEnum = pgEnum("sector", ["Activity-based Mathematics", "Pre-School", "Reading"]);
+export const categoryEnum = pgEnum("category", ["Activity-based Mathematics", "Pre-School", "Reading"]);
 
 export const users = pgTable("users", {
     id: text("id").primaryKey(),
@@ -50,4 +50,4 @@ export const trainingRecords = pgTable("training_records", {
   refPhotos: text("ref_photos"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}); 

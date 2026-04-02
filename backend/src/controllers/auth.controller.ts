@@ -2,7 +2,7 @@ import { FastifyRequest, FastifyReply} from "fastify";
 import { db } from "../db/client";
 import { users } from "../db/schema";
 import { eq } from "drizzle-orm";
-import { hashedPassword, comaprePassword } from "../utils/password";
+import { hashedPassword, comparePassword } from "../utils/password";
 import { signToken } from "../utils/jwt";
 import { generateId } from "../utils/idGenerator";
 
@@ -10,11 +10,13 @@ export const register = async (
     request : FastifyRequest,
     reply: FastifyReply
 ) =>{
+    console.log("CP0");
     const {email, password, role} = request.body as {
         email: string;
         password: string;
         role: "admin" | "teacher";
     };
+    console.log("CP1");
 
     const existing = await db.select().from(users).where(eq(users.email, email));
 
@@ -56,7 +58,7 @@ export const login = async (
         return reply.status(401).send({success: false, message: "Invalid Credentials"});
     }
 
-    const valid = await comaprePassword(password, user.password);
+    const valid = await comparePassword(password, user.password);
 
     if(!valid){
         return reply.status(401).send({success: false, message: "Invalid Credentials"});

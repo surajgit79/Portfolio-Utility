@@ -3,5 +3,8 @@ export const env ={
     databaseUrl:  process.env.DATABASE_URL!,
     jwtSecret:    process.env.JWT_SECRET!,
     jwtExpiresIn: process.env.JWT_EXPIRES_IN || "7d",
-    frontendUrl:  process.env.FRONTEND_URL || "http://localhost:8081"
+    frontendUrl:  process.env.FRONTEND_URL || "http://localhost:8081",
+    cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME!,
+    cloudinaryApiKey:    process.env.CLOUDINARY_API_KEY!,
+    cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET!,
 };

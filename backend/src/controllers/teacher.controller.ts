@@ -2,9 +2,8 @@ import { FastifyRequest, FastifyReply } from "fastify";
 import { db } from "../db/client";
 import { users, teachers } from "../db/schema";
 import { eq } from "drizzle-orm";
-import { string, success } from "zod";
-import { id } from "zod/v4/locales";
 import { generateId } from "../utils/idGenerator";
+import { uploadSingleImage } from "../utils/upload";
 
 
 export const createTeacher = async (
@@ -12,15 +11,14 @@ export const createTeacher = async (
     reply: FastifyReply
 ) =>{
 
-    const {userId, name, address, contact, email, gender, imageUrl, dob} = request.body as{
+    const {userId, name, address, contact, email, gender, dob} = request.body as{
         userId: string,
         name: string,
         address: string,
         contact: string,
         email: string,
         gender: "Male" | "Female" | "Others",
-        imageUrl?: string,
-        dob: string
+        dob: string,
     }
 
     const existing = await db.select().from(teachers).where(eq(teachers.userId, userId));
@@ -40,6 +38,11 @@ export const createTeacher = async (
         })
     }
     const id = await generateId("teachers");
+    let imageUrl: string | undefined;
+    if(request.isMultipart()){
+        const url = await uploadSingleImage(request, "portfolio-utility/tecahers");
+        if( url ) imageUrl = url;
+    }
 
     const [teacher] = await db.insert(teachers).values({
         id,
@@ -53,7 +56,7 @@ export const createTeacher = async (
         dob: new Date(dob)
     }).returning();
 
-    return reply.status(201).send({success: true, message: "Tecaher profile created successfully", data: teacher});
+    return reply.status(201).send({success: true, message: "Teacher profile created successfully", data: teacher});
 }
 
 export const getTeacher = async(
@@ -84,7 +87,7 @@ export const getTeacherById = async(
     const [teacher] = await db.select().from(teachers).where(eq(teachers.id, id));
 
     if(!teacher){
-        reply.status(404).send({success:false, message: "Teacher not found"});
+        return reply.status(404).send({success:false, message: "Teacher not found"});
     }
 
     return reply.send({
@@ -101,19 +104,24 @@ export const updateTeacher = async (
 )=>{
     const { id } = request.params as {id:string};
 
-    const { name, address, contact, email, gender, imageUrl, dob } = request.params as{
+    const { name, address, contact, email, gender, dob } = request.body as{
         name?: string,
         address?: string,
         contact?: string,
         email?: string,
         gender?: "Male" | "Female" | "Others",
-        imageUrl?: string,
         dob?: string
     }
 
     const [existing] = await db.select().from(teachers).where(eq(teachers.id, id));
     if(!existing){
-        reply.status(404).send({ success:false, message: "Teacher records not found"});
+        return reply.status(404).send({ success:false, message: "Teacher records not found"});
+    }
+
+    let imageUrl: string | undefined;
+    if(request.isMultipart()){
+        const url = await uploadSingleImage(request, "portfolio-utility/teachers");
+        if( url ) imageUrl = url;
     }
 
     const [ updated ] = await db.update(teachers).set({

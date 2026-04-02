@@ -1,6 +1,5 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { verifyToken } from "../utils/jwt";
-import { success } from "zod";
 
 export const requireAuth = async (
     request: FastifyRequest,
