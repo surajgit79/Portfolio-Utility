@@ -78,87 +78,6 @@ Portfolio-Utility/
     ├── package.json
     └── tsconfig.json
 ```
-Portfolio-Utility/
-├── backend/
-│   ├── src/
-│   │   ├── config/
-│   │   │   └── env.ts
-│   │   ├── controllers/
-│   │   │   ├── auth.controller.ts
-│   │   │   ├── teacher.controller.ts
-│   │   │   ├── trainingEvents.controller.ts
-│   │   │   └── trainingRecords.controller.ts
-│   │   ├── db/
-│   │   │   ├── client.ts
-│   │   │   └── schema.ts
-│   │   ├── middlewares/
-│   │   │   ├── requireAuth.ts
-│   │   │   └── requireRole.ts
-│   │   ├── routes/
-│   │   │   ├── auth.route.ts
-│   │   │   ├── teacher.route.ts
-│   │   │   ├── trainingEvent.route.ts
-│   │   │   └── trainingRecords.routes.ts
-│   │   ├── types/
-│   │   │   └── fastify.d.types.ts
-│   │   ├── utils/
-│   │   │   ├── idGenerator.ts
-│   │   │   ├── jwt.ts
-│   │   │   └── password.ts
-│   │   ├── app.ts
-│   │   └── index.ts
-│   ├── docker-compose.yml
-│   ├── drizzle.config.ts
-│   ├── .env.example
-│   ├── package.json
-│   └── tsconfig.json
-└── frontend/
-    ├── app/
-    ├── components/
-    ├── public/
-    ├── .env.example
-    ├── package.json
-    └── tsconfig.json
-```
-Portfolio-Utility/
-├── backend/
-│   ├── src/
-│   │   ├── config/
-│   │   │   └── env.ts
-│   │   ├── controllers/
-│   │   │   ├── auth.controller.ts
-│   │   │   └── teacher.controller.ts
-│   │   ├── db/
-│   │   │   ├── client.ts
-│   │   │   └── schema.ts
-│   │   ├── middlewares/
-│   │   │   ├── requireAuth.ts
-│   │   │   └── requireRole.ts
-│   │   ├── routes/
-│   │   │   ├── auth.route.ts
-│   │   │   └── teacher.route.ts
-│   │   ├── services/
-│   │   ├── types/
-│   │   │   └── fastify.d.ts
-│   │   ├── utils/
-│   │   │   ├── jwt.ts
-│   │   │   └── password.ts
-│   │   ├── app.ts
-│   │   └── index.ts
-│   ├── drizzle/
-│   ├── docker-compose.yml
-│   ├── drizzle.config.ts
-│   ├── .env.example
-│   ├── package.json
-│   └── tsconfig.json
-└── frontend/
-    ├── app/
-    ├── components/
-    ├── public/
-    ├── .env.example
-    ├── package.json
-    └── tsconfig.json
-```
 
 ---
 
@@ -211,6 +130,55 @@ GET    /api/training-records/teacher/:trainingEventId → Get records by event (
 POST   /api/training-records                          → Create training record (admin only)
 POST   /api/training-records/bulk                     → Bulk create records (admin only)
 ```
+
+---
+
+## ID Generation
+
+### Record IDs
+Format: `{PREFIX}-{YEAR}-{SEQUENCE}`
+- `PREFIX`: 3-letter code based on table (e.g., `USR` for users, `TCH` for teachers, `TRN` for training events, `TRC` for training records)
+- `YEAR`: Current year (4 digits)
+- `SEQUENCE`: Auto-incrementing 4-digit number, padded with zeros
+
+| Table | Prefix |
+|-------|--------|
+| users | USR |
+| teachers | TCH |
+| training_events | TRN |
+| training_records | TRC |
+| career_records | CAR |
+| event_records | EVT |
+
+**Example:** `TCH-2026-0001`, `TRC-2026-0001`
+
+### Certificate Numbers
+Format: `{CATEGORY}-{SECTOR}{PHASE?}-{YEAR}-{SEQUENCE}`
+
+| Category | Code |
+|----------|------|
+| Activity-based Mathematics | ABM |
+| Reading | RED |
+| Pre-primary | PRE |
+
+| Sector | Code |
+|--------|------|
+| Book 1 | B1 |
+| Book 2 | B2 |
+| Book 3 | B3 |
+| Phonics | PHO |
+| Guided Reading | GR |
+| Book-based Activities | BBA |
+| Writing Workshop | WW |
+
+| Phase | Code |
+|-------|------|
+| Phase 1 | P1 |
+| Phase 2 | P2 |
+
+**Examples:**
+- `ABM-B1P1-2026-0001` (Activity-based Mathematics, Book 1, Phase 1)
+- `RED-GR-2026-0001` (Reading, Guided Reading, no phase)
 
 ---
 
