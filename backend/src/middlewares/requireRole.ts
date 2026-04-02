@@ -2,6 +2,12 @@ import { FastifyRequest, FastifyReply } from "fastify";
 
 export const requireRole = (...roles: ("admin" | "teacher")[]) =>{
     return async (request: FastifyRequest , reply: FastifyReply) =>{
+        if(!request.user){
+            return reply.status(401).send({
+                    success: false,
+                    message: "Unauthorized"
+            });
+        }
         if(!roles.includes(request.user.role)){
             return reply.status(403).send({
                     success: false,
