@@ -1,41 +1,22 @@
-import { FastifyRequest, FastifyReply } from "fastify";
-import { db } from "../db/client";
-import { trainingEvents } from "../db/schema";
-import { generateId } from "../utils/idGenerator";
-import { eq } from "drizzle-orm";
+import { FastifyReply, FastifyRequest } from "fastify";
+import { createTrainingEventSchema, updateTrainingEventSchema } from "../utils/validation";
+import { trainingEventService } from "../services/trainingEvent.service";
 
 export const createTrainingEvent = async(
     request: FastifyRequest,
     reply: FastifyReply
 )=>{
-    const { category, sector, phase, name, mentorsName, venue, description, startDate, duration,} = request.body as {
-        category: "Activity-based Mathematics" | "Reading" | "Pre-School",
-        sector: string;
-        phase?: string;
-        name: string;
-        mentorsName?: string;
-        venue?: string;
-        description?: string;
-        startDate: string;
-        duration: string;
-    };
+    const body = createTrainingEventSchema.safeParse(request.body);
+    if(!body.success){
+        return reply.status(400).send({
+            success: false,
+            message: "Validation Failed",
+            error: body.error.flatten().fieldErrors,
+        });
+    }
 
-    const id = await generateId("training_events");
-
-    const [event] = await db.insert(trainingEvents).values({
-        id,
-        category,
-        sector,
-        phase,
-        name,
-        mentorsName,
-        venue,
-        description,
-        startDate: new Date(startDate),
-        duration,
-    }).returning();
-
-    return reply.status(201).send({
+    const event = trainingEventService.create(body.data);
+    return reply.send({
         success: true,
         message: "Training event created successfully",
         data: event,
@@ -46,23 +27,18 @@ export const getTrainingEvents = async(
     request: FastifyRequest,
     reply: FastifyReply
 ) =>{
-    const { category, sector } = request.query as{
+    const { category, sector, phase } = request.query as {
         category?: string,
         sector?: string,
+        phase?: string
     };
 
-    const result = await db.select().from(trainingEvents);
-
-    const filtered = result.filter((event)=>{
-        if(category && event.category !== category) return false;
-        if(sector && event.sector !== sector) return false;
-        return true;    
-    });
+    const events = trainingEventService.getAll(category, sector, phase);
 
     return reply.send({
         success: true,
         message: "Training events fetched successfully",
-        data: filtered,
+        data: events,
     });
 };
 
@@ -70,61 +46,50 @@ export const getTrainingEvents = async(
 export const getTrainingEventById = async(
     request: FastifyRequest,
     reply: FastifyReply
-)=>{
-    const { id } = request.params as { id: string};
-
-    const [event] = await db.select().from(trainingEvents).where(eq(trainingEvents.id, id));
-
-    if(!event){
-        return reply.status(404).send({success:false, message: "Training Event not found"});
-    }
+) =>{
+    const { id } = request.params as {id: string};
+    const event = trainingEventService.getById(id);
 
     return reply.send({
-        success:true,
-        message: "Training Event found",
+        success: true,
+        message: "Training event fetched successfully",
         data: event,
     });
 };
 
-export const updateTrainigEvent = async(
+export const updateTrainingEvent = async (
     request: FastifyRequest,
     reply: FastifyReply
 )=>{
-    const { id } = request.body as {id: string};
+    const { id } = request.params as { id: string};
 
-    const [event] = await db.select().from(trainingEvents).where(eq(trainingEvents.id, id));
-    if(!event){
-        return reply.status(404).send({success:false, message: "Training Event not found"});
+    const body = updateTrainingEventSchema.safeParse(request.body);
+    if(!body.success){
+        return reply.status(400).send({
+            success: false,
+            message: "Validation failed",
+            error: body.error.flatten().fieldErrors,
+        });
     }
 
-    const { category, sector, phase, name, mentorsName, venue, description, startDate, duration,} = request.body as {
-        category?: "Activity-based Mathematics" | "Reading" | "Pre-School",
-        sector?: string;
-        phase?: string;
-        name?: string;
-        mentorsName?: string;
-        venue?: string;
-        description?: string;
-        startDate?: string;
-        duration?: string;
-    };
-
-    const [updated] = await db.update(trainingEvents).set({
-        ...(category && { category }),
-        ...(sector && {sector}),
-        ...(phase && { phase }),
-        ...(name && { name }),
-        ...(mentorsName && { mentorsName }),
-        ...(venue && { venue }),
-        ...(description && { description }),
-        ...(startDate && { startDate: new Date(startDate) }),
-        ...(duration && { duration }),
-        updatedAt: new Date(),
-    }).where(eq(trainingEvents.id, id)).returning();
-
+    const event = trainingEventService.update(id, body.data);
     return reply.send({
-        success:true,
-        message: "Training Event updated successfully",
-        data: updated,
+        success: true,
+        message: "Training event updated successfully",
+        data: event,
     });
 };
+
+export const deleteTrainingEvent = async(
+    request: FastifyRequest,
+    reply: FastifyReply
+)=>{
+    const { id } = request.params as { id: string};
+    await trainingEventService.delete(id);
+    
+    return reply.send({
+        success: true,
+        message: "Training event deleted successfully"
+    });
+};
+

@@ -18,6 +18,9 @@ export const loginSchema = z.object({
 export type RegisterRequest = z.infer<typeof registerSchema>;
 export type LoginRequest    = z.infer<typeof loginSchema>;
 
+
+// Teacher
+
 export const createTeacherSchema = z.object({
   userId:  z.string().min(1, "User ID is required"),
   name:    z.string().min(2, "Name must be at least 2 characters"),
@@ -35,3 +38,26 @@ export const updateTeacherSchema = createTeacherSchema.partial();
 
 export type CreateTeacherRequest = z.infer<typeof createTeacherSchema>;
 export type UpdateTeacherRequest = z.infer<typeof updateTeacherSchema>;
+
+
+// Training-Event
+
+export const createTrainingEventSchema = z.object({
+  category:    z.enum(["Activity-based Mathematics", "Reading", "Pre-School"]),
+  sector:      z.string().min(2, "Sector is required"),
+  phase:       z.string().optional(),
+  name:        z.string().min(3, "Name must be at least 3 characters"),
+  mentorsName: z.string().optional(),
+  venue:       z.string().optional(),
+  description: z.string().optional(),
+  startDate:   z.string().refine(
+                 (date) => !isNaN(Date.parse(date)),
+                 "Invalid date format"
+               ),
+  duration:    z.string().min(1, "Duration is required"),
+});
+
+export const updateTrainingEventSchema = createTrainingEventSchema.partial();
+
+export type CreateTrainingEventRequest = z.infer<typeof createTrainingEventSchema>;
+export type UpdateTrainingEventRequest = z.infer<typeof updateTrainingEventSchema>;
