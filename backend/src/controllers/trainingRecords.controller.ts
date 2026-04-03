@@ -1,146 +1,113 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-import { trainingEvents, trainingRecords, teachers } from "../db/schema";
-import { db } from "../db/client";
-import { eq } from "drizzle-orm";
-import { generateCertificateNumber, generateId } from "../utils/idGenerator";
-import { uploadMultipleImages, uploadSingleImage } from "../utils/upload";
+import { trainingRecordService } from "../services/trainingRecord.service";
+import { createTrainingRecordSchema, bulkCreateTrainingRecordSchema, updateTrainingRecordSchema } from "../utils/validation";
 
-export const createTrainingRecords = async (
+export const createTrainingRecord = async (
     request: FastifyRequest,
     reply: FastifyReply
-)=>{
-    const { teacherId, trainingEventId, rating} = request.body as {
-        teacherId: string;
-        trainingEventId: string;
-        rating: number;
-    };
-
-    // check if the training event exists or not
-    const [event] = await db.select().from(trainingEvents).where(eq(trainingEvents.id, trainingEventId));
-    if(!event){
-        return reply.status(404).send({success:false, message: "Training Event not found"});
-    };
-
-    const [teacher] = await db.select().from(teachers).where(eq(teachers.id, teacherId));
-    if(!teacher){
-        return reply.status(404).send({success: false, message: "Teacher not found"});
+    ) => {
+    const body = createTrainingRecordSchema.safeParse(request.body);
+    if (!body.success) {
+        return reply.status(400).send({
+        success: false,
+        message: "Validation failed",
+        errors:  body.error.flatten().fieldErrors,
+        });
     }
 
-    // check if the training records are already recorded
-    const [exists] = await db.select().from(trainingRecords).where(eq(trainingRecords.teacherId, teacherId));
-    if(exists){
-        return reply.status(409).send({success:false, message: "Training record already exists for the teacher and event"});
-    };
+    const record = await trainingRecordService.create(body.data, request);
 
-    const id = await generateId("training_records");
-    const certificateNumber = await generateCertificateNumber(event.category, event.sector, event.phase ?? null);
-    let refPhotos: string | undefined;
-    if(request.isMultipart()){
-        const urls = await uploadMultipleImages(request, "portfolio-utility/training-records");
-        if(urls.length > 0) refPhotos = urls.join(",");
-    }
-    
-    const [record] = await db.insert(trainingRecords).values({
-        id,
-        teacherId,
-        trainingEventId,
-        rating,
-        certificateNumber,
-        refPhotos,
-    }).returning();
-
-    return reply.send({
+    return reply.status(201).send({
         success: true,
         message: "Training record created successfully",
-        data: record,
+        data:    record,
     });
 };
 
-
-export const bulkCreateTrainingRecords = async(
+export const bulkCreateTrainingRecords = async (
     request: FastifyRequest,
     reply: FastifyReply
-)=>{
-    const { trainingEventId, teacherIds, rating } = request.body as {
-        trainingEventId: string;
-        teacherIds: string[];
-        rating: number;
+    ) => {
+    const body = bulkCreateTrainingRecordSchema.safeParse(request.body);
+
+    if (!body.success) {
+        return reply.status(400).send({
+        success: false,
+        message: "Validation failed",
+        errors:  body.error.flatten().fieldErrors,
+        });
     }
 
-    const [event] = await db.select().from(trainingEvents).where(eq(trainingEvents.id, trainingEventId));
-    if(!event){
-        return reply.status(400).send({success:false, message: "Training Event not found"});
-    }
+    const result = await trainingRecordService.bulkCreate(body.data);
 
-    const created = [];
-    const skipped = [];
-
-    for(const teacherId of teacherIds){
-        const [teacher] = await db.select().from(teachers).where(eq(teachers.id, teacherId));
-        if (!teacher) {
-        skipped.push(teacherId);
-        continue;
-        }
-        
-        const [existing] = await db.select().from(trainingRecords).where(eq(trainingRecords.teacherId, teacherId));
-        if(existing){
-            skipped.push(existing);
-            continue;
-        }
-
-        const id = await generateId("training_records");
-        const certificateNumber = await generateCertificateNumber(event.category, event.sector, event.phase?? null);
-        const [record] = await db.insert(trainingRecords).values({
-            id, teacherId, trainingEventId, rating, certificateNumber
-        }).returning();
-
-        created.push(record);
-    }
-
-    return reply.send({
+    return reply.status(201).send({
         success: true,
-        message: `${created.length} records created, ${skipped.length} records skipped (found duplicate)`,
-        data: created,
+        message: `${result.created.length} records created, ${result.skipped.length} skipped`,
+        data:    result,
     });
 };
 
-export const getTrainingRecordByTeacher = async(
-    request:FastifyRequest,
+export const getTrainingRecordsByTeacher = async (
+    request: FastifyRequest,
     reply: FastifyReply
-)=>{
-    const { teacherId } = request.params as { teacherId: string};
-    
-    const records = await db.select().from(trainingRecords).where(eq(trainingRecords.teacherId, teacherId));
-    if(!records){
-        return reply.status(404).send({success: false, message:"No records found"});
-    }
+    ) => {
+    const { teacherId } = request.params as { teacherId: string };
+    const records       = await trainingRecordService.getByTeacher(teacherId);
 
     return reply.send({
         success: true,
         message: "Training records fetched successfully",
-        data: records,
+        data:    records,
     });
 };
 
-export const getTrainingRecordByEvent = async(
-    request:FastifyRequest,
+export const getTrainingRecordsByEvent = async (
+    request: FastifyRequest,
     reply: FastifyReply
-)=>{
-    const { trainingEventId } = request.params as { trainingEventId: string};
-
-    const records = await db.select().from(trainingRecords).where(eq(trainingRecords.trainingEventId, trainingEventId));
-    if(!records){
-        return reply.status(404).send({
-            success: false,
-            message: "Records not found"
-        });
-    }
+    ) => {
+    const { eventId } = request.params as { eventId: string };
+    const records     = await trainingRecordService.getByEvent(eventId);
 
     return reply.send({
         success: true,
-        message: "Trainnig Records fetched successfully",
-        data: records,
+        message: "Training records fetched successfully",
+        data:    records,
     });
 };
 
+export const updateTrainingRecord = async (
+    request: FastifyRequest,
+    reply: FastifyReply
+    ) => {
+    const { id } = request.params as { id: string };
+    const body = updateTrainingRecordSchema.safeParse(request.body);
 
+    if (!body.success) {
+        return reply.status(400).send({
+        success: false,
+        message: "Validation failed",
+        errors:  body.error.flatten().fieldErrors,
+        });
+    }
+
+    const record = await trainingRecordService.update(id, body.data);
+
+    return reply.send({
+        success: true,
+        message: "Training record updated successfully",
+        data:    record,
+    });
+};
+
+export const deleteTrainingRecord = async (
+    request: FastifyRequest,
+    reply: FastifyReply
+    ) => {
+    const { id } = request.params as { id: string };
+    await trainingRecordService.delete(id);
+
+    return reply.send({
+        success: true,
+        message: "Training record deleted successfully",
+    });
+};

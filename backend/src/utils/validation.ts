@@ -61,3 +61,26 @@ export const updateTrainingEventSchema = createTrainingEventSchema.partial();
 
 export type CreateTrainingEventRequest = z.infer<typeof createTrainingEventSchema>;
 export type UpdateTrainingEventRequest = z.infer<typeof updateTrainingEventSchema>;
+
+
+// Training-record
+export const createTrainingRecordSchema = z.object({
+  teacherId:       z.string().min(1, "Teacher ID is required"),
+  trainingEventId: z.string().min(1, "Training event ID is required"),
+  rating:          z.number().int().min(1, "Rating must be at least 1").max(5, "Rating must not exceed 5"),
+});
+
+export const bulkCreateTrainingRecordSchema = z.object({
+  trainingEventId: z.string().min(1, "Training event ID is required"),
+  teacherIds:      z.array(z.string().min(1)).min(1, "At least one teacher required"),
+  rating:          z.number().int().min(1, "Rating must be at least 1").max(5, "Rating must not exceed 5"),
+});
+
+export const updateTrainingRecordSchema = z.object({
+  rating:    z.number().int().min(1).max(5).optional(),
+  refPhotos: z.string().optional(),
+});
+
+export type CreateTrainingRecordRequest     = z.infer<typeof createTrainingRecordSchema>;
+export type BulkCreateTrainingRecordRequest = z.infer<typeof bulkCreateTrainingRecordSchema>;
+export type UpdateTrainingRecordRequest     = z.infer<typeof updateTrainingRecordSchema>;

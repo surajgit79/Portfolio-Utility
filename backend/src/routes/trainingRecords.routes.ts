@@ -1,27 +1,38 @@
 import { FastifyInstance } from "fastify";
-import { createTrainingRecords, getTrainingRecordByEvent, getTrainingRecordByTeacher, bulkCreateTrainingRecords } from "../controllers/trainingRecords.controller";
+import { createTrainingRecord,  bulkCreateTrainingRecords, getTrainingRecordsByTeacher, getTrainingRecordsByEvent, updateTrainingRecord, deleteTrainingRecord, } from "../controllers/trainingRecords.controller";
 import { requireAuth } from "../middlewares/requireAuth";
 import { requireRole } from "../middlewares/requireRole";
 
-export async function trainingRecordsRoute(app: FastifyInstance){
-
-    app.get("/teacher/:teacherId",{
+export async function trainingRecordRoutes(app: FastifyInstance) {
+    // Protected — both roles
+    app.get("/teacher/:teacherId", {
         preHandler: [requireAuth],
-        handler: getTrainingRecordByTeacher,
+        handler: getTrainingRecordsByTeacher,
     });
 
-    app.get("/event/:trainingEventId", {
+    app.get("/event/:eventId", {
         preHandler: [requireAuth],
-        handler: getTrainingRecordByEvent,
+        handler: getTrainingRecordsByEvent,
     });
 
-    app.post("/",{
+    // Admin only
+    app.post("/", {
         preHandler: [requireAuth, requireRole("admin")],
-        handler: createTrainingRecords,
+        handler: createTrainingRecord,
     });
 
-    app.post("/bulk",{
+    app.post("/bulk", {
         preHandler: [requireAuth, requireRole("admin")],
         handler: bulkCreateTrainingRecords,
     });
-};
+
+    app.patch("/:id", {
+        preHandler: [requireAuth, requireRole("admin")],
+        handler: updateTrainingRecord,
+    });
+
+    app.delete("/:id", {
+        preHandler: [requireAuth, requireRole("admin")],
+        handler: deleteTrainingRecord,
+    });
+}
