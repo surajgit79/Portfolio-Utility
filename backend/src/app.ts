@@ -6,8 +6,10 @@ import multipart from "@fastify/multipart";
 import { authRoutes } from "./routes/auth.route";
 import { teacherRoutes } from "./routes/teacher.route";
 import { trainingEventRoutes } from "./routes/trainingEvent.route";
-import { trainingRecordsRoute } from "./routes/trainingRecords.routes";
+import { trainingRecordRoutes } from "./routes/trainingRecords.routes";
 import { errorHandler } from "./utils/errorHandler";
+import { careerRecordRoutes } from "./routes/careerRecord.route";
+import { eventRecordRoutes } from "./routes/eventRecord.route";
 
 const app = Fastify({logger: true});
 
@@ -36,6 +38,8 @@ app.get('/health',async ()=>{
 app.register(authRoutes, { prefix: "/api/auth" });
 app.register(teacherRoutes, {prefix: "/api/teachers"});
 app.register(trainingEventRoutes, {prefix: "/api/training-events"});
-app.register(trainingRecordsRoute, {prefix: "/api/training-records"});
+app.register(trainingRecordRoutes, {prefix: "/api/training-records"});
+app.register(careerRecordRoutes,{prefix: "/api/career-records"});
+app.register(eventRecordRoutes, {prefix: "/api/event-records"});
 
 export default app;

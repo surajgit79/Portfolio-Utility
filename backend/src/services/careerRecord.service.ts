@@ -1,0 +1,88 @@
+import { careerRecordRepository } from "../repositories/careerRecord.repository";
+import { teacherRepository } from "../repositories/teacher.repository";
+import { generateId } from "../utils/idGenerator";
+import { AppError, ErrorCode } from "../utils/errorHandler";
+
+export const careerRecordService = {
+  create: async (data: {
+    teacherId:        string;
+    role:             string;
+    oraganization:    string;
+    startDate:        string;
+    endDate?:         string;
+    stillWorking:     number;
+    achievements?:    string;
+    refContactDetail?: string;
+  }) => {
+    const teacher = await teacherRepository.findById(data.teacherId);
+
+    if (!teacher) {
+      throw new AppError(404, ErrorCode.NOT_FOUND, "Teacher not found");
+    }
+
+    const id = await generateId("career_records");
+
+    const { startDate, endDate, ...rest } = data;
+
+    return careerRecordRepository.create({
+      id,
+      ...rest,
+      startDate: new Date(startDate),
+      ...(endDate && { endDate: new Date(endDate) }),
+    });
+  },
+
+  getByTeacher: async (teacherId: string) => {
+    const teacher = await teacherRepository.findById(teacherId);
+
+    if (!teacher) {
+      throw new AppError(404, ErrorCode.NOT_FOUND, "Teacher not found");
+    }
+
+    return careerRecordRepository.findByTeacherId(teacherId);
+  },
+
+  getById: async (id: string) => {
+    const record = await careerRecordRepository.findById(id);
+
+    if (!record) {
+      throw new AppError(404, ErrorCode.NOT_FOUND, "Career record not found");
+    }
+
+    return record;
+  },
+
+  update: async (id: string, data: Partial<{
+    role:             string;
+    oraganization:    string;
+    startDate:        string;
+    endDate:          string;
+    stillWorking:     number;
+    achievements:     string;
+    refContactDetail: string;
+  }>) => {
+    const existing = await careerRecordRepository.findById(id);
+
+    if (!existing) {
+      throw new AppError(404, ErrorCode.NOT_FOUND, "Career record not found");
+    }
+
+    const { startDate, endDate, ...rest } = data;
+
+    return careerRecordRepository.update(id, {
+      ...rest,
+      ...(startDate && { startDate: new Date(startDate) }),
+      ...(endDate && { endDate: new Date(endDate) }),
+    });
+  },
+
+  delete: async (id: string) => {
+    const existing = await careerRecordRepository.findById(id);
+
+    if (!existing) {
+      throw new AppError(404, ErrorCode.NOT_FOUND, "Career record not found");
+    }
+
+    await careerRecordRepository.delete(id);
+  },
+};

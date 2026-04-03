@@ -84,3 +84,49 @@ export const updateTrainingRecordSchema = z.object({
 export type CreateTrainingRecordRequest     = z.infer<typeof createTrainingRecordSchema>;
 export type BulkCreateTrainingRecordRequest = z.infer<typeof bulkCreateTrainingRecordSchema>;
 export type UpdateTrainingRecordRequest     = z.infer<typeof updateTrainingRecordSchema>;
+
+
+//career
+export const createCareerRecordSchema = z.object({
+  teacherId:        z.string().min(1, "Teacher ID is required"),
+  role:             z.string().min(2, "Role is required"),
+  organization:     z.string().min(2, "Organization is required"),
+  startDate:        z.string().refine(
+                      (date) => !isNaN(Date.parse(date)),
+                      "Invalid date format"
+                    ),
+  endDate:          z.string().refine(
+                      (date) => !isNaN(Date.parse(date)),
+                      "Invalid date format"
+                    ).optional(),
+  stillWorking:     z.number().int().min(0).max(1),
+  achievements:     z.string().optional(),
+  refContactDetail: z.string().optional(),
+});
+
+export const updateCareerRecordSchema = createCareerRecordSchema.partial();
+
+export type CreateCareerRecordRequest = z.infer<typeof createCareerRecordSchema>;
+export type UpdateCareerRecordRequest = z.infer<typeof updateCareerRecordSchema>;
+
+
+// event 
+
+export const createEventRecordSchema = z.object({
+  teacherId:   z.string().min(1, "Teacher ID is required"),
+  eventType:   z.enum(["Seminar", "Conference", "Panel Discussion", "Podcast"]),
+  name:        z.string().min(2, "Name is required"),
+  role:        z.string().min(2, "Role is required"),
+  organizer:   z.string().min(2, "Organizer is required"),
+  venue:       z.string().optional(),
+  date:        z.string().refine(
+                 (date) => !isNaN(Date.parse(date)),
+                 "Invalid date format"
+               ),
+  description: z.string().optional(),
+});
+
+export const updateEventRecordSchema = createEventRecordSchema.partial();
+
+export type CreateEventRecordRequest = z.infer<typeof createEventRecordSchema>;
+export type UpdateEventRecordRequest = z.infer<typeof updateEventRecordSchema>;

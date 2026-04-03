@@ -2,6 +2,7 @@ import { pgTable, text, timestamp, pgEnum, integer } from "drizzle-orm/pg-core";
 
 export const genderEnum = pgEnum("gender", ["Male", "Female", "Others"]);
 export const categoryEnum = pgEnum("category", ["Activity-based Mathematics", "Pre-School", "Reading"]);
+export const eventEnum = pgEnum("event_type", ["Seminar", "Conference", "Panel Discussion","Podcast"]);
 
 export const users = pgTable("users", {
     id: text("id").primaryKey(),
@@ -63,4 +64,19 @@ export const careerRecords = pgTable("career_records",{
     achievements: text("id"),
     refContactDetail: text("ref_contact"),
     createdAt: timestamp("created_at").defaultNow().notNull()
+});
+
+export const eventRecords = pgTable("event_records",{
+    id: text("id").primaryKey(),
+    teacherId: text("teacher_id").notNull().references(()=> teachers.id, {onDelete: "cascade"}),
+    eventType: eventEnum("event_type").notNull(),
+    name: text("name").notNull(),
+    role: text("role").notNull(),
+    organizer: text("organizer").notNull(),
+    venue: text("venue"),
+    date: timestamp("date").notNull(),
+    description: text("description"),
+    referenceImage: text("reference_image"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
