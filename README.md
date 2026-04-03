@@ -41,28 +41,50 @@ Portfolio-Utility/
 │   │   │   └── env.ts
 │   │   ├── controllers/
 │   │   │   ├── auth.controller.ts
+│   │   │   ├── careerRecord.controller.ts
+│   │   │   ├── eventRecord.controller.ts
 │   │   │   ├── teacher.controller.ts
 │   │   │   ├── trainingEvents.controller.ts
 │   │   │   └── trainingRecords.controller.ts
 │   │   ├── db/
 │   │   │   ├── client.ts
-│   │   │   └── schema.ts
+│   │   │   ├── schema.ts
+│   │   │   └── seed.ts
 │   │   ├── middlewares/
 │   │   │   ├── requireAuth.ts
 │   │   │   └── requireRole.ts
+│   │   ├── repositories/
+│   │   │   ├── careerRecord.repository.ts
+│   │   │   ├── eventRecord.repository.ts
+│   │   │   ├── teacher.repository.ts
+│   │   │   ├── trainingEvent.repository.ts
+│   │   │   ├── trainingRecord.repository.ts
+│   │   │   └── user.repository.ts
 │   │   ├── routes/
 │   │   │   ├── auth.route.ts
+│   │   │   ├── careerRecord.route.ts
+│   │   │   ├── eventRecord.route.ts
 │   │   │   ├── teacher.route.ts
 │   │   │   ├── trainingEvent.route.ts
 │   │   │   └── trainingRecords.routes.ts
+│   │   ├── services/
+│   │   │   ├── auth.service.ts
+│   │   │   ├── careerRecord.service.ts
+│   │   │   ├── eventRecord.service.ts
+│   │   │   ├── teacher.service.ts
+│   │   │   ├── trainingEvent.service.ts
+│   │   │   └── trainingRecord.service.ts
 │   │   ├── types/
 │   │   │   └── fastify.d.types.ts
 │   │   ├── utils/
 │   │   │   ├── cloudinary.ts
+│   │   │   ├── errorHandler.ts
 │   │   │   ├── idGenerator.ts
 │   │   │   ├── jwt.ts
+│   │   │   ├── pagination.ts
 │   │   │   ├── password.ts
-│   │   │   └── upload.ts
+│   │   │   ├── upload.ts
+│   │   │   └── validation.ts
 │   │   ├── app.ts
 │   │   └── index.ts
 │   ├── docker-compose.yml
@@ -96,6 +118,10 @@ Portfolio-Utility/
 | Generate certificate | ✓ | ✗ |
 | View certificate | ✓ | ✓ |
 | Download certificate | ✓ | ✓ |
+| Update career record | ✓ | ✗ |
+| Delete career record | ✓ | ✗ |
+| Update event record | ✓ | ✗ |
+| Delete event record | ✓ | ✗ |
 
 ---
 
@@ -129,6 +155,24 @@ GET    /api/training-records/teacher/:teacherId       → Get records by teacher
 GET    /api/training-records/teacher/:trainingEventId → Get records by event (protected)
 POST   /api/training-records                          → Create training record (admin only)
 POST   /api/training-records/bulk                     → Bulk create records (admin only)
+```
+
+### Career Records
+```
+GET    /api/career-records/teacher/:teacherId  → Get records by teacher (protected)
+GET    /api/career-records/:id                 → Get record by ID (protected)
+POST   /api/career-records                     → Create career record (admin only)
+PATCH  /api/career-records/:id                 → Update career record (admin only)
+DELETE /api/career-records/:id                 → Delete career record (admin only)
+```
+
+### Event Records
+```
+GET    /api/event-records/teacher/:teacherId  → Get records by teacher (protected)
+GET    /api/event-records/:id                 → Get record by ID (protected)
+POST   /api/event-records                     → Create event record (admin only)
+PATCH  /api/event-records/:id                  → Update event record (admin only)
+DELETE /api/event-records/:id                  → Delete event record (admin only)
 ```
 
 ---
@@ -196,6 +240,12 @@ training_events
 
 training_records
   id, teacherId(FK), trainingEventId(FK), rating, certificateNumber, refPhotos, createdAt, updatedAt
+
+career_records
+  id, teacherId(FK), role, oraganization, startDate, endDate, stillWorking, achievements, refContactDetail, createdAt
+
+event_records
+  id, teacherId(FK), eventType, name, role, organizer, venue, date, description, referenceImage, createdAt, updatedAt
 ```
 
 ---
