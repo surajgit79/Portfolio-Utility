@@ -1,5 +1,5 @@
 import { db } from "../db/client";
-import { teachers } from "../db/schema";
+import { teachers, users } from "../db/schema";
 import { eq, ilike } from "drizzle-orm";
 
 type Teacher = typeof teachers.$inferSelect;
@@ -58,6 +58,10 @@ export const teacherRepository = {
   },
 
   delete: async (id: string): Promise<void> => {
-    await db.delete(teachers).where(eq(teachers.id, id));
+    const [ teacher ] = await db.select().from(teachers).where(eq(teachers.id, id));
+
+    if(teacher){
+      await db.delete(users).where(eq(users.id, teacher.userId));
+    }
   },
 };

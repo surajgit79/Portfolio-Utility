@@ -1,27 +1,25 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { teacherService } from "../services/teacher.service";
-import { createTeacherSchema, updateTeacherSchema } from "../utils/validation";
+import { registerTeacherSchema, updateTeacherSchema } from "../utils/validation";
 
-export const createTeacher = async (
+export const registerTeacher = async(
   request: FastifyRequest,
   reply: FastifyReply
-) => {
-  const body = createTeacherSchema.safeParse(request.body);
-
-  if (!body.success) {
+)=>{
+  const body = registerTeacherSchema.safeParse(request.body);
+  if(!body.success){
     return reply.status(400).send({
       success: false,
       message: "Validation failed",
-      errors:  body.error.flatten().fieldErrors,
+      error: body.error.flatten().fieldErrors,
     });
   }
 
-  const teacher = await teacherService.create(body.data, request);
-
-  return reply.status(201).send({
+  const teacher = await teacherService.register(body.data,request);
+  return reply.send({
     success: true,
-    message: "Teacher profile created successfully",
-    data:    teacher,
+    message: "Teacher registered successfully",
+    data: teacher,
   });
 };
 

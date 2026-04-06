@@ -4,60 +4,69 @@ import { generateId } from "../utils/idGenerator";
 import { AppError, ErrorCode } from "../utils/errorHandler";
 import { uploadSingleImage } from "../utils/upload";
 import { FastifyRequest } from "fastify";
+import { hashedPassword } from "../utils/password";
 
 export const teacherService = {
-  create: async (
+  register: async (
     data: {
-      userId:  string;
-      name:    string;
-      address: string;
-      contact: string;
-      email:   string;
-      gender:  "Male" | "Female" | "Others";
-      dob:     string;
+      email:    string;
+      password: string;
+      name:     string;
+      address:  string;
+      contact:  string;
+      gender:   "Male" | "Female" | "Others";
+      dob:      string;
     },
     request: FastifyRequest
   ) => {
-    const user = await userRepository.findById(data.userId);
-
-    if (!user) {
-      throw new AppError(404, ErrorCode.NOT_FOUND, "User not found");
+    const existingUser = await userRepository.findByEmail(data.email);
+    if (existingUser) {
+      throw new AppError(409, ErrorCode.CONFLICT, "Email already exists");
     }
 
-    if (user.role !== "teacher") {
-      throw new AppError(400, ErrorCode.VALIDATION_ERROR, "Only users with role 'teacher' can have a teacher profile");
-    }
+    const hashed = await hashedPassword(data.password);
+    const userId = await generateId("users");
 
-    const existingTeacher = await teacherRepository.findByUserId(data.userId);
-
-    if (existingTeacher) {
-      throw new AppError(409, ErrorCode.CONFLICT, "Teacher profile already exists for this user");
-    }
+    const user = await userRepository.create({
+      id:       userId,
+      email:    data.email,
+      password: hashed,
+      role:     "teacher",
+    });
 
     let imageUrl: string | undefined;
-
     if (request.isMultipart()) {
       const url = await uploadSingleImage(request, "portfolio-utility/teachers");
       if (url) imageUrl = url;
     }
 
-    const id = await generateId("teachers");
+    const teacherId = await generateId("teachers");
 
-    return teacherRepository.create({
-      id,
-      ...data,
+    const teacher = await teacherRepository.create({
+      id:       teacherId,
+      userId:   user.id,
+      name:     data.name,
+      address:  data.address,
+      contact:  data.contact,
+      email:    data.email,
+      gender:   data.gender,
+      dob:      new Date(data.dob),
       imageUrl,
-      dob: new Date(data.dob),
     });
+
+    return teacher;
   },
 
   getAll: async (search?: string) => {
-    return teacherRepository.findAll(search);
+    const teachers = await teacherRepository.findAll(search);
+    if(teachers.length === 0){
+      throw new AppError(200, ErrorCode.NOT_FOUND, "No teachers found");
+    }
+    return teachers;
   },
 
   getById: async (id: string) => {
     const teacher = await teacherRepository.findById(id);
-
     if (!teacher) {
       throw new AppError(404, ErrorCode.NOT_FOUND, "Teacher not found");
     }
