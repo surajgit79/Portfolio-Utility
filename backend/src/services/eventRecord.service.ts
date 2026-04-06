@@ -20,13 +20,16 @@ export const eventRecordService = {
     request: FastifyRequest
   ) => {
     const teacher = await teacherRepository.findById(data.teacherId);
-
     if (!teacher) {
       throw new AppError(404, ErrorCode.NOT_FOUND, "Teacher not found");
     }
 
-    let referenceImage: string | undefined;
+    const duplicate = await eventRecordRepository.findDuplicate(data.teacherId, data.name, new Date(data.date));
+    if(duplicate){
+      throw new AppError(409, ErrorCode.CONFLICT, "Event records for the user exist at the same date");
+    }
 
+    let referenceImage: string | undefined;
     if (request.isMultipart()) {
       const url = await uploadSingleImage(
         request,
@@ -36,9 +39,7 @@ export const eventRecordService = {
     }
 
     const id = await generateId("event_records");
-
     const { date, ...rest } = data;
-
     return eventRecordRepository.create({
       id,
       ...rest,

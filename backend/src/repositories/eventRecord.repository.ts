@@ -1,6 +1,6 @@
 import { db } from "../db/client";
 import { eventRecords } from "../db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 type EventRecord    = typeof eventRecords.$inferSelect;
 type NewEventRecord = typeof eventRecords.$inferInsert;
@@ -40,5 +40,16 @@ export const eventRecordRepository = {
 
   delete: async (id: string): Promise<void> => {
     await db.delete(eventRecords).where(eq(eventRecords.id, id));
+  },
+
+  findDuplicate: async(teacherId: string, name: string, date: Date): Promise<EventRecord| undefined>=>{
+    const [record] = await db.select().from(eventRecords).where(
+      and(
+        eq(eventRecords.teacherId, teacherId),
+        eq(eventRecords.name, name),
+        eq(eventRecords.date, date)
+      )
+    );
+    return record;
   },
 };
