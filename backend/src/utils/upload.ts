@@ -4,7 +4,6 @@ import path from "path";
 import fs, { unlinkSync } from "fs";
 import os from "os";
 import { pipeline } from "stream/promises";
-import { file } from "zod";
 
 export const uploadSingleImage = async(
     request: FastifyRequest,
