@@ -10,6 +10,7 @@ import { trainingRecordRoutes } from "./routes/trainingRecords.routes";
 import { errorHandler } from "./utils/errorHandler";
 import { careerRecordRoutes } from "./routes/careerRecord.route";
 import { eventRecordRoutes } from "./routes/eventRecord.route";
+import { certificateRoutes } from "./routes/certificate.route";
 
 const app = Fastify({logger: true});
 
@@ -41,5 +42,6 @@ app.register(trainingEventRoutes, {prefix: "/api/training-events"});
 app.register(trainingRecordRoutes, {prefix: "/api/training-records"});
 app.register(careerRecordRoutes,{prefix: "/api/career-records"});
 app.register(eventRecordRoutes, {prefix: "/api/event-records"});
+app.register(certificateRoutes, {prefix: "/api/certificates"})
 
 export default app;
