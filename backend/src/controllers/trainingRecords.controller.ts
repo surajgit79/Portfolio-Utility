@@ -56,7 +56,7 @@ export const getTrainingRecordsByTeacher = async (
 
     return reply.send({
         success: true,
-        message: "Training records fetched successfully",
+        message: records.length === 0? "No records found": "Training records fetched successfully",
         data:    records,
     });
 };
@@ -70,7 +70,7 @@ export const getTrainingRecordsByEvent = async (
 
     return reply.send({
         success: true,
-        message: "Training records fetched successfully",
+        message: records.length === 0? "No records found": "Training records fetched successfully",
         data:    records,
     });
 };
