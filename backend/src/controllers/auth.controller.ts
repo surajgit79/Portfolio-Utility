@@ -5,8 +5,9 @@ import { authService } from "../services/auth.service";
 export const register = async(
     request: FastifyRequest,
     reply: FastifyReply
-)=>{
-    const body = registerSchema.safeParse(request.body);
+ )=>{
+     const body = registerSchema.safeParse(request.body);
+     console.log("Validation result:", body);
     if (!body.success) {
         return reply.status(400).send({
         success: false,
@@ -18,7 +19,6 @@ export const register = async(
     const data = await authService.register(
         body.data.email,
         body.data.password,
-        body.data.role
     );
 
     return reply.status(201).send({
@@ -41,7 +41,7 @@ export const login = async(
         });
     }
 
-    const data = authService.login(
+    const data = await authService.login(
         body.data.email,
         body.data.password,
     );
