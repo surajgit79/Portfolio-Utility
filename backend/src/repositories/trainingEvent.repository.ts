@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { trainingEvents } from "../db/schema";
 
@@ -37,4 +37,20 @@ export const trainingEventRepository = {
     delete: async (id: string):Promise<void>=>{
         await db.delete(trainingEvents).where(eq(trainingEvents.id, id));
     },
+
+    findDuplicate: async(
+        category: string,
+        sector: string,
+        phase: string | null | undefined,
+        startDate: Date
+    ): Promise<TrainingEvent | undefined> =>{
+        const duplicate = await db.select().from(trainingEvents).where(
+            and(
+                eq(trainingEvents.category, category as any),
+                eq(trainingEvents.sector, sector),
+                eq(trainingEvents.startDate, startDate)
+            )
+        );
+        return duplicate[0];
+    }
 }

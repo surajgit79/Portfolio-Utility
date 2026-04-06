@@ -4,7 +4,11 @@ import { generateId } from "../utils/idGenerator";
 
 export const trainingEventService = {
     getAll: async(category?: string, sector?: string, phase?: string)=>{
-        return trainingEventRepository.findAll(category, sector, phase);
+        const events = trainingEventRepository.findAll(category, sector, phase);
+        if((await events).length === 0){
+            throw new AppError(200, ErrorCode.NOT_FOUND, "No training events found");
+        }
+        return events;
     },
 
     getById: async(id: string)=>{
@@ -27,6 +31,13 @@ export const trainingEventService = {
         startDate:   string;
         duration:    string;
     }) => {
+        const duplicate = await trainingEventRepository.findDuplicate(
+            data.category, data.sector, data.phase, new Date(data.startDate)
+        );
+        if(duplicate){
+            throw new AppError(409, ErrorCode.CONFLICT, "A training event with the same category, same sector and start date already exists");
+        }
+
         const id = await generateId("training_events");
 
         return trainingEventRepository.create({

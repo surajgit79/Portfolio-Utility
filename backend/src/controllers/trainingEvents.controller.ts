@@ -15,7 +15,7 @@ export const createTrainingEvent = async(
         });
     }
 
-    const event = trainingEventService.create(body.data);
+    const event = await trainingEventService.create(body.data);
     return reply.send({
         success: true,
         message: "Training event created successfully",
@@ -33,7 +33,7 @@ export const getTrainingEvents = async(
         phase?: string
     };
 
-    const events = trainingEventService.getAll(category, sector, phase);
+    const events = await trainingEventService.getAll(category, sector, phase);
 
     return reply.send({
         success: true,
@@ -48,7 +48,7 @@ export const getTrainingEventById = async(
     reply: FastifyReply
 ) =>{
     const { id } = request.params as {id: string};
-    const event = trainingEventService.getById(id);
+    const event = await trainingEventService.getById(id);
 
     return reply.send({
         success: true,
@@ -72,7 +72,7 @@ export const updateTrainingEvent = async (
         });
     }
 
-    const event = trainingEventService.update(id, body.data);
+    const event = await trainingEventService.update(id, body.data);
     return reply.send({
         success: true,
         message: "Training event updated successfully",

@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { createTrainingEvent, getTrainingEvents, getTrainingEventById, updateTrainigEvent } from "../controllers/trainingEvents.controller";
+import { createTrainingEvent, getTrainingEvents, getTrainingEventById, updateTrainingEvent, deleteTrainingEvent } from "../controllers/trainingEvents.controller";
 import { requireAuth } from "../middlewares/requireAuth";
 import { requireRole } from "../middlewares/requireRole";
 
@@ -22,6 +22,11 @@ export async function trainingEventRoutes(app: FastifyInstance){
 
     app.patch("/:id",{
         preHandler: [requireAuth, requireRole("admin")],
-        handler: updateTrainigEvent,
+        handler: updateTrainingEvent,
     });
+
+    app.delete("/:id",{
+        preHandler: [requireAuth, requireRole("admin")],
+        handler: deleteTrainingEvent,
+    })
 };
