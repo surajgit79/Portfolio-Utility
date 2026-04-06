@@ -15,15 +15,17 @@ export const careerRecordService = {
     refContactDetail?: string;
   }) => {
     const teacher = await teacherRepository.findById(data.teacherId);
-
     if (!teacher) {
       throw new AppError(404, ErrorCode.NOT_FOUND, "Teacher not found");
     }
 
+    const duplicate = await careerRecordRepository.findDuplicate(data.teacherId, data.role, data.organization);
+    if(duplicate){
+      throw new AppError(409, ErrorCode.CONFLICT, "Career record already exists for the teacher at the same role and same organization");
+    }
+
     const id = await generateId("career_records");
-
     const { startDate, endDate, ...rest } = data;
-
     return careerRecordRepository.create({
       id,
       ...rest,

@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { careerRecords } from "../db/schema"
 
@@ -28,5 +28,16 @@ export const careerRecordRepository = {
 
     delete: async(id:string):Promise<void>=>{
         await db.delete(careerRecords).where(eq(careerRecords.id, id));
+    },
+
+    findDuplicate: async(teacherId: string, role: string, organization: string): Promise<Career | undefined>=>{
+        const [record] = await db.select().from(careerRecords).where(
+            and(
+                eq(careerRecords.teacherId, teacherId),
+                eq(careerRecords.role, role),
+                eq(careerRecords.organization, organization)
+            )
+        );
+        return record;
     },
 };

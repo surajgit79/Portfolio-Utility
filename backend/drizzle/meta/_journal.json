@@ -43,6 +43,13 @@
       "when": 1775203647840,
       "tag": "0005_new_loki",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1775457275451,
+      "tag": "0006_wise_mantis",
+      "breakpoints": true
     }
   ]
 }
