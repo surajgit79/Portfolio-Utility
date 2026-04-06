@@ -7,7 +7,7 @@ export const careerRecordService = {
   create: async (data: {
     teacherId:        string;
     role:             string;
-    oraganization:    string;
+    organization:    string;
     startDate:        string;
     endDate?:         string;
     stillWorking:     number;

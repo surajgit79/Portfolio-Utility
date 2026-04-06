@@ -16,8 +16,8 @@ export const careerRecordRepository = {
         return record;
     },
 
-    findByTeacherId: async (tecaherId: string): Promise<Career[]>=>{
-        const record = await db.select().from(careerRecords).where(eq(careerRecords.teacherId, tecaherId));
+    findByTeacherId: async (teacherId: string): Promise<Career[]>=>{
+        const record = await db.select().from(careerRecords).where(eq(careerRecords.teacherId, teacherId));
         return record;
     },
 
