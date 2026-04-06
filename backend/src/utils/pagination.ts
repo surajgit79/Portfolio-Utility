@@ -17,7 +17,7 @@ export const getPaginationParams = (
     query: Record<string, unknown>
 ): PaginationParams=>{
     const page = Math.max(1, parseInt(query.page as string) || 1);
-    const limit = Math.min(100, Math.max(100, Math.max(1, parseInt(query.limit as string) || 10)));
+    const limit = Math.min(100, Math.max(1, Math.max(1, parseInt(query.limit as string) || 10)));
     return { page, limit};
 };
 
