@@ -19,9 +19,6 @@ export type LoginRequest    = z.infer<typeof loginSchema>;
 
 
 // Teacher
-
-
-
 export const registerTeacherSchema = z.object({
   email:    z.string().email("Invalid email format"),
   password: z.string()
@@ -45,8 +42,21 @@ export type UpdateTeacherRequest = z.infer<typeof updateTeacherSchema>;
 
 
 // Training-Event
-
-export const createTrainingEventSchema = z.object({
+const sectorPhaseMap:Record<string, {sectors: string[], hasPhase: boolean}> = {
+  "Activity-based Mathematics" : {
+    sectors: ["Book 1", "Book 2", "Book 3"],
+    hasPhase: true
+  },
+  "Reading": {
+    sectors: ["Phonics", "Guided Reading", "Book-based Activities", "Writing workshop"],
+    hasPhase: false
+  },
+  "Pre-School": {
+    sectors: [],
+    hasPhase: true
+  },
+}
+const baseTrainingEventSchema = z.object({
   category:    z.enum(["Activity-based Mathematics", "Reading", "Pre-School"]),
   sector:      z.string().min(2, "Sector is required"),
   phase:       z.string().optional(),
@@ -61,11 +71,39 @@ export const createTrainingEventSchema = z.object({
   duration:    z.string().min(1, "Duration is required"),
 });
 
-export const updateTrainingEventSchema = createTrainingEventSchema.partial();
+export const createTrainingEventSchema = baseTrainingEventSchema
+  .superRefine((data, ctx) => {
+    const rule = sectorPhaseMap[data.category];
+
+    if (rule.sectors.length > 0 && !rule.sectors.includes(data.sector)) {
+      ctx.addIssue({
+        code:    z.ZodIssueCode.custom,
+        path:    ["sector"],
+        message: `Invalid sector for ${data.category}. Must be one of: ${rule.sectors.join(", ")}`,
+      });
+    }
+
+    if (rule.hasPhase && !data.phase) {
+      ctx.addIssue({
+        code:    z.ZodIssueCode.custom,
+        path:    ["phase"],
+        message: `Phase is required for ${data.category}`,
+      });
+    }
+
+    if (!rule.hasPhase && data.phase) {
+      ctx.addIssue({
+        code:    z.ZodIssueCode.custom,
+        path:    ["phase"],
+        message: `Phase is not applicable for ${data.category}`,
+      });
+    }
+  });
+
+export const updateTrainingEventSchema = baseTrainingEventSchema.partial();
 
 export type CreateTrainingEventRequest = z.infer<typeof createTrainingEventSchema>;
 export type UpdateTrainingEventRequest = z.infer<typeof updateTrainingEventSchema>;
-
 
 // Training-record
 export const createTrainingRecordSchema = z.object({
