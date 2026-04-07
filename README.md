@@ -1,33 +1,46 @@
-# Portfolio-Utility
+# Portfolio Utility
 
-A full-stack Teacher/Trainee Portfolio Management System that allows admins to manage teacher records, training history, career data, events, and certificates.
+A full-stack Teacher Portfolio Management System for managing teacher profiles, training history, career records, event participation, and certificate generation.
+
+---
+
+## Features
+
+- **Authentication** — JWT-based auth with role-based access control (Admin/Teacher)
+- **Teacher Management** — CRUD operations with profile images via Cloudinary
+- **Training Events** — Create and manage training programs with categories and phases
+- **Training Records** — Track teacher participation with auto-generated certificate numbers
+- **Career Records** — Manage professional history and achievements
+- **Event Records** — Track seminar, conference, podcast participation
+- **Certificate Generation** — PDF certificates with professional templates using Puppeteer
+- **Image Upload** — Cloudinary integration for image storage
+- **Search & Filter** — Search teachers and filter training events
 
 ---
 
 ## Tech Stack
 
 ### Backend
-| Tool | Purpose |
-|------|---------|
-| Node.js | Runtime environment |
+| Technology | Purpose |
+|------------|---------|
+| Node.js | Runtime |
 | TypeScript | Type safety |
 | Fastify | HTTP framework |
 | Drizzle ORM | Database ORM |
 | PostgreSQL | Database |
-| JWT | Stateless authentication |
-| Zod | Input validation |
-| Pino | Logging (built into Fastify) |
-| Docker | PostgreSQL containerization |
+| JWT | Authentication |
+| Zod | Validation |
 | bcryptjs | Password hashing |
-| Cloudinary | Image upload & storage |
+| Cloudinary | Image storage |
+| Puppeteer | PDF generation |
 
 ### Frontend
-| Tool | Purpose |
-|------|---------|
+| Technology | Purpose |
+|------------|---------|
 | Next.js | React framework |
 | TypeScript | Type safety |
-| TailwindCSS | Utility-first styling |
-| shadcn/ui | UI component library |
+| TailwindCSS | Styling |
+| shadcn/ui | UI components |
 
 ---
 
@@ -37,143 +50,392 @@ A full-stack Teacher/Trainee Portfolio Management System that allows admins to m
 Portfolio-Utility/
 ├── backend/
 │   ├── src/
-│   │   ├── config/
-│   │   │   └── env.ts
-│   │   ├── controllers/
-│   │   │   ├── auth.controller.ts
-│   │   │   ├── careerRecord.controller.ts
-│   │   │   ├── eventRecord.controller.ts
-│   │   │   ├── teacher.controller.ts
-│   │   │   ├── trainingEvents.controller.ts
-│   │   │   └── trainingRecords.controller.ts
-│   │   ├── db/
-│   │   │   ├── client.ts
-│   │   │   ├── schema.ts
-│   │   │   └── seed.ts
-│   │   ├── middlewares/
-│   │   │   ├── requireAuth.ts
-│   │   │   └── requireRole.ts
-│   │   ├── repositories/
-│   │   │   ├── careerRecord.repository.ts
-│   │   │   ├── eventRecord.repository.ts
-│   │   │   ├── teacher.repository.ts
-│   │   │   ├── trainingEvent.repository.ts
-│   │   │   ├── trainingRecord.repository.ts
-│   │   │   └── user.repository.ts
-│   │   ├── routes/
-│   │   │   ├── auth.route.ts
-│   │   │   ├── careerRecord.route.ts
-│   │   │   ├── eventRecord.route.ts
-│   │   │   ├── teacher.route.ts
-│   │   │   ├── trainingEvent.route.ts
-│   │   │   └── trainingRecords.routes.ts
-│   │   ├── services/
-│   │   │   ├── auth.service.ts
-│   │   │   ├── careerRecord.service.ts
-│   │   │   ├── eventRecord.service.ts
-│   │   │   ├── teacher.service.ts
-│   │   │   ├── trainingEvent.service.ts
-│   │   │   └── trainingRecord.service.ts
-│   │   ├── types/
-│   │   │   └── fastify.d.types.ts
-│   │   ├── utils/
-│   │   │   ├── cloudinary.ts
-│   │   │   ├── errorHandler.ts
-│   │   │   ├── idGenerator.ts
-│   │   │   ├── jwt.ts
-│   │   │   ├── pagination.ts
-│   │   │   ├── password.ts
-│   │   │   ├── upload.ts
-│   │   │   └── validation.ts
-│   │   ├── app.ts
-│   │   └── index.ts
+│   │   ├── config/          # Environment configuration
+│   │   ├── controllers/     # Request handlers
+│   │   ├── db/              # Database client, schema, seed
+│   │   ├── middlewares/     # Auth & role middleware
+│   │   ├── repositories/    # Data access layer
+│   │   ├── routes/          # API route definitions
+│   │   ├── services/        # Business logic
+│   │   ├── types/           # TypeScript declarations
+│   │   ├── utils/           # Helpers (JWT, validation, etc.)
+│   │   ├── app.ts           # Fastify app setup
+│   │   └── index.ts         # Entry point
 │   ├── docker-compose.yml
 │   ├── drizzle.config.ts
-│   ├── .env.example
-│   ├── package.json
-│   └── tsconfig.json
+│   └── package.json
 └── frontend/
     ├── app/
     ├── components/
     ├── public/
-    ├── .env.example
-    ├── package.json
-    └── tsconfig.json
+    └── package.json
 ```
 
 ---
 
-## Roles & Access Control
+## Getting Started
 
-| Action | Admin | Teacher |
-|--------|-------|---------|
-| Register / Login | ✓ | ✓ |
-| View teacher profile | ✓ | ✓ |
-| Search teachers | ✓ | ✓ |
-| Create teacher profile | ✓ | ✗ |
-| Update teacher profile | ✓ | ✗ |
-| Add training record | ✓ | ✗ |
-| Add career record | ✓ | ✗ |
-| Add event record | ✓ | ✗ |
-| Generate certificate | ✓ | ✗ |
-| View certificate | ✓ | ✓ |
-| Download certificate | ✓ | ✓ |
-| Update career record | ✓ | ✗ |
-| Delete career record | ✓ | ✗ |
-| Update event record | ✓ | ✗ |
-| Delete event record | ✓ | ✗ |
+### Prerequisites
+
+- Node.js v20+
+- Docker Desktop
+- Git
+
+### Backend Setup
+
+```bash
+# Clone repository
+git clone https://github.com/surajgit79/Portfolio-Utility.git
+cd Portfolio-Utility/backend
+
+# Install dependencies
+npm install
+
+# Copy environment file
+cp .env.example .env
+```
+
+Configure your `.env` file:
+```env
+PORT=3000
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/portfolio_utility
+JWT_SECRET=your-super-secret-key
+JWT_EXPIRES_IN=7d
+FRONTEND_URL=http://localhost:3001
+CLOUDINARY_CLOUD_NAME=your-cloud-name
+CLOUDINARY_API_KEY=your-api-key
+CLOUDINARY_API_SECRET=your-api-secret
+```
+
+Start PostgreSQL:
+```bash
+docker compose up -d
+```
+
+Initialize database:
+```bash
+npm run db:push
+npm run db:seed  # Optional: seed test data
+```
+
+Start server:
+```bash
+npm run dev
+```
+
+Server runs at `http://localhost:3000`
+
+### Frontend Setup
+
+```bash
+cd ../frontend
+
+npm install
+cp .env.example .env.local
+```
+
+Configure `.env.local`:
+```env
+NEXT_PUBLIC_API_URL=http://localhost:3000
+```
+
+Start server:
+```bash
+npm run dev
+```
+
+Frontend runs at `http://localhost:3001`
 
 ---
 
-## API Endpoints
+## API Documentation
+
+### Base URL
+```
+http://localhost:3000/api
+```
+
+### Authentication
+
+All protected routes require:
+```
+Authorization: Bearer <token>
+```
+
+---
 
 ### Auth
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | `/auth/register` | Register admin user | Public |
+| POST | `/auth/login` | Login & get token | Public |
+
+**Register Request:**
+```json
+{
+  "email": "admin@example.com",
+  "password": "Admin123!"
+}
 ```
-POST   /api/auth/register     → Register a new user
-POST   /api/auth/login        → Login and receive JWT token
+
+**Login Request:**
+```json
+{
+  "email": "admin@example.com",
+  "password": "Admin123!"
+}
 ```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Login successful",
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiIs..."
+  }
+}
+```
+
+---
 
 ### Teachers
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/teachers` | List all teachers | Public |
+| GET | `/teachers/:id` | Get teacher by ID | Public |
+| POST | `/teachers/register` | Create teacher | Admin |
+| PATCH | `/teachers/:id` | Update teacher | Admin |
+| DELETE | `/teachers/:id` | Delete teacher | Admin |
+
+**Create Teacher (Multipart):**
 ```
-GET    /api/teachers          → Get all teachers (public)
-GET    /api/teachers/:id      → Get teacher by ID (public)
-POST   /api/teachers          → Create teacher profile (admin only)
-PATCH  /api/teachers/:id      → Update teacher profile (admin only)
+Content-Type: multipart/form-data
 ```
+
+| Field | Type | Required |
+|-------|------|----------|
+| email | string | Yes |
+| password | string | Yes |
+| name | string | Yes |
+| address | string | Yes |
+| contact | string (10 digits) | Yes |
+| gender | Male/Female/Others | Yes |
+| dob | ISO date string | Yes |
+| image | file | No |
+
+---
 
 ### Training Events
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/training-events` | List all events | Protected |
+| GET | `/training-events/:id` | Get event by ID | Protected |
+| POST | `/training-events` | Create event | Admin |
+| PATCH | `/training-events/:id` | Update event | Admin |
+| DELETE | `/training-events/:id` | Delete event | Admin |
+
+**Create Event Request:**
+```json
+{
+  "category": "Activity-based Mathematics",
+  "sector": "Book 1",
+  "phase": "Phase 1",
+  "name": "Training on Basic Math Concepts",
+  "mentorsName": "John Doe",
+  "venue": "Conference Hall A",
+  "startDate": "2026-05-01",
+  "duration": "3 days",
+  "description": "Introduction to activity-based mathematics"
+}
 ```
-GET    /api/training-events              → Get all training events (protected)
-GET    /api/training-events/:id         → Get training event by ID (protected)
-POST   /api/training-events              → Create training event (admin only)
-PATCH  /api/training-events/:id          → Update training event (admin only)
-```
+
+**Categories:** `Activity-based Mathematics`, `Pre-School`, `Reading`
+
+---
 
 ### Training Records
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/training-records/teacher/:teacherId` | Records by teacher | Protected |
+| GET | `/training-records/event/:eventId` | Records by event | Protected |
+| POST | `/training-records` | Create record | Admin |
+| POST | `/training-records/bulk` | Bulk create | Admin |
+| PATCH | `/training-records/:id` | Update record | Admin |
+| DELETE | `/training-records/:id` | Delete record | Admin |
+
+**Create Record Request:**
+```json
+{
+  "teacherId": "TCH-2026-0001",
+  "trainingEventId": "TRN-2026-0001",
+  "rating": 4
+}
 ```
-GET    /api/training-records/teacher/:teacherId       → Get records by teacher (protected)
-GET    /api/training-records/teacher/:trainingEventId → Get records by event (protected)
-POST   /api/training-records                          → Create training record (admin only)
-POST   /api/training-records/bulk                     → Bulk create records (admin only)
+
+**Bulk Create Request:**
+```json
+{
+  "trainingEventId": "TRN-2026-0001",
+  "teacherIds": ["TCH-2026-0001", "TCH-2026-0002"],
+  "rating": 5
+}
 ```
+
+---
 
 ### Career Records
-```
-GET    /api/career-records/teacher/:teacherId  → Get records by teacher (protected)
-GET    /api/career-records/:id                 → Get record by ID (protected)
-POST   /api/career-records                     → Create career record (admin only)
-PATCH  /api/career-records/:id                 → Update career record (admin only)
-DELETE /api/career-records/:id                 → Delete career record (admin only)
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/career-records/teacher/:teacherId` | Records by teacher | Protected |
+| GET | `/career-records/:id` | Get record by ID | Protected |
+| POST | `/career-records` | Create record | Admin |
+| PATCH | `/career-records/:id` | Update record | Admin |
+| DELETE | `/career-records/:id` | Delete record | Admin |
+
+**Create Record Request:**
+```json
+{
+  "teacherId": "TCH-2026-0001",
+  "role": "Senior Teacher",
+  "organization": "ABC School",
+  "startDate": "2020-01-15",
+  "endDate": "2024-06-30",
+  "stillWorking": 0,
+  "achievements": "Best Teacher Award 2023",
+  "refContactDetail": "contact@abcschool.com"
+}
 ```
 
+---
+
 ### Event Records
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/event-records/teacher/:teacherId` | Records by teacher | Protected |
+| GET | `/event-records/:id` | Get record by ID | Protected |
+| POST | `/event-records` | Create record | Admin |
+| PATCH | `/event-records/:id` | Update record | Admin |
+| DELETE | `/event-records/:id` | Delete record | Admin |
+
+**Create Record Request:**
+```json
+{
+  "teacherId": "TCH-2026-0001",
+  "eventType": "Conference",
+  "name": "Education Summit 2026",
+  "role": "Speaker",
+  "organizer": "Education Ministry",
+  "venue": "Kathmandu",
+  "date": "2026-03-15",
+  "description": "Spoke about modern teaching methods"
+}
 ```
-GET    /api/event-records/teacher/:teacherId  → Get records by teacher (protected)
-GET    /api/event-records/:id                 → Get record by ID (protected)
-POST   /api/event-records                     → Create event record (admin only)
-PATCH  /api/event-records/:id                  → Update event record (admin only)
-DELETE /api/event-records/:id                  → Delete event record (admin only)
-```
+
+**Event Types:** `Seminar`, `Conference`, `Panel Discussion`, `Podcast`
+
+---
+
+### Certificates
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/certificates/:certificateNumber` | View certificate | Protected |
+| GET | `/certificates/:certificateNumber/download` | Download PDF | Protected |
+
+---
+
+## Database Schema
+
+### Users
+| Column | Type | Constraints |
+|--------|------|-------------|
+| id | TEXT | PK |
+| email | TEXT | UNIQUE, NOT NULL |
+| password | TEXT | NOT NULL |
+| role | TEXT | NOT NULL, DEFAULT 'teacher' |
+| created_at | TIMESTAMP | NOT NULL |
+| updated_at | TIMESTAMP | NOT NULL |
+
+### Teachers
+| Column | Type | Constraints |
+|--------|------|-------------|
+| id | TEXT | PK |
+| user_id | TEXT | FK → users, UNIQUE |
+| name | TEXT | NOT NULL |
+| address | TEXT | NOT NULL |
+| contact | TEXT | NOT NULL |
+| email | TEXT | UNIQUE, NOT NULL |
+| gender | ENUM | NOT NULL |
+| image_url | TEXT | |
+| dob | TIMESTAMP | NOT NULL |
+| created_at | TIMESTAMP | NOT NULL |
+| updated_at | TIMESTAMP | NOT NULL |
+
+### Training Events
+| Column | Type | Constraints |
+|--------|------|-------------|
+| id | TEXT | PK |
+| category | ENUM | NOT NULL |
+| sector | TEXT | NOT NULL |
+| phase | TEXT | |
+| name | TEXT | NOT NULL |
+| mentors_name | TEXT | |
+| venue | TEXT | |
+| start_date | TIMESTAMP | NOT NULL |
+| duration | TEXT | NOT NULL |
+| description | TEXT | |
+| created_at | TIMESTAMP | NOT NULL |
+| updated_at | TIMESTAMP | NOT NULL |
+
+### Training Records
+| Column | Type | Constraints |
+|--------|------|-------------|
+| id | TEXT | PK |
+| teacher_id | TEXT | FK → teachers |
+| training_event_id | TEXT | FK → training_events |
+| rating | INTEGER | NOT NULL |
+| certificate_number | TEXT | UNIQUE, NOT NULL |
+| ref_photos | TEXT | |
+| created_at | TIMESTAMP | NOT NULL |
+| updated_at | TIMESTAMP | NOT NULL |
+
+### Career Records
+| Column | Type | Constraints |
+|--------|------|-------------|
+| id | TEXT | PK |
+| teacher_id | TEXT | FK → teachers |
+| role | TEXT | NOT NULL |
+| organization | TEXT | NOT NULL |
+| start_date | TIMESTAMP | NOT NULL |
+| end_date | TIMESTAMP | |
+| still_working | INTEGER | NOT NULL, DEFAULT 0 |
+| achievements | TEXT | |
+| ref_contact | TEXT | |
+| created_at | TIMESTAMP | NOT NULL |
+| updated_at | TIMESTAMP | NOT NULL |
+
+### Event Records
+| Column | Type | Constraints |
+|--------|------|-------------|
+| id | TEXT | PK |
+| teacher_id | TEXT | FK → teachers |
+| event_type | ENUM | NOT NULL |
+| name | TEXT | NOT NULL |
+| role | TEXT | NOT NULL |
+| organizer | TEXT | NOT NULL |
+| venue | TEXT | |
+| date | TIMESTAMP | NOT NULL |
+| description | TEXT | |
+| reference_image | TEXT | |
+| created_at | TIMESTAMP | NOT NULL |
+| updated_at | TIMESTAMP | NOT NULL |
 
 ---
 
@@ -181,9 +443,6 @@ DELETE /api/event-records/:id                  → Delete event record (admin on
 
 ### Record IDs
 Format: `{PREFIX}-{YEAR}-{SEQUENCE}`
-- `PREFIX`: 3-letter code based on table (e.g., `USR` for users, `TCH` for teachers, `TRN` for training events, `TRC` for training records)
-- `YEAR`: Current year (4 digits)
-- `SEQUENCE`: Auto-incrementing 4-digit number, padded with zeros
 
 | Table | Prefix |
 |-------|--------|
@@ -194,201 +453,32 @@ Format: `{PREFIX}-{YEAR}-{SEQUENCE}`
 | career_records | CAR |
 | event_records | EVT |
 
-**Example:** `TCH-2026-0001`, `TRC-2026-0001`
+**Examples:** `TCH-2026-0001`, `CAR-2026-0001`
 
 ### Certificate Numbers
 Format: `{CATEGORY}-{SECTOR}{PHASE?}-{YEAR}-{SEQUENCE}`
 
-| Category | Code |
-|----------|------|
-| Activity-based Mathematics | ABM |
-| Reading | RED |
-| Pre-primary | PRE |
-
-| Sector | Code |
-|--------|------|
-| Book 1 | B1 |
-| Book 2 | B2 |
-| Book 3 | B3 |
-| Phonics | PHO |
-| Guided Reading | GR |
-| Book-based Activities | BBA |
-| Writing Workshop | WW |
-
-| Phase | Code |
-|-------|------|
-| Phase 1 | P1 |
-| Phase 2 | P2 |
-
 **Examples:**
-- `ABM-B1P1-2026-0001` (Activity-based Mathematics, Book 1, Phase 1)
-- `RED-GR-2026-0001` (Reading, Guided Reading, no phase)
+- `ABM-B1P1-2026-0001` — Activity-based Math, Book 1, Phase 1
+- `RED-GR-2026-0001` — Reading, Guided Reading
+- `PRE-BBA-2026-0001` — Pre-School, Book-based Activities
 
 ---
 
-## Database Schema
+## Seed Data
 
-```
-users
-  id, email, password, role, createdAt, updatedAt
+Run `npm run db:seed` to create:
 
-teachers
-  id, userId(FK), name, address, contact, email, gender, imageUrl, dob, createdAt, updatedAt
+**Admin User:**
+- Email: `admin@portfolio.com`
+- Password: `Admin1234`
 
-training_events
-  id, category, sector, phase, name, mentorsName, venue, startDate, duration, description, createdAt, updatedAt
-
-training_records
-  id, teacherId(FK), trainingEventId(FK), rating, certificateNumber, refPhotos, createdAt, updatedAt
-
-career_records
-  id, teacherId(FK), role, oraganization, startDate, endDate, stillWorking, achievements, refContactDetail, createdAt
-
-event_records
-  id, teacherId(FK), eventType, name, role, organizer, venue, date, description, referenceImage, createdAt, updatedAt
-```
-
----
-
-## Getting Started
-
-### Prerequisites
-- Node.js v20+
-- Docker Desktop
-- Git
-
-### Backend Setup
-
-**1. Clone the repository**
-```bash
-git clone https://github.com/surajgit79/Portfolio-Utility.git
-cd Portfolio-Utility/backend
-```
-
-**2. Install dependencies**
-```bash
-npm install
-```
-
-**3. Set up environment variables**
-```bash
-cp .env.example .env
-```
-
-Fill in your `.env`:
-```
-PORT=
-DATABASE_URL=
-JWT_SECRET=
-JWT_EXPIRES_IN=
-FRONTEND_URL=
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
-```
-
-**4. Start the database**
-```bash
-docker compose up -d
-```
-
-**5. Run migrations**
-```bash
-npm run db:generate
-npm run db:migrate
-```
-
-**6. Start the development server**
-```bash
-npm run dev
-```
-
-Server runs at `http://localhost:3000`
-
-Health check: `GET http://localhost:3000/health`
-
----
-
-### Frontend Setup
-
-**1. Navigate to frontend**
-```bash
-cd ../frontend
-```
-
-**2. Install dependencies**
-```bash
-npm install
-```
-
-**3. Set up environment variables**
-```bash
-cp .env.example .env.local
-```
-
-Fill in your `.env.local`:
-```
-NEXT_PUBLIC_API_URL=http://localhost:3000
-```
-
-**4. Start the development server**
-```bash
-npm run dev
-```
-
-Frontend runs at `http://localhost:3001`
-
----
-
-## Git Convention
-
-This project follows [Conventional Commits](https://www.conventionalcommits.org/).
-
-### Commit Format
-```
-<type>(<scope>): <description>
-
-# Examples
-chore(init): initial backend scaffold
-feat(auth): add JWT login endpoint
-feat(teacher): add create teacher route
-fix(auth): correct token expiry check
-refactor(middleware): simplify requireRole logic
-docs(readme): update setup instructions
-```
-
-### Branch Naming
-```
-feat/task-id-short-description
-fix/task-id-short-description
-chore/task-id-short-description
-
-# Examples
-feat/auth-jwt-login
-feat/teacher-crud
-fix/cors-origin-error
-```
-
----
-
-## Environment Variables
-
-### Backend
-| Variable | Description | Example |
-|----------|-------------|---------|
-| PORT | Server port | 3000 |
-| DATABASE_URL | PostgreSQL connection string | postgresql://... |
-| JWT_SECRET | Secret key for JWT signing | random-long-string |
-| JWT_EXPIRES_IN | JWT expiry duration | 7d |
-| FRONTEND_URL | Allowed CORS origin | http://localhost:3001 |
-| CLOUDINARY_CLOUD_NAME | Cloudinary cloud name | your-cloud-name |
-| CLOUDINARY_API_KEY | Cloudinary API key | your-api-key |
-| CLOUDINARY_API_SECRET | Cloudinary API secret | your-api-secret |
-
-### Frontend
-| Variable | Description | Example |
-|----------|-------------|---------|
-| NEXT_PUBLIC_API_URL | Backend API base URL | http://localhost:3000 |
+**Teacher Users:**
+- `ram.bahadur@school.com` / `Teacher1234`
+- `sita.sharma@school.com` / `Teacher1234`
+- `hari.thapa@school.com` / `Teacher1234`
+- `gita.rai@school.com` / `Teacher1234`
+- `bikash.karki@school.com` / `Teacher1234`
 
 ---
 
@@ -396,26 +486,102 @@ fix/cors-origin-error
 
 ### Backend
 ```bash
-npm run dev          # Start dev server with hot reload
-npm run build        # Compile TypeScript
-npm run start        # Run compiled output
-npm run db:generate  # Generate migration files
-npm run db:migrate   # Apply migrations to database
-npm run db:studio    # Open Drizzle Studio (DB browser)
+npm run dev          # Development server
+npm run build        # Build for production
+npm run start        # Start production server
+npm run db:generate  # Generate migrations
+npm run db:push      # Push schema to DB
+npm run db:migrate   # Apply migrations
+npm run db:studio    # Drizzle Studio
+npm run db:seed      # Seed database
 ```
 
 ### Frontend
 ```bash
-npm run dev      # Start Next.js dev server
-npm run build    # Build for production
-npm run start    # Start production server
-npm run lint     # Run ESLint
+npm run dev          # Development server
+npm run build        # Build for production
+npm run start        # Start production server
+npm run lint         # Run ESLint
 ```
+
+---
+
+## Git Workflow
+
+### Branch Naming
+```
+feat/feature-name
+fix/bug-description
+chore/refactor-name
+```
+
+### Commit Format
+```
+<type>(<scope>): <description>
+
+Types: feat, fix, refactor, chore, docs, test
+```
+
+### Examples
+```
+feat(auth): add JWT login
+fix(teacher): correct validation
+chore(db): add migration
+docs(readme): update API docs
+```
+
+---
+
+## Environment Variables
+
+### Backend
+| Variable | Description | Required |
+|----------|-------------|----------|
+| PORT | Server port | No (default: 3000) |
+| DATABASE_URL | PostgreSQL connection string | Yes |
+| JWT_SECRET | JWT signing secret | Yes |
+| JWT_EXPIRES_IN | Token expiry | No (default: 7d) |
+| FRONTEND_URL | CORS origin | No |
+| CLOUDINARY_CLOUD_NAME | Cloud storage | Yes |
+| CLOUDINARY_API_KEY | Cloud storage | Yes |
+| CLOUDINARY_API_SECRET | Cloud storage | Yes |
+
+### Frontend
+| Variable | Description | Required |
+|----------|-------------|----------|
+| NEXT_PUBLIC_API_URL | Backend URL | Yes |
+
+---
+
+## Troubleshooting
+
+### Database Tables Not Found
+If tables are missing after setup:
+```bash
+npm run db:push
+```
+
+### Migration Conflicts
+If you encounter schema conflicts:
+```bash
+npm run db:generate
+# Then manually apply SQL or use:
+npm run db:push --force
+```
+
+### Cloudinary Upload Fails
+Ensure your Cloudinary credentials are correct and the cloud name matches exactly.
+
+---
+
+## License
+
+ISC
 
 ---
 
 ## Contributors
 
 - **Bishesh Khatiwada** — UI/UX Design
-- **Piyush Lal Shrestha** — Frontend
-- **Suraj Gupta** — Backend
+- **Piyush Lal Shrestha** — Frontend Development
+- **Suraj Gupta** — Backend Development
