@@ -1,6 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { createTrainingEventSchema, updateTrainingEventSchema } from "../utils/validation";
 import { trainingEventService } from "../services/trainingEvent.service";
+import { calculatePagination, getPaginationParams } from "../utils/pagination";
 
 export const createTrainingEvent = async(
     request: FastifyRequest,
@@ -33,12 +34,17 @@ export const getTrainingEvents = async(
         phase?: string
     };
 
-    const events = await trainingEventService.getAll(category, sector, phase);
+    const { page, limit } = getPaginationParams(request.query as Record<string, unknown>);
+
+    const all = await trainingEventService.getAll(category, sector, phase);
+    const total = all.length;
+    const paginated = all.slice((page -1) * limit, page * limit);
 
     return reply.send({
         success: true,
         message: "Training events fetched successfully",
-        data: events,
+        data: paginated,
+        pagination: calculatePagination(total, page, limit),
     });
 };
 

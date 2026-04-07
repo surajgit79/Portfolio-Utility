@@ -1,6 +1,7 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { teacherService } from "../services/teacher.service";
 import { registerTeacherSchema, updateTeacherSchema } from "../utils/validation";
+import { calculatePagination, getPaginationParams } from "../utils/pagination";
 
 export const registerTeacher = async(
   request: FastifyRequest,
@@ -28,12 +29,17 @@ export const getTeachers = async (
   reply: FastifyReply
 ) => {
   const { search } = request.query as { search?: string };
-  const teachers   = await teacherService.getAll(search);
+  const { page, limit } = getPaginationParams(request.query as Record<string, unknown>);
+
+  const all = await teacherService.getAll(search);
+  const total = all.length;
+  const paginated = all.slice((page-1)*limit, page*limit );
 
   return reply.send({
     success: true,
-    message: "Teachers fetched successfully",
-    data:    teachers,
+    message: paginated.length === 0? "No teachers found" : "Teachers fetched successfully",
+    data: paginated,
+    pagination: calculatePagination(total, page, limit),
   });
 };
 

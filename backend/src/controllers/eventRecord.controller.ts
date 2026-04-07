@@ -4,6 +4,7 @@ import {
   createEventRecordSchema,
   updateEventRecordSchema,
 } from "../utils/validation";
+import { calculatePagination, getPaginationParams } from "../utils/pagination";
 
 export const createEventRecord = async (
   request: FastifyRequest,
@@ -31,13 +32,18 @@ export const getEventRecordsByTeacher = async (
   request: FastifyRequest,
   reply: FastifyReply
 ) => {
-  const { teacherId } = request.params as { teacherId: string };
-  const records       = await eventRecordService.getByTeacher(teacherId);
+  const { teacherId }   = request.params as { teacherId: string };
+  const { page, limit } = getPaginationParams(request.query as Record<string, unknown>);
+
+  const all       = await eventRecordService.getByTeacher(teacherId);
+  const total     = all.length;
+  const paginated = all.slice((page - 1) * limit, page * limit);
 
   return reply.send({
     success: true,
-    message: "Event records fetched successfully",
-    data:    records,
+    message:    paginated.length === 0 ? "No event records found" : "Event records fetched successfully",
+    data:       paginated,
+    pagination: calculatePagination(total, page, limit),
   });
 };
 
