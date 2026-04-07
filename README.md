@@ -98,7 +98,7 @@ cp .env.example .env
 Configure your `.env` file:
 ```env
 PORT=3000
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/portfolio_utility
+DATABASE_URL=your-postgres-db-url
 JWT_SECRET=your-super-secret-key
 JWT_EXPIRES_IN=7d
 FRONTEND_URL=http://localhost:3001
