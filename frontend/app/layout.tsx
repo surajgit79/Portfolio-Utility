@@ -26,9 +26,9 @@ export default function RootLayout({
       lang="en"
       className={`${openSans.variable} h-full antialiased`}
     >
-      
-      <body className="min-h-full flex flex-col">
-        <Navbar/>
+
+      <body className="min-h-full flex flex-col bg-[#EBF4FB]">
+        <Navbar />
         <div className="px-15">
           {children}
         </div>

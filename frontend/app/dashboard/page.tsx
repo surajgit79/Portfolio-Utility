@@ -5,27 +5,31 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "
 import Link from "next/link"
 import { toast } from "sonner"
 import { useState, useEffect } from "react"
-import type { User } from "@/types"
-import { getUsers } from "@/lib/api"
-import { getRandom } from "@/utils/Random"
+import type { User, Users, Teachers } from "@/types"
+import { getUsers, getTeachers } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Linker } from "@/utils/Linker"
 
-const schools = ['Navodaya', 'GS', 'Gyanodaya', 'SIA']
-const depts = ['Math', 'Science', 'English']
-
-function deleteUser(users: User[], id: number) {
-    const newUsers = users.filter((user) => user.id != id)
+function deleteUser(users: Users[], id: number) {
+    const newUsers = users.filter((user) => Number(user.id) != id)
     // toast.info(`User (#${id}) has been deleted`)
     alert(`User (#${id}) has been deleted`)
     return newUsers
 }
 
+function deleteTeacher(teachers: Teachers[], id: number) {
+    const newTeachers = teachers.filter((teacher) => Number(teacher.id) != id)
+    return newTeachers
+}
+
 export default function Dashboard() {
 
-    const [users, setUsers] = useState<User[]>([])
+    // const [users, setUsers] = useState<Users[]>([])
+    const [teachers, setTeachers] = useState<Teachers[]>([])
     useEffect(() => {
-        getUsers().then(setUsers)
+        getTeachers().then(res => {
+            setTeachers(res)
+        })
     }, [])
     return (
         <div>
@@ -37,8 +41,6 @@ export default function Dashboard() {
                 <TableHeader>
                     <TableRow>
                         <TableHead>Name</TableHead>
-                        {/* <TableHead>School</TableHead> */}
-                        {/* <TableHead>Department</TableHead> */}
                         <TableHead>Class</TableHead>
                         <TableHead>Program</TableHead>
                         <TableHead>Tenure</TableHead>
@@ -47,19 +49,17 @@ export default function Dashboard() {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {users.map(({ id, name, school, department, grade, program, tenure, address }: User) => (
+                    {teachers.map(({ id, userId, name, address, contact, email, gender, imageUrl, dob }: Teachers) => (
                         <TableRow key={id}>
                             <TableCell>{name}</TableCell>
-                            {/* <TableCell>{schools[getRandom(0, 3)]}</TableCell> */}
-                            {/* <TableCell>{depts[getRandom(0, 2)]}</TableCell> */}
-                            <TableCell>{getRandom(1, 10)}</TableCell>
-                            <TableCell>{name}</TableCell>
-                            <TableCell>{id == 1 ? `${id} year` : `${id} years`}</TableCell>
-                            <TableCell>{`Hetauda - ${getRandom(1, 10)}`}</TableCell>
+                            <TableCell>N/A</TableCell>
+                            <TableCell>N/A</TableCell>
+                            <TableCell>N/A</TableCell>
+                            <TableCell>{address}</TableCell>
                             <TableCell className="font-medium text-[#2D84C4]">
                                 <Link className="hover:font-bold" href={`/teacher/${id}`}>View</Link> |
                                 <Link className="hover:font-bold" href={`/teacher/${id}`}>Edit</Link> |
-                                <Link className="hover:font-bold" href='#' onClick={() => setUsers(deleteUser(users, id))}>Delete</Link>
+                                <Link className="hover:font-bold" href='#' onClick={() => setTeachers(deleteTeacher(teachers, Number(id)))}>Delete</Link>
                             </TableCell>
                         </TableRow>
                     ))}

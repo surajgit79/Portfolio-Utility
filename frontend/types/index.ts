@@ -113,15 +113,15 @@ export type CareerRecords = {
 }
 
 export type EventRecords = {
-    id: string,
-    teacherId: string,
-    eventType: 'Confernce' | 'Panel-Discussion' | '',
-    name: string,
-    roleAtEvent: string,
-    startDate: string,
-    duration: string,
-    _refImage: string,
-    _organizer: string,
-    _description: string,
-    createdAt: string,
+    id: string
+    teacherId: string
+    eventType: 'Conference' | 'Panel-Discussion' | 'Other'
+    name: string
+    roleAtEvent: string
+    startDate: string
+    duration: string
+    refImage?: string
+    organizer?: string
+    description?: string
+    createdAt: string
 }
