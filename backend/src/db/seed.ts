@@ -62,7 +62,7 @@ const seed = async () => {
       contact:  "9841000001",
       email:    "ram.bahadur@school.com",
       gender:   "Male" as const,
-      dob:      new Date("1985-03-15"),
+      dob:      "1985-03-15",
       imageUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Ram",
     },
     {
@@ -73,7 +73,7 @@ const seed = async () => {
       contact:  "9841000002",
       email:    "sita.sharma@school.com",
       gender:   "Female" as const,
-      dob:      new Date("1990-07-22"),
+      dob:      "1990-07-22",
       imageUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sita",
     },
     {
@@ -84,7 +84,7 @@ const seed = async () => {
       contact:  "9841000003",
       email:    "hari.thapa@school.com",
       gender:   "Male" as const,
-      dob:      new Date("1988-11-10"),
+      dob:      "1988-11-10",
       imageUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Hari",
     },
     {
@@ -95,7 +95,7 @@ const seed = async () => {
       contact:  "9841000004",
       email:    "gita.rai@school.com",
       gender:   "Female" as const,
-      dob:      new Date("1992-05-18"),
+      dob:      "1992-05-18",
       imageUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Gita",
     },
     {
@@ -106,7 +106,7 @@ const seed = async () => {
       contact:  "9841000005",
       email:    "bikash.karki@school.com",
       gender:   "Male" as const,
-      dob:      new Date("1987-09-25"),
+      dob:      "1987-09-25",
       imageUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Bikash",
     },
   ];
