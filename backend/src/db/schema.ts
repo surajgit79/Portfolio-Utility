@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, pgEnum, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, pgEnum, integer, date } from "drizzle-orm/pg-core";
 
 export const genderEnum = pgEnum("gender", ["Male", "Female", "Others"]);
 export const categoryEnum = pgEnum("category", ["Activity-based Mathematics", "Pre-School", "Reading"]);
@@ -22,7 +22,7 @@ export const teachers = pgTable("teachers",{
     email: text("email").notNull().unique(),
     gender: genderEnum("gender").notNull(),
     imageUrl: text("image_url"),
-    dob: timestamp("dob").notNull(),
+    dob: date("dob").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),    
 });
