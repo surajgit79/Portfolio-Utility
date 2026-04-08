@@ -1,9 +1,10 @@
 import { HI, H3, PG } from "../defaults/Typography"
 import { ShieldCheckIcon } from '@heroicons/react/24/outline'
 import { Button } from "../ui/button"
-import { use, useEffect, useState } from "react"
-import type { Training } from "@/types"
+import { useEffect, useState } from "react"
+import type { TrainingAttended } from "@/types"
 import { getTrainings } from "@/lib/api"
+import { getMY } from "@/utils/GetDate"
 
 type Props = {
     id: string,
@@ -11,7 +12,7 @@ type Props = {
 }
 
 export const TrainingBlock = ({ id, classNames }: Props) => {
-    const [trainings, setTrainings] = useState<Training[]>([])
+    const [trainings, setTrainings] = useState<TrainingAttended[]>([])
 
     useEffect(() => {
         getTrainings(id).then(res => setTrainings(Array.isArray(res) ? res : [res]))
@@ -32,13 +33,15 @@ export const TrainingBlock = ({ id, classNames }: Props) => {
                             <div key={training.id} className="bg-white border shadow rounded-lg px-10 py-5">
                                 <div className="flex justify-between">
                                     <H3
-                                        text={training.title}
+                                        text={training.category}
                                         classNames="!p-0 !m-0 text-black"
                                     />
-                                    <span>Aug, 2024</span>
+                                    <span>
+                                        {`${getMY(training.startDate)}`}
+                                    </span>
                                 </div>
                                 <PG
-                                    text={`Book ${training.program.book} | Phase ${training.program.phase}`}
+                                    text={`${training.sector} | ${training.phase}`}
                                     classNames="!m-0 !p-0 !text-[#555555]"
                                 />
                                 <PG

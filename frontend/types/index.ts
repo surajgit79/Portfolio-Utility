@@ -10,11 +10,31 @@ type Day = Range<1, 32>
 export type CustomDate = | { year: number } | { year: number; month: Month } | { year: number; month: Month; day: Day }
 
 export type Training = {
-    id: number,
+    id: string,
     ref: string,
     title: string,
     program: Program,
     description: string,
+}
+
+export type TrainingAttended = {
+    id: string,
+    trainingEventId:  string,
+    trainingName: string,
+    certificateNumber: string,
+    venue?: string,
+    category: string,
+    description: string,
+    duration: string,
+    mentorsName: string,
+    phase: string,
+    sector: string,
+    rating?: number
+    refPhotos?: string | null,
+    startDate: string,
+    teacherId: string,
+    createdAt: string,
+    updatedAt: string,
 }
 
 export type Career = {

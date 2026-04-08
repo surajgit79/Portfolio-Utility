@@ -1,0 +1,62 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1774858311805,
+      "tag": "0000_loving_hiroim",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1774879660114,
+      "tag": "0001_wide_hiroim",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1774883089341,
+      "tag": "0002_numerous_ultimatum",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1774945732848,
+      "tag": "0003_yummy_callisto",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1774953133959,
+      "tag": "0004_swift_silk_fever",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1775203647840,
+      "tag": "0005_new_loki",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1775457275451,
+      "tag": "0006_wise_mantis",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1775644901820,
+      "tag": "0007_normal_speed_demon",
+      "breakpoints": true
+    }
+  ]
+}

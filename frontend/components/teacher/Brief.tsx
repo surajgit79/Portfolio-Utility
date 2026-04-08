@@ -1,5 +1,6 @@
 import { MiniDetail } from "./MiniDetail"
 import { H2, PG } from "../defaults/Typography"
+import { getDOB } from "@/utils/GetDate"
 
 type Props = {
     name: string,
@@ -45,7 +46,7 @@ export const BriefBlock = ({ name, imageUrl, address, gender, school, department
                         />
                         <MiniDetail
                             category="dob"
-                            detail={dob}
+                            detail={getDOB(dob)}
                         />
                     </div>
                 </div>
