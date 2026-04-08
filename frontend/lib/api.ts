@@ -1,17 +1,5 @@
-import type { Teachers, Training, Program, EventRecords, Career } from "@/types"
+import type { Teachers, Training, Program, EventRecords, Career, TrainingAttended } from "@/types"
 
-// Get all users
-// export async function getUsers() {
-//     const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL
-//     if (!BASE_URL)
-//         throw new Error('BACKEND_URL not set')
-//     const res = await fetch(BASE_URL)
-
-//     if (!res.ok)
-//         throw new Error('Unable to fetch data')
-
-//     return res.json()
-// }
 export async function getUsers() {
     const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL
     if (!BASE_URL)
@@ -33,7 +21,7 @@ export type TeachersResponse = {
 export async function getTeachers(): Promise<Teachers[]> {
     const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL
 
-    if (!BASE_URL) 
+    if (!BASE_URL)
         throw new Error('BACKEND_URL not set')
 
     const res = await fetch(`${BASE_URL}/teachers`)
@@ -66,41 +54,94 @@ export async function getTeacher(id: string): Promise<Teachers> {
 export type TrainingResponse = {
     success: boolean,
     message: string,
-    data: Training[]
+    data: TrainingAttended[]
 }
 
-function getDummyTrainings(): Training[] {
-    return [
-        {
-            id: -1,
-            ref: "DUMMY-001",
-            title: "[DUMMY] Activity Based Math Workshop",
-            program: { book: 1, phase: 1 } as Program,
-            description: "This is fallback dummy data. API failed."
-        },
-        {
-            id: -2,
-            ref: "DUMMY-002",
-            title: "[DUMMY] Reading Enhancement Program",
-            program: { book: 1, phase: 2 } as Program,
-            description: "Dummy record for development/testing only."
-        },
-        {
-            id: -3,
-            ref: "DUMMY-003",
-            title: "[DUMMY] Pre-School Teaching Training",
-            program: { book: 1, phase: 3 } as Program,
-            description: "Clearly marked dummy dataset."
-        }
-    ]
-}
+export const dummyTrainingAttended: TrainingAttended[] = [
+    {
+        id: 'TA-001',
+        trainingEventId: 'TE-101',
+        trainingName: 'Activity Based Learning Workshop',
+        certificateNumber: 'CERT-ABL-2023-001',
+        venue: 'Kathmandu Training Center',
+        category: 'Pedagogy',
+        description: 'Focused on activity-based teaching methods for primary students.',
+        duration: '3 days',
+        mentorsName: 'Dr. Ramesh Sharma',
+        phase: 'Phase 1',
+        sector: 'Education',
+        rating: 4,
+        refPhotos: null,
+        startDate: '2023-05-10',
+        teacherId: 'T-001',
+        createdAt: '2023-05-15T10:00:00Z',
+        updatedAt: '2023-05-15T10:00:00Z',
+    },
+    {
+        id: 'TA-002',
+        trainingEventId: 'TE-102',
+        trainingName: 'Digital Teaching Tools Training',
+        certificateNumber: 'CERT-DTT-2023-002',
+        venue: 'Pokhara Learning Hub',
+        category: 'Technology',
+        description: 'Introduction to digital platforms and smart teaching tools.',
+        duration: '5 days',
+        mentorsName: 'Anita Karki',
+        phase: 'Phase 2',
+        sector: 'ICT in Education',
+        rating: 5,
+        refPhotos: 'https://example.com/photo1.jpg',
+        startDate: '2023-07-01',
+        teacherId: 'T-001',
+        createdAt: '2023-07-06T09:30:00Z',
+        updatedAt: '2023-07-06T09:30:00Z',
+    },
+    {
+        id: 'TA-003',
+        trainingEventId: 'TE-103',
+        trainingName: 'Inclusive Education Training',
+        certificateNumber: 'CERT-IET-2022-045',
+        venue: 'Biratnagar Education Office',
+        category: 'Special Education',
+        description: 'Training on inclusive classrooms and supporting diverse learners.',
+        duration: '2 days',
+        mentorsName: 'Sita Gurung',
+        phase: 'Phase 1',
+        sector: 'Inclusive Education',
+        rating: 3,
+        refPhotos: null,
+        startDate: '2022-11-20',
+        teacherId: 'T-002',
+        createdAt: '2022-11-22T08:15:00Z',
+        updatedAt: '2022-11-22T08:15:00Z',
+    },
+    {
+        id: 'TA-004',
+        trainingEventId: 'TE-104',
+        trainingName: 'Curriculum Development Workshop',
+        certificateNumber: 'CERT-CDW-2024-010',
+        venue: 'Lalitpur Resource Center',
+        category: 'Curriculum',
+        description: 'Advanced curriculum planning and assessment strategies.',
+        duration: '4 days',
+        mentorsName: 'Prof. Kiran Adhikari',
+        phase: 'Phase 3',
+        sector: 'Academic Development',
+        rating: 5,
+        refPhotos: 'https://example.com/photo2.jpg',
+        startDate: '2024-02-12',
+        teacherId: 'T-003',
+        createdAt: '2024-02-16T11:00:00Z',
+        updatedAt: '2024-02-16T11:00:00Z',
+    }
+]
 
-export async function getTrainings(id: string): Promise<Training[]> {
+export async function getTrainings(id: string): Promise<TrainingAttended[]> {
     const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL
 
     if (!BASE_URL) {
         console.warn("BACKEND_URL not set, using dummy data")
-        return getDummyTrainings()
+        return dummyTrainingAttended
     }
 
     try {
@@ -110,12 +151,12 @@ export async function getTrainings(id: string): Promise<Training[]> {
             throw new Error(`HTTP error: ${res.status}`)
 
         const json: TrainingResponse = await res.json()
-
+        console.log(json.data)
         return json.data
 
     } catch (error) {
-        console.error("Failed to fetch trainings:", error)
-        return getDummyTrainings()
+        console.error("Failed to fetch careers:", error)
+        return dummyTrainingAttended
     }
 }
 
@@ -168,28 +209,7 @@ export const dummyEventRecords: EventRecords[] = [
 ]
 
 export async function getEventRecords(id: string): Promise<EventRecords[]> {
-    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL
-
-    if (!BASE_URL) {
-        console.warn("BACKEND_URL not set, using dummy data")
-        return dummyEventRecords
-    }
-
-    try {
-        const res = await fetch(`${BASE_URL}/event-records/teacher/${id}`)
-
-        if (!res.ok) {
-            throw new Error(`HTTP error: ${res.status}`)
-        }
-
-        const json: EventRecordsResponse = await res.json()
-
-        return json.data
-
-    } catch (error) {
-        console.error("Failed to fetch events:", error)
-        return dummyEventRecords
-    }
+    return dummyEventRecords
 }
 
 export type CareerResponse = {
@@ -234,27 +254,28 @@ export const dummyCareer: Career[] = [
 ]
 
 export async function getCareers(id: string): Promise<Career[]> {
-    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL
+    return dummyCareer
+    // const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL
 
-    if (!BASE_URL) {
-        console.warn("BACKEND_URL not set, using dummy data")
-        return dummyCareer
-    }
+    // if (!BASE_URL) {
+    //     console.warn("BACKEND_URL not set, using dummy data")
+    //     return dummyCareer
+    // }
 
-    try {
-        const res = await fetch(`${BASE_URL}/career-records/teacher/${id}`)
+    // try {
+    //     const res = await fetch(`${BASE_URL}/career-records/teacher/${id}`)
 
-        if (!res.ok) 
-            throw new Error(`HTTP error: ${res.status}`)
+    //     if (!res.ok) 
+    //         throw new Error(`HTTP error: ${res.status}`)
 
-        const json: CareerResponse = await res.json()
+    //     const json: CareerResponse = await res.json()
 
-        return json.data
+    //     return json.data
 
-    } catch (error) {
-        console.error("Failed to fetch careers:", error)
-        return dummyCareer
-    }
+    // } catch (error) {
+    //     console.error("Failed to fetch careers:", error)
+    //     return dummyCareer
+    // }
 }
 
 // Get user by id
