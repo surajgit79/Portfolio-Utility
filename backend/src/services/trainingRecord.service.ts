@@ -96,7 +96,7 @@ export const trainingRecordService = {
             throw new AppError(404, ErrorCode.NOT_FOUND, "Teacher not found");
         }
 
-       return trainingRecordRepository.findByTeacherId(teacherId);
+       return trainingRecordRepository.findByTeacherIdWithEvent(teacherId);
     },
 
     getByEvent: async(eventId: string)=>{

@@ -1,5 +1,5 @@
 import { db } from "../db/client";
-import { trainingRecords } from "../db/schema";
+import { trainingRecords, trainingEvents } from "../db/schema";
 import { eq, and } from "drizzle-orm";
 
 type TrainingRecord = typeof trainingRecords.$inferInsert;
@@ -19,6 +19,34 @@ export const trainingRecordRepository = {
     findByTeacherId: async(teacherId: string): Promise<TrainingRecord[]>=>{
         const record = await db.select().from(trainingRecords).where(eq(trainingRecords.teacherId, teacherId));
         return record;
+    },
+
+    findByTeacherIdWithEvent: async(teacherId: string) =>{
+        return db.select({
+            id:                trainingRecords.id,
+            teacherId:         trainingRecords.teacherId,
+            trainingEventId:   trainingRecords.trainingEventId,
+            rating:            trainingRecords.rating,
+            certificateNumber: trainingRecords.certificateNumber,
+            refPhotos:         trainingRecords.refPhotos,
+            createdAt:         trainingRecords.createdAt,
+            updatedAt:         trainingRecords.updatedAt,
+            // Training event details
+            trainingName:      trainingEvents.name,
+            category:          trainingEvents.category,
+            sector:            trainingEvents.sector,
+            phase:             trainingEvents.phase,
+            description:       trainingEvents.description,
+            mentorsName:       trainingEvents.mentorsName,
+            venue:             trainingEvents.venue,
+            startDate:         trainingEvents.startDate,
+            duration:          trainingEvents.duration,
+        }).from(trainingRecords)
+        .innerJoin(
+            trainingEvents,
+            eq(trainingRecords.trainingEventId, trainingEvents.id)
+        )
+        .where(eq(trainingRecords.teacherId, teacherId));
     },
 
     findByEventId: async(eventId: string): Promise<TrainingRecord[]>=>{
