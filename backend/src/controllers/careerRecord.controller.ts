@@ -1,6 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { createCareerRecordSchema, updateCareerRecordSchema } from "../utils/validation";
 import { careerRecordService } from "../services/careerRecord.service";
+import { calculatePagination, getPaginationParams } from "../utils/pagination";
 
 export const createCareerRecord = async (
     request: FastifyRequest,
@@ -28,12 +29,17 @@ export const getCareerRecordsByTeacher = async(
     reply: FastifyReply
 )=>{
     const { teacherId } = request.params as { teacherId: string};
-    const records = await careerRecordService.getByTeacher(teacherId);
+    const { page, limit } = getPaginationParams( request.query as Record<string, unknown>);
+
+    const all = await careerRecordService.getByTeacher(teacherId);
+    const total = all.length;
+    const paginated = all.slice((page - 1) * limit, page * limit);
     
     return reply.send({
         success: true,
-        message: "Career record fetched successfully",
-        data: records,
+        message: paginated.length === 0? "No records found": "Career record fetched successfully",
+        data: paginated,
+        pagination: calculatePagination(total, page, limit),
     });
 };
 

@@ -14,7 +14,7 @@ import { hashedPassword } from "../utils/password";
 import { generateCertificateNumber } from "../utils/idGenerator";
 
 const seed = async () => {
-  console.log("Cleaning existing data...");
+  console.log("🧹 Cleaning existing data...");
 
   await db.delete(eventRecords);
   await db.delete(careerRecords);
@@ -23,7 +23,7 @@ const seed = async () => {
   await db.delete(teachers);
   await db.delete(users);
 
-  console.log("Seeding users...");
+  console.log("🌱 Seeding users...");
 
   const adminPassword   = await hashedPassword("Admin1234");
   const teacherPassword = await hashedPassword("Teacher1234");
@@ -51,7 +51,7 @@ const seed = async () => {
     });
   }
 
-  console.log("Seeding teachers...");
+  console.log("🌱 Seeding teachers...");
 
   const teacherProfiles = [
     {
@@ -62,7 +62,7 @@ const seed = async () => {
       contact:  "9841000001",
       email:    "ram.bahadur@school.com",
       gender:   "Male" as const,
-      dob:      new Date("1985-03-15"),
+      dob:      "1985-03-15",
       imageUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Ram",
     },
     {
@@ -73,7 +73,7 @@ const seed = async () => {
       contact:  "9841000002",
       email:    "sita.sharma@school.com",
       gender:   "Female" as const,
-      dob:      new Date("1990-07-22"),
+      dob:      "1990-07-22",
       imageUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sita",
     },
     {
@@ -84,7 +84,7 @@ const seed = async () => {
       contact:  "9841000003",
       email:    "hari.thapa@school.com",
       gender:   "Male" as const,
-      dob:      new Date("1988-11-10"),
+      dob:      "1988-11-10",
       imageUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Hari",
     },
     {
@@ -95,7 +95,7 @@ const seed = async () => {
       contact:  "9841000004",
       email:    "gita.rai@school.com",
       gender:   "Female" as const,
-      dob:      new Date("1992-05-18"),
+      dob:      "1992-05-18",
       imageUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Gita",
     },
     {
@@ -106,16 +106,13 @@ const seed = async () => {
       contact:  "9841000005",
       email:    "bikash.karki@school.com",
       gender:   "Male" as const,
-      dob:      new Date("1987-09-25"),
+      dob:      "1987-09-25",
       imageUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Bikash",
     },
   ];
 
   for (const profile of teacherProfiles) {
-    await db.insert(teachers).values({
-      ...profile,
-      dob: profile.dob.toISOString().split('T')[0],
-    });
+    await db.insert(teachers).values(profile);
   }
 
   console.log("🌱 Seeding training events...");
@@ -162,7 +159,7 @@ const seed = async () => {
     await db.insert(trainingEvents).values(event);
   }
 
-  console.log("Seeding training records...");
+  console.log("🌱 Seeding training records...");
 
   const trainingRecordData = [
     { id: "REC-2026-0001", teacherId: "TCH-2026-0001", trainingEventId: "TRN-2026-0001", rating: 4, category: "Activity-based Mathematics", sector: "Book 1", phase: "Phase 1" },
@@ -189,7 +186,7 @@ const seed = async () => {
     });
   }
 
-  console.log("Seeding career records...");
+  console.log("🌱 Seeding career records...");
 
   const careerRecordData = [
     {
@@ -228,7 +225,7 @@ const seed = async () => {
     await db.insert(careerRecords).values(record);
   }
 
-  console.log("Seeding event records...");
+  console.log("🌱 Seeding event records...");
 
   const eventRecordData = [
     {
@@ -269,13 +266,13 @@ const seed = async () => {
     await db.insert(eventRecords).values(record);
   }
 
-  console.log("Seeding complete!");
+  console.log("✅ Seeding complete!");
   await pool.end();
   process.exit(0);
 };
 
 seed().catch(async (err) => {
-  console.error("Seeding failed:", err);
+  console.error("❌ Seeding failed:", err);
   await pool.end();
   process.exit(1);
 });

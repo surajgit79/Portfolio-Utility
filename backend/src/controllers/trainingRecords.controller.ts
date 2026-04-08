@@ -1,6 +1,7 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { trainingRecordService } from "../services/trainingRecord.service";
 import { createTrainingRecordSchema, bulkCreateTrainingRecordSchema, updateTrainingRecordSchema } from "../utils/validation";
+import { calculatePagination, getPaginationParams } from "../utils/pagination";
 
 export const createTrainingRecord = async (
     request: FastifyRequest,
@@ -52,12 +53,17 @@ export const getTrainingRecordsByTeacher = async (
     reply: FastifyReply
     ) => {
     const { teacherId } = request.params as { teacherId: string };
-    const records       = await trainingRecordService.getByTeacher(teacherId);
+    const { page, limit } = getPaginationParams(request.query as Record<string, unknown>)
+
+    const all = await trainingRecordService.getByTeacher(teacherId);
+    const total = all.length;
+    const paginated = all.slice((page - 1) * limit, page * limit);
 
     return reply.send({
         success: true,
-        message: records.length === 0? "No records found": "Training records fetched successfully",
-        data:    records,
+        message: paginated.length === 0? "No records found": "Training records fetched successfully",
+        data: paginated,
+        pagination: calculatePagination(total, page, limit),
     });
 };
 
@@ -66,12 +72,17 @@ export const getTrainingRecordsByEvent = async (
     reply: FastifyReply
     ) => {
     const { eventId } = request.params as { eventId: string };
-    const records     = await trainingRecordService.getByEvent(eventId);
+    const { page, limit } = getPaginationParams( request.query as Record<string, unknown>);
+
+    const all     = await trainingRecordService.getByEvent(eventId);
+    const total = all.length;
+    const paginated = all.slice((page - 1) * limit, page * limit);
 
     return reply.send({
         success: true,
-        message: records.length === 0? "No records found": "Training records fetched successfully",
-        data:    records,
+        message: paginated.length === 0? "No records found": "Training records fetched successfully",
+        data: paginated,
+        pagination: calculatePagination(total, page, limit),
     });
 };
 
