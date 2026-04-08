@@ -374,7 +374,7 @@ Content-Type: multipart/form-data
 | email | TEXT | UNIQUE, NOT NULL |
 | gender | ENUM | NOT NULL |
 | image_url | TEXT | |
-| dob | TIMESTAMP | NOT NULL |
+| dob | DATE | NOT NULL |
 | created_at | TIMESTAMP | NOT NULL |
 | updated_at | TIMESTAMP | NOT NULL |
 
@@ -449,7 +449,7 @@ Format: `{PREFIX}-{YEAR}-{SEQUENCE}`
 | users | USR |
 | teachers | TCH |
 | training_events | TRN |
-| training_records | TRC |
+| training_records | REC |
 | career_records | CAR |
 | event_records | EVT |
 
