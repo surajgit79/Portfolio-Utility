@@ -348,6 +348,7 @@ Content-Type: multipart/form-data
 |--------|----------|-------------|------|
 | GET | `/certificates/:certificateNumber` | View certificate | Protected |
 | GET | `/certificates/:certificateNumber/download` | Download PDF | Protected |
+| GET | `/certificates/bulk/:eventId/download` | Bulk download PDFs for an event | Protected |
 
 ---
 
@@ -550,6 +551,20 @@ docs(readme): update API docs
 | Variable | Description | Required |
 |----------|-------------|----------|
 | NEXT_PUBLIC_API_URL | Backend URL | Yes |
+
+---
+
+## Future Enhancements
+
+### Planned Features
+
+- **Teacher Tenure Tracking** — Add functionality to track and manage teacher tenure periods, including appointment dates, contract periods, and tenure history
+- **Dashboard Analytics** — Visual statistics and insights for admin and teachers
+- **Bulk Export** — Export teacher data and records to CSV/Excel
+- **Email Notifications** — Automated email alerts for training events and certificate generation
+- **Multi-year Archive** — Archive and retrieve historical training records by academic year
+- **Role-based Views** — Customized dashboards for different user roles
+- **Progress Reports** — Generate comprehensive teacher performance reports
 
 ---
 
