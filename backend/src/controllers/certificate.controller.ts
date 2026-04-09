@@ -27,3 +27,20 @@ export const downloadCertificate = async (
 
     return reply.send(pdf);
 }
+
+export const bulkDownloadCertificates = async (
+  request: FastifyRequest,
+  reply: FastifyReply
+) => {
+  const { eventId } = request.params as { eventId: string };
+
+  const pdf = await certificateService.bulkGeneratePDF(eventId);
+
+  reply.header("Content-Type", "application/pdf");
+  reply.header(
+    "Content-Disposition",
+    `attachment; filename="certificates-${eventId}.pdf"`
+  );
+
+  return reply.send(pdf);
+};

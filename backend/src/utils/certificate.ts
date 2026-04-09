@@ -1,4 +1,5 @@
 import puppeteer from "puppeteer";
+import { PDFDocument } from "pdf-lib";
 
 interface CertificateData {
   teacherName:       string;
@@ -373,4 +374,17 @@ export const generateCertificatePDF = async (
   await browser.close();
 
   return Buffer.from(pdf);
+};
+
+export const mergePDFs = async (pdfs: Buffer[]): Promise<Buffer> => {
+  const mergedPdf = await PDFDocument.create();
+
+  for (const pdfBuffer of pdfs) {
+    const pdf   = await PDFDocument.load(pdfBuffer);
+    const pages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+    pages.forEach((page) => mergedPdf.addPage(page));
+  }
+
+  const mergedBytes = await mergedPdf.save();
+  return Buffer.from(mergedBytes);
 };

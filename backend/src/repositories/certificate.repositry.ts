@@ -19,4 +19,8 @@ export const certificateRepository = {
         return teacher;
     },
 
+    findByEventId: async (eventId: string) => {
+    return db.select().from(trainingRecords).where(eq(trainingRecords.trainingEventId, eventId));
+  },
+
 }

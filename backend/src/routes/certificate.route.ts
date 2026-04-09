@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { requireAuth } from "../middlewares/requireAuth";
-import { downloadCertificate, viewCertificate } from "../controllers/certificate.controller";
+import { requireRole } from "../middlewares/requireRole";
+import { bulkDownloadCertificates, downloadCertificate, viewCertificate } from "../controllers/certificate.controller";
 
 export async function certificateRoutes(app: FastifyInstance){
     app.get("/:certificateNumber",{
@@ -12,4 +13,9 @@ export async function certificateRoutes(app: FastifyInstance){
         preHandler: [requireAuth],
         handler: downloadCertificate,
     });
+
+    app.get("/bulk/:eventId/download", {
+    preHandler: [requireAuth, requireRole("admin")],
+    handler:    bulkDownloadCertificates,
+  });
 }
