@@ -6,6 +6,11 @@ import { uploadSingleImage } from "../utils/upload";
 import { FastifyRequest } from "fastify";
 import { hashedPassword } from "../utils/password";
 
+const calculateTenure = (teachingSince: number | null): number | null => {
+  if (!teachingSince) return null;
+  return new Date().getFullYear() - teachingSince;
+};
+
 export const teacherService = {
   register: async (
     data: {
@@ -50,7 +55,7 @@ export const teacherService = {
       contact:  data.contact,
       email:    data.email,
       gender:   data.gender,
-      dob:      new Date(data.dob),
+      dob:      data.dob,
       imageUrl,
     });
 
@@ -58,11 +63,11 @@ export const teacherService = {
   },
 
   getAll: async (search?: string) => {
-    const teachers = await teacherRepository.findAll(search);
-    if(teachers.length === 0){
-      throw new AppError(200, ErrorCode.NOT_FOUND, "No teachers found");
-    }
-    return teachers;
+    const result = await teacherRepository.findAll(search);
+    return result.map((teacher) => ({
+      ...teacher,
+      tenure: calculateTenure(teacher.teachingSince),
+    }));
   },
 
   getById: async (id: string) => {
@@ -71,7 +76,10 @@ export const teacherService = {
       throw new AppError(404, ErrorCode.NOT_FOUND, "Teacher not found");
     }
 
-    return teacher;
+    return {
+      ...teacher,
+      tenure: calculateTenure(teacher.teachingSince),
+    };
   },
 
   update: async (
@@ -104,7 +112,7 @@ export const teacherService = {
     return teacherRepository.update(id, {
       ...rest,
       ...(imageUrl && { imageUrl }),
-      ...(dob && { dob: new Date(dob) }),
+      ...(dob && { dob: dob }),
       updatedAt: new Date(),
     });
   },

@@ -33,6 +33,7 @@ export const registerTeacherSchema = z.object({
               (date) => !isNaN(Date.parse(date)),
               "Invalid date format"
             ),
+  teachingSince: z.number().int().min(1950, "Invalid year").max(new Date().getFullYear(), "Year cannot be in the future").optional(),
 });
 
 export type RegisterTeacherRequest = z.infer<typeof registerTeacherSchema>;

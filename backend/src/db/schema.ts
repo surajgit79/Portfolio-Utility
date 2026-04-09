@@ -23,6 +23,7 @@ export const teachers = pgTable("teachers",{
     gender: genderEnum("gender").notNull(),
     imageUrl: text("image_url"),
     dob: date("dob").notNull(),
+    teachingSince: integer("teaching_since"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),    
 });
