@@ -42,6 +42,6 @@ app.register(trainingEventRoutes, {prefix: "/api/training-events"});
 app.register(trainingRecordRoutes, {prefix: "/api/training-records"});
 app.register(careerRecordRoutes,{prefix: "/api/career-records"});
 app.register(eventRecordRoutes, {prefix: "/api/event-records"});
-app.register(certificateRoutes, {prefix: "/api/certificates"})
+app.register(certificateRoutes, {prefix: "/api/certificates"});
 
 export default app;

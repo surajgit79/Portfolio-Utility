@@ -3,6 +3,7 @@ import { pgTable, text, timestamp, pgEnum, integer, date } from "drizzle-orm/pg-
 export const genderEnum = pgEnum("gender", ["Male", "Female", "Others"]);
 export const categoryEnum = pgEnum("category", ["Activity-based Mathematics", "Pre-School", "Reading"]);
 export const eventEnum = pgEnum("event_type", ["Seminar", "Conference", "Panel Discussion","Podcast"]);
+export const gradeEnum = pgEnum("grade", ["Nursery", "LKG", "UKG", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6", "Grade 7", "Grade 8", "Grade 9", "Grade 10"]);
 
 export const users = pgTable("users", {
     id: text("id").primaryKey(),
@@ -59,6 +60,7 @@ export const careerRecords = pgTable("career_records",{
     teacherId: text("teacher_id").notNull().references(()=>teachers.id, { onDelete: "cascade"}),
     role: text("role").notNull(),
     organization: text("organization").notNull(),
+    grade: gradeEnum("grade"),
     startDate: timestamp("start_date").notNull(),
     endDate: timestamp("end_date"),
     stillWorking: integer("still_working").notNull().default(0),

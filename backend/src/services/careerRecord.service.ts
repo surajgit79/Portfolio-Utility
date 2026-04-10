@@ -5,13 +5,14 @@ import { AppError, ErrorCode } from "../utils/errorHandler";
 
 export const careerRecordService = {
   create: async (data: {
-    teacherId:        string;
-    role:             string;
-    organization:    string;
-    startDate:        string;
-    endDate?:         string;
-    stillWorking:     number;
-    achievements?:    string;
+    teacherId: string;
+    role: string;
+    organization: string;
+    grade?: "Nursery" | "LKG" | "UKG" | "Grade 1" | "Grade 2" | "Grade 3" | "Grade 4" | "Grade 5" | "Grade 6" | "Grade 7" | "Grade 8" | "Grade 9" | "Grade 10";
+    startDate: string;
+    endDate?: string;
+    stillWorking: number;
+    achievements?: string;
     refContactDetail?: string;
   }) => {
     const teacher = await teacherRepository.findById(data.teacherId);
@@ -55,16 +56,16 @@ export const careerRecordService = {
   },
 
   update: async (id: string, data: Partial<{
-    role:             string;
-    oraganization:    string;
-    startDate:        string;
-    endDate:          string;
-    stillWorking:     number;
-    achievements:     string;
+    role: string;
+    oraganization: string;
+    grade?: "Nursery" | "LKG" | "UKG" | "Grade 1" | "Grade 2" | "Grade 3" | "Grade 4" | "Grade 5" | "Grade 6" | "Grade 7" | "Grade 8" | "Grade 9" | "Grade 10";
+    startDate: string;
+    endDate: string;
+    stillWorking: number;
+    achievements: string;
     refContactDetail: string;
   }>) => {
     const existing = await careerRecordRepository.findById(id);
-
     if (!existing) {
       throw new AppError(404, ErrorCode.NOT_FOUND, "Career record not found");
     }
