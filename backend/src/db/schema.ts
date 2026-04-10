@@ -1,4 +1,5 @@
 import { pgTable, text, timestamp, pgEnum, integer, date } from "drizzle-orm/pg-core";
+import { array } from "zod";
 
 export const genderEnum = pgEnum("gender", ["Male", "Female", "Others"]);
 export const categoryEnum = pgEnum("category", ["Activity-based Mathematics", "Pre-School", "Reading"]);
@@ -45,14 +46,16 @@ export const trainingEvents = pgTable("training_events", {
 });
 
 export const trainingRecords = pgTable("training_records", {
-  id: text("id").primaryKey(),
-  teacherId: text("teacher_id").notNull().references(() => teachers.id, { onDelete: "cascade" }),
-  trainingEventId: text("training_event_id").notNull().references(() => trainingEvents.id, { onDelete: "cascade" }),
-  rating: integer("rating").notNull(),
-  certificateNumber: text("certificate_number").notNull().unique(),
-  refPhotos: text("ref_photos"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    id: text("id").primaryKey(),
+    teacherId: text("teacher_id").notNull().references(() => teachers.id, { onDelete: "cascade" }),
+    trainingEventId: text("training_event_id").notNull().references(() => trainingEvents.id, { onDelete: "cascade" }),
+    rating: integer("rating").notNull(),
+    certificateNumber: text("certificate_number").notNull().unique(),
+    refPhotos: text("ref_photos"),
+    feedback: text("feedback"),
+    skills: text("skills").array().default([]),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }); 
 
 export const careerRecords = pgTable("career_records",{
