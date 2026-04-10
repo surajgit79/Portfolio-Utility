@@ -273,7 +273,9 @@ Content-Type: multipart/form-data
 {
   "teacherId": "TCH-2026-0001",
   "trainingEventId": "TRN-2026-0001",
-  "rating": 4
+  "rating": 4,
+  "feedback": "Excellent participation",
+  "skills": ["Communication", "Leadership"]
 }
 ```
 
@@ -282,7 +284,9 @@ Content-Type: multipart/form-data
 {
   "trainingEventId": "TRN-2026-0001",
   "teacherIds": ["TCH-2026-0001", "TCH-2026-0002"],
-  "rating": 5
+  "rating": 5,
+  "feedback": "Great learning experience",
+  "skills": ["Math", "Teaching"]
 }
 ```
 
@@ -304,6 +308,7 @@ Content-Type: multipart/form-data
   "teacherId": "TCH-2026-0001",
   "role": "Senior Teacher",
   "organization": "ABC School",
+  "grade": "Grade 5",
   "startDate": "2020-01-15",
   "endDate": "2024-06-30",
   "stillWorking": 0,
@@ -339,6 +344,8 @@ Content-Type: multipart/form-data
 ```
 
 **Event Types:** `Seminar`, `Conference`, `Panel Discussion`, `Podcast`
+
+**Grades:** `Nursery`, `LKG`, `UKG`, `Grade 1` - `Grade 10`
 
 ---
 
@@ -376,6 +383,7 @@ Content-Type: multipart/form-data
 | gender | ENUM | NOT NULL |
 | image_url | TEXT | |
 | dob | DATE | NOT NULL |
+| teaching_since | INTEGER | |
 | created_at | TIMESTAMP | NOT NULL |
 | updated_at | TIMESTAMP | NOT NULL |
 
@@ -404,6 +412,8 @@ Content-Type: multipart/form-data
 | rating | INTEGER | NOT NULL |
 | certificate_number | TEXT | UNIQUE, NOT NULL |
 | ref_photos | TEXT | |
+| feedback | TEXT | |
+| skills | TEXT[] | DEFAULT '{}' |
 | created_at | TIMESTAMP | NOT NULL |
 | updated_at | TIMESTAMP | NOT NULL |
 
@@ -414,6 +424,7 @@ Content-Type: multipart/form-data
 | teacher_id | TEXT | FK → teachers |
 | role | TEXT | NOT NULL |
 | organization | TEXT | NOT NULL |
+| grade | ENUM | |
 | start_date | TIMESTAMP | NOT NULL |
 | end_date | TIMESTAMP | |
 | still_working | INTEGER | NOT NULL, DEFAULT 0 |
