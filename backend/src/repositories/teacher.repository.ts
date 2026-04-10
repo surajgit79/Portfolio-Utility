@@ -1,16 +1,39 @@
 import { db } from "../db/client";
 import { teachers, users } from "../db/schema";
-import { eq, ilike } from "drizzle-orm";
+import { eq, ilike, and } from "drizzle-orm";
+import { careerRecords } from "../db/schema";
 
 type Teacher = typeof teachers.$inferSelect;
 type NewTeacher = typeof teachers.$inferInsert;
 
 export const teacherRepository = {
-  findById: async (id: string): Promise<Teacher | undefined> => {
+  findById: async (id: string) => {
     const [teacher] = await db
-      .select()
+      .select({
+        id:                  teachers.id,
+        userId:              teachers.userId,
+        name:                teachers.name,
+        address:             teachers.address,
+        contact:             teachers.contact,
+        email:               teachers.email,
+        gender:              teachers.gender,
+        imageUrl:            teachers.imageUrl,
+        dob:                 teachers.dob,
+        teachingSince:       teachers.teachingSince,
+        createdAt:           teachers.createdAt,
+        updatedAt:           teachers.updatedAt,
+        currentOrganization: careerRecords.organization,
+      })
       .from(teachers)
+      .leftJoin(
+        careerRecords,
+        and(
+          eq(careerRecords.teacherId, teachers.id),
+          eq(careerRecords.stillWorking, 1)
+        )
+      )
       .where(eq(teachers.id, id));
+
     return teacher;
   },
 
@@ -31,13 +54,37 @@ export const teacherRepository = {
   },
 
   findAll: async (search?: string): Promise<Teacher[]> => {
+    const query = db
+      .select({
+        id:                  teachers.id,
+        userId:              teachers.userId,
+        name:                teachers.name,
+        address:             teachers.address,
+        contact:             teachers.contact,
+        email:               teachers.email,
+        gender:              teachers.gender,
+        imageUrl:            teachers.imageUrl,
+        dob:                 teachers.dob,
+        teachingSince:       teachers.teachingSince,
+        createdAt:           teachers.createdAt,
+        updatedAt:           teachers.updatedAt,
+        currentOrganization: careerRecords.organization,
+      })
+      .from(teachers)
+      .leftJoin(
+        careerRecords,
+        and(
+          eq(careerRecords.teacherId, teachers.id),
+          eq(careerRecords.stillWorking, 1)
+        )
+      );
+
     if (search) {
-      return db
-        .select()
-        .from(teachers)
-        .where(ilike(teachers.name, `%${search}%`));
+      return query.where(ilike(teachers.name, `%${search}%`));
     }
-    return db.select().from(teachers);
+
+    return query;
+
   },
 
   create: async (data: NewTeacher): Promise<Teacher> => {
