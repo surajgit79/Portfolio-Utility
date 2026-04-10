@@ -1,10 +1,14 @@
-export const env ={
-    port: Number(process.env.PORT) || 3000,
-    databaseUrl:  process.env.DATABASE_URL!,
-    jwtSecret:    process.env.JWT_SECRET!,
-    jwtExpiresIn: process.env.JWT_EXPIRES_IN || "7d",
-    frontendUrl:  process.env.FRONTEND_URL || "http://localhost:8081",
-    cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME!,
-    cloudinaryApiKey:    process.env.CLOUDINARY_API_KEY!,
-    cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET!,
+import { validateEnv } from "./validateEnv";
+
+const _env = validateEnv();
+
+export const env = {
+  port:                Number(_env.PORT) || 3000,
+  databaseUrl:         _env.DATABASE_URL,
+  jwtSecret:           _env.JWT_SECRET,
+  jwtExpiresIn:        _env.JWT_EXPIRES_IN,
+  frontendUrl:         _env.FRONTEND_URL,
+  cloudinaryCloudName: _env.CLOUDINARY_CLOUD_NAME,
+  cloudinaryApiKey:    _env.CLOUDINARY_API_KEY,
+  cloudinaryApiSecret: _env.CLOUDINARY_API_SECRET,
 };
