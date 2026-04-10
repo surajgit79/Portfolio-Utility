@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { createCareerRecordSchema, updateCareerRecordSchema } from "../utils/validation";
+import { createCareerRecordSchema, updateCareerRecordSchema } from "../utils/schemaValidator";
 import { careerRecordService } from "../services/careerRecord.service";
-import { calculatePagination, getPaginationParams } from "../utils/pagination";
+import { calculatePagination, getPaginationParams } from "../utils/paginationHandler";
 
 export const createCareerRecord = async (
     request: FastifyRequest,

@@ -2,9 +2,9 @@ import { teacherRepository } from "../repositories/teacher.repository";
 import { userRepository } from "../repositories/user.repository";
 import { generateId } from "../utils/idGenerator";
 import { AppError, ErrorCode } from "../utils/errorHandler";
-import { uploadSingleImage } from "../utils/upload";
+import { uploadSingleImage } from "../utils/imageUploader";
 import { FastifyRequest } from "fastify";
-import { hashedPassword } from "../utils/password";
+import { hashedPassword } from "../utils/passwordHasherVerifier";
 
 const calculateTenure = (teachingSince: number | null): number | null => {
   if (!teachingSince) return null;

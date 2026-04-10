@@ -1,8 +1,8 @@
 import { userRepository } from "../repositories/user.repository";
 import { AppError, ErrorCode } from "../utils/errorHandler";
 import { generateId } from "../utils/idGenerator";
-import { signToken } from "../utils/jwt";
-import { comparePassword, hashedPassword } from "../utils/password";
+import { signToken } from "../utils/jwtAuthenticator";
+import { comparePassword, hashedPassword } from "../utils/passwordHasherVerifier";
 
 export const authService = {
     register: async (email: string, password: string)=>{

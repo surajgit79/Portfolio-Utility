@@ -10,7 +10,7 @@ import {
   careerRecords,
   eventRecords,
 } from "./schema";
-import { hashedPassword } from "../utils/password";
+import { hashedPassword } from "../utils/passwordHasherVerifier";
 import { generateCertificateNumber } from "../utils/idGenerator";
 
 const seed = async () => {

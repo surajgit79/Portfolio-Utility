@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { createTrainingEventSchema, updateTrainingEventSchema } from "../utils/validation";
+import { createTrainingEventSchema, updateTrainingEventSchema } from "../utils/schemaValidator";
 import { trainingEventService } from "../services/trainingEvent.service";
-import { calculatePagination, getPaginationParams } from "../utils/pagination";
+import { calculatePagination, getPaginationParams } from "../utils/paginationHandler";
 
 export const createTrainingEvent = async(
     request: FastifyRequest,

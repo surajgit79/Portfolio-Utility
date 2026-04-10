@@ -1,7 +1,7 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { trainingRecordService } from "../services/trainingRecord.service";
-import { createTrainingRecordSchema, bulkCreateTrainingRecordSchema, updateTrainingRecordSchema } from "../utils/validation";
-import { calculatePagination, getPaginationParams } from "../utils/pagination";
+import { createTrainingRecordSchema, bulkCreateTrainingRecordSchema, updateTrainingRecordSchema } from "../utils/schemaValidator";
+import { calculatePagination, getPaginationParams } from "../utils/paginationHandler";
 
 export const createTrainingRecord = async (
     request: FastifyRequest,

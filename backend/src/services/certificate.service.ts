@@ -1,5 +1,5 @@
 import { certificateRepository } from "../repositories/certificate.repositry"
-import { generateCertificatePDF, mergePDFs } from "../utils/certificate";
+import { generateCertificatePDF, mergePDFs } from "../utils/certificateGenerator";
 import { AppError, ErrorCode } from "../utils/errorHandler";
 
 export const certificateService = {

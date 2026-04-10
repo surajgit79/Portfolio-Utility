@@ -1,7 +1,7 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { teacherService } from "../services/teacher.service";
-import { registerTeacherSchema, updateTeacherSchema } from "../utils/validation";
-import { calculatePagination, getPaginationParams } from "../utils/pagination";
+import { registerTeacherSchema, updateTeacherSchema } from "../utils/schemaValidator";
+import { calculatePagination, getPaginationParams } from "../utils/paginationHandler";
 
 export const registerTeacher = async(
   request: FastifyRequest,

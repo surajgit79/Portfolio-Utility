@@ -3,8 +3,8 @@ import { eventRecordService } from "../services/eventRecord.service";
 import {
   createEventRecordSchema,
   updateEventRecordSchema,
-} from "../utils/validation";
-import { calculatePagination, getPaginationParams } from "../utils/pagination";
+} from "../utils/schemaValidator";
+import { calculatePagination, getPaginationParams } from "../utils/paginationHandler";
 
 export const createEventRecord = async (
   request: FastifyRequest,

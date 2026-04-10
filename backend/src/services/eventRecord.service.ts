@@ -2,7 +2,7 @@ import { eventRecordRepository } from "../repositories/eventRecord.repository";
 import { teacherRepository } from "../repositories/teacher.repository";
 import { generateId } from "../utils/idGenerator";
 import { AppError, ErrorCode } from "../utils/errorHandler";
-import { uploadSingleImage } from "../utils/upload";
+import { uploadSingleImage } from "../utils/imageUploader";
 import { FastifyRequest } from "fastify";
 
 export const eventRecordService = {

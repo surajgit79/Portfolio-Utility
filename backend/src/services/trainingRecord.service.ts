@@ -3,7 +3,7 @@ import { trainingEventRepository } from "../repositories/trainingEvent.repositor
 import { AppError, ErrorCode } from "../utils/errorHandler";
 import { teacherRepository } from "../repositories/teacher.repository";
 import { trainingRecordRepository } from "../repositories/trainingRecord.repository";
-import { uploadMultipleImages } from "../utils/upload";
+import { uploadMultipleImages } from "../utils/imageUploader";
 import { generateCertificateNumber, generateId } from "../utils/idGenerator";
 
 export const trainingRecordService = {
