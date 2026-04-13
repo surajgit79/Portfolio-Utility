@@ -31,16 +31,16 @@ app.register(multipart, {
 
 errorHandler(app);
 
-app.get('/health',async ()=>{
+app.get('/api/v1/health',async ()=>{
     return {status: "ok"};
 });
 
-app.register(authRoutes, { prefix: "/api/auth" });
-app.register(teacherRoutes, {prefix: "/api/teachers"});
-app.register(trainingEventRoutes, {prefix: "/api/training-events"});
-app.register(trainingRecordRoutes, {prefix: "/api/training-records"});
-app.register(careerRecordRoutes,{prefix: "/api/career-records"});
-app.register(eventRecordRoutes, {prefix: "/api/event-records"});
-app.register(certificateRoutes, {prefix: "/api/certificates"});
+app.register(authRoutes, { prefix: "/api/v1/auth" });
+app.register(teacherRoutes, {prefix: "/api/v1/teachers"});
+app.register(trainingEventRoutes, {prefix: "/api/v1/training-events"});
+app.register(trainingRecordRoutes, {prefix: "/api/v1/training-records"});
+app.register(careerRecordRoutes,{prefix: "/api/v1/career-records"});
+app.register(eventRecordRoutes, {prefix: "/api/v1/event-records"});
+app.register(certificateRoutes, {prefix: "/api/v1/certificates"});
 
 export default app;
