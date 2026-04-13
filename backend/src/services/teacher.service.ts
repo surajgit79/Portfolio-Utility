@@ -5,6 +5,8 @@ import { AppError, ErrorCode } from "../utils/errorHandler";
 import { uploadSingleImage } from "../utils/imageUploader";
 import { FastifyRequest } from "fastify";
 import { hashedPassword } from "../utils/passwordHasherVerifier";
+import { db } from "../db/client";
+import { users, teachers } from "../db/schema";
 
 const calculateTenure = (teachingSince: number | null): number | null => {
   if (!teachingSince) return null;
@@ -21,6 +23,7 @@ export const teacherService = {
       contact:  string;
       gender:   "Male" | "Female" | "Others";
       dob:      string;
+      teachingSince?: number;
     },
     request: FastifyRequest
   ) => {
@@ -29,37 +32,39 @@ export const teacherService = {
       throw new AppError(409, ErrorCode.CONFLICT, "Email already exists");
     }
 
-    const hashed = await hashedPassword(data.password);
-    const userId = await generateId("users");
-
-    const user = await userRepository.create({
-      id:       userId,
-      email:    data.email,
-      password: hashed,
-      role:     "teacher",
-    });
-
     let imageUrl: string | undefined;
     if (request.isMultipart()) {
       const url = await uploadSingleImage(request, "portfolio-utility/teachers");
       if (url) imageUrl = url;
     }
 
-    const teacherId = await generateId("teachers");
+    return db.transaction( async(tx)=>{
+      const hashed = await hashedPassword(data.password);
+      const userId = await generateId("users");
 
-    const teacher = await teacherRepository.create({
-      id:       teacherId,
-      userId:   user.id,
-      name:     data.name,
-      address:  data.address,
-      contact:  data.contact,
-      email:    data.email,
-      gender:   data.gender,
-      dob:      data.dob,
-      imageUrl,
+      const [user] = await tx.insert(users).values({
+        id:       userId,
+        email:    data.email,
+        password: hashed,
+        role:     "teacher",
+      }).returning();
+
+      const teacherId = await generateId("teachers");
+
+      const [teacher] = await tx.insert(teachers).values({
+        id:       teacherId,
+        userId:   user.id,
+        name:     data.name,
+        address:  data.address,
+        contact:  data.contact,
+        email:    data.email,
+        gender:   data.gender,
+        dob:      data.dob,
+        teachingSince: data.teachingSince,
+        imageUrl,
+      }).returning();
+      return teacher;
     });
-
-    return teacher;
   },
 
   getAll: async (search?: string) => {

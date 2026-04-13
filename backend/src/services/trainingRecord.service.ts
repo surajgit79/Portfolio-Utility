@@ -5,6 +5,8 @@ import { teacherRepository } from "../repositories/teacher.repository";
 import { trainingRecordRepository } from "../repositories/trainingRecord.repository";
 import { uploadMultipleImages } from "../utils/imageUploader";
 import { generateCertificateNumber, generateId } from "../utils/idGenerator";
+import { db } from "../db/client";
+import { trainingRecords } from "../db/schema";
 
 export const trainingRecordService = {
     create: async(
@@ -58,36 +60,38 @@ export const trainingRecordService = {
             throw new AppError(404, ErrorCode.NOT_FOUND, "Training event not found");
         }
 
-        const skipped = [];
-        const created = [];
+        const skipped = [] as any[];
+        const created = [] as any[];
 
-        for(const teacherId of data.teacherIds){
-            const teacher = await teacherRepository.findById(teacherId);
-            if(!teacher){
-                skipped.push(teacherId);
-                continue;
+        await db.transaction( async (tx)=> {
+            for(const teacherId of data.teacherIds){
+                const teacher = await teacherRepository.findById(teacherId);
+                if(!teacher){
+                    skipped.push(teacherId);
+                    continue;
+                }
+
+                const existing = await trainingRecordRepository.findByTeacherAndEvent(teacherId, data.trainingEventId);
+                if(existing){
+                    skipped.push(teacherId);
+                    continue;
+                }
+
+                const id = await generateId("training_records");
+                const certificateNumber = await generateCertificateNumber(event.category, event.sector, event.phase?? null);
+
+                const [record] = await tx.insert(trainingRecords).values({
+                    id,
+                    teacherId,
+                    trainingEventId: data.trainingEventId,
+                    rating: data.rating,
+                    certificateNumber,
+                }).returning();
+
+                created.push(record);
             }
-
-            const existing = await trainingRecordRepository.findByTeacherAndEvent(teacherId, data.trainingEventId);
-            if(existing){
-                skipped.push(teacherId);
-                continue;
-            }
-
-            const id = await generateId("training_records");
-            const certificateNumber = await generateCertificateNumber(event.category, event.sector, event.phase?? null);
-
-            const record = await trainingRecordRepository.create({
-                id,
-                teacherId,
-                trainingEventId: data.trainingEventId,
-                rating: data.rating,
-                certificateNumber,
-            });
-
-            created.push(teacherId);
-        }
-        return { created, skipped};
+        });
+        return { created, skipped };
     },
 
     getByTeacher: async(teacherId: string)=>{
