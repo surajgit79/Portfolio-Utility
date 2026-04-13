@@ -1,4 +1,4 @@
-import { FastifyInstance } from "fastify";
+import { FastifyInstance, FastifyError } from "fastify";
 
 export enum ErrorCode{
     VALIDATION_ERROR = "VALIDATION_ERROR",
@@ -22,7 +22,7 @@ export class AppError extends Error{
 }
 
 export const errorHandler = (app:FastifyInstance)=>{
-    app.setErrorHandler((error, _request, reply)=>{
+    app.setErrorHandler((error: FastifyError, _request, reply)=>{
         app.log.error(error);
 
         if(error instanceof AppError){
@@ -31,6 +31,34 @@ export const errorHandler = (app:FastifyInstance)=>{
                 message: error.message,
                 code: error.statusCode,
                 errors: error.errors,
+            });
+        }
+
+        if (error.message?.includes("duplicate key")) {
+            return reply.status(409).send({
+                success: false,
+                message: "Record already exists",
+                code:    ErrorCode.CONFLICT,
+                errors:  [],
+            });
+        }
+
+        if (error.message?.includes("foreign key")) {
+            return reply.status(400).send({
+                success: false,
+                message: "Referenced record does not exist",
+                code:    ErrorCode.VALIDATION_ERROR,
+                errors:  [],
+            });
+        }
+
+        // Fastify validation error
+        if (error.statusCode === 400) {
+            return reply.status(400).send({
+                success: false,
+                message: error.message,
+                code:    ErrorCode.VALIDATION_ERROR,
+                errors:  [],
             });
         }
 
