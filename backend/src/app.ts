@@ -11,8 +11,13 @@ import { errorHandler } from "./utils/errorHandler";
 import { careerRecordRoutes } from "./routes/careerRecord.route";
 import { eventRecordRoutes } from "./routes/eventRecord.route";
 import { certificateRoutes } from "./routes/certificate.route";
+import { requestLogger, responseLogger } from "./middlewares/requestLogger";
 
-const app = Fastify({logger: true});
+const app = Fastify({
+    logger: {
+        level: "error",
+    }
+});
 
 app.register(helmet);
 app.register(cors, {
@@ -30,6 +35,9 @@ app.register(multipart, {
 });
 
 errorHandler(app);
+
+app.addHook("preHandler", requestLogger);
+app.addHook("onSend", responseLogger);
 
 app.get('/api/v1/health',async ()=>{
     return {status: "ok"};
