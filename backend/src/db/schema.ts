@@ -1,5 +1,4 @@
-import { pgTable, text, timestamp, pgEnum, integer, date } from "drizzle-orm/pg-core";
-import { array } from "zod";
+import { pgTable, text, timestamp, pgEnum, integer, date, index } from "drizzle-orm/pg-core";
 
 export const genderEnum = pgEnum("gender", ["Male", "Female", "Others"]);
 export const categoryEnum = pgEnum("category", ["Activity-based Mathematics", "Pre-School", "Reading"]);
@@ -13,7 +12,9 @@ export const users = pgTable("users", {
     role: text("role", {enum:["admin", "teacher"]}).notNull().default("teacher"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
-})
+},(table)=>({
+    emailIdx: index("users_email_idx").on(table.email)
+}));
 
 export const teachers = pgTable("teachers",{
     id: text("id").primaryKey(),
@@ -28,7 +29,11 @@ export const teachers = pgTable("teachers",{
     teachingSince: integer("teaching_since"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),    
-});
+}, (table)=>({
+    userIdIdx: index("teachers_user_id_idx").on(table.userId),
+    emailIdx: index("teachers_emai_idx").on(table.email),
+    nameIdx: index("teachers_name_idx").on(table.name),
+}));
 
 export const trainingEvents = pgTable("training_events", {
     id: text("id").primaryKey(),
@@ -43,7 +48,12 @@ export const trainingEvents = pgTable("training_events", {
     description: text("description"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (table) => ({
+    categoryIdx:  index("training_events_category_idx").on(table.category),
+    sectorIdx:    index("training_events_sector_idx").on(table.sector),
+    phaseIdx:     index("training_events_phase_idx").on(table.phase),
+    startDateIdx: index("training_events_start_date_idx").on(table.startDate),
+}));
 
 export const trainingRecords = pgTable("training_records", {
     id: text("id").primaryKey(),
@@ -56,7 +66,11 @@ export const trainingRecords = pgTable("training_records", {
     skills: text("skills").array().default([]),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
-}); 
+}, (table) => ({
+    teacherIdIdx:       index("training_records_teacher_id_idx").on(table.teacherId),
+    trainingEventIdIdx: index("training_records_training_event_id_idx").on(table.trainingEventId),
+    certNumberIdx:      index("training_records_certificate_number_idx").on(table.certificateNumber),
+})); 
 
 export const careerRecords = pgTable("career_records",{
     id: text("id").primaryKey(),
@@ -70,7 +84,10 @@ export const careerRecords = pgTable("career_records",{
     achievements: text("achievements"),
     refContactDetail: text("ref_contact"),
     createdAt: timestamp("created_at").defaultNow().notNull()
-});
+}, (table) => ({
+    teacherIdIdx:    index("career_records_teacher_id_idx").on(table.teacherId),
+    stillWorkingIdx: index("career_records_still_working_idx").on(table.stillWorking),
+}));
 
 export const eventRecords = pgTable("event_records",{
     id: text("id").primaryKey(),
@@ -85,4 +102,6 @@ export const eventRecords = pgTable("event_records",{
     referenceImage: text("reference_image"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (table) => ({
+    teacherIdIdx: index("event_records_teacher_id_idx").on(table.teacherId),
+}));
