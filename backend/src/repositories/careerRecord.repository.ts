@@ -2,7 +2,7 @@ import { and, eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { careerRecords } from "../db/schema"
 
-type Career = typeof careerRecords.$inferInsert;
+type Career = typeof careerRecords.$inferSelect;
 type NewCareer = typeof careerRecords.$inferInsert;
 
 export const careerRecordRepository = {

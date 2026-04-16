@@ -7,8 +7,8 @@ export const requireAuth = async (
 ) =>{
     const authHeader = request.headers.authorization;
 
-    if(!authHeader || !authHeader.startsWith("Bearer")){
-            return reply.status(401).send({success:false, message:"Authentication required"});
+    if(!authHeader || !authHeader.startsWith("Bearer ")){
+        return reply.status(401).send({success:false, message:"Authentication required"});
     }
 
     const token = authHeader.split(" ")[1];
