@@ -7,6 +7,9 @@ import { FastifyRequest } from "fastify";
 import { hashedPassword } from "../utils/passwordHasherVerifier";
 import { db } from "../db/client";
 import { users, teachers } from "../db/schema";
+import csv from "csv-parser";
+import { z } from "zod";
+import { bulkTeacherRowSchema } from "../utils/schemaValidator";
 
 const calculateTenure = (teachingSince: number | null): number | null => {
   if (!teachingSince) return null;
@@ -24,6 +27,7 @@ export const teacherService = {
       gender:   "Male" | "Female" | "Others";
       dob:      string;
       teachingSince?: number;
+      qualification?: string;
     },
     request: FastifyRequest
   ) => {
@@ -61,10 +65,99 @@ export const teacherService = {
         gender:   data.gender,
         dob:      data.dob,
         teachingSince: data.teachingSince,
+        qualification: data.qualification,
         imageUrl,
       }).returning();
       return teacher;
     });
+  },
+
+  processBulkCSV: async(fileStream: NodeJS.ReadableStream)=>{
+    const rawRows: any[] = [];
+
+    await new Promise((resolve, reject)=>{
+      fileStream.pipe(csv())
+        .on('data', (data)=> rawRows.push(data))
+        .on('end', resolve)
+        .on('error', reject);
+    });
+
+    const summary = { totalRows: rawRows.length, successful: 0, failed: 0};
+    const errors: Array <{row: number, email: string, reason: string}> =[];
+    const successfulInserts: string[] =[];
+
+    for(let i = 0; i< rawRows.length; i++){
+      const row = rawRows[i];
+      const rowNumber = i+2;
+
+      try {
+        const validData = bulkTeacherRowSchema.parse(row);
+
+        const existingUser = await userRepository.findByEmail(validData.email);
+        if (existingUser) {
+          errors.push({ row: rowNumber, email: validData.email, reason: "Email already exists" });
+          summary.failed++;
+          continue;
+        }
+
+        const hashed = await hashedPassword('P@ssword123');
+        const userId = await generateId('users');
+        const teacherId = await generateId('teachers');
+
+        await db.transaction(async(tx)=>{
+          const [user] = await tx.insert(users).values({
+            id: userId,
+            email: validData.email,
+            password: hashed,
+            role: "teacher",
+          }).returning();
+
+          await tx.insert(teachers).values({
+            id: teacherId,
+            userId: userId,
+            email: validData.email,
+            name: validData.name,
+            address: validData.address,
+            contact: validData.contact,
+            gender: validData.gender,
+            dob: validData.dob instanceof Date ? validData.dob.toISOString().split('T')[0] : validData.dob,
+            qualification: validData.highest_qualification,
+            teachingSince: validData.teaching_since,
+          }).returning();
+        });
+        summary.successful++;
+        successfulInserts.push(teacherId);
+        
+      } catch (error: any) {
+        summary.failed++;
+        if(error instanceof z.ZodError){
+          const issue = error.issues[0];
+          errors.push({
+            row: rowNumber,
+            email: row.email || 'Email',
+            reason: ` ${issue.path.join('.')}: ${issue.message}`,
+          });
+        }
+        // Handle Database errors (like unique constraint on email)
+        else if (error.code === '23505') { 
+          errors.push({
+            row: rowNumber,
+            email: row.email,
+            reason: 'Email already exists in the database'
+          });
+        } 
+        else {
+          errors.push({
+            row: rowNumber,
+            email: row.email,
+            reason: error.message || 'Unknown server error'
+          });
+        }
+      }
+    }
+
+    return { summary, errors, successfulInserts };
+
   },
 
   getAll: async (search?: string) => {

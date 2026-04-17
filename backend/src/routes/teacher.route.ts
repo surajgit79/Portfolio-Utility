@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { getTeachers, getTeacherById, updateTeacher, deleteTeacher, registerTeacher,} from "../controllers/teacher.controller";
+import { getTeachers, getTeacherById, updateTeacher, deleteTeacher, registerTeacher, bulkUploadTeachers} from "../controllers/teacher.controller";
 import { requireAuth } from "../middlewares/requireAuth";
 import { requireRole } from "../middlewares/requireRole";
 
@@ -13,6 +13,11 @@ export async function teacherRoutes(app: FastifyInstance) {
     preHandler: [requireAuth, requireRole("admin")],
     handler: registerTeacher,
   });
+
+  app.post("/bulk",{
+    preHandler: [requireAuth, requireRole("admin")],
+    handler: bulkUploadTeachers,
+  })
 
   app.patch("/:id", {
     preHandler: [requireAuth, requireRole("admin")],

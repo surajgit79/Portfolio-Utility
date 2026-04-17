@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, pgEnum, integer, date, index } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, pgEnum, integer, date, index, boolean, varchar } from "drizzle-orm/pg-core";
 
 export const genderEnum = pgEnum("gender", ["Male", "Female", "Others"]);
 export const categoryEnum = pgEnum("category", ["Activity-based Mathematics", "Pre-School", "Reading"]);
@@ -10,6 +10,9 @@ export const users = pgTable("users", {
     email: text("email").notNull().unique(),
     password: text("password").notNull(),
     role: text("role", {enum:["admin", "teacher"]}).notNull().default("teacher"),
+    // is_verified: boolean("is_verified").default(false).notNull(),
+    // resetToken: varchar("reset_token"),
+    // resetTokenExpiration: timestamp("reset_token_expiration"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
 },(table)=>({

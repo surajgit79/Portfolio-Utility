@@ -92,6 +92,20 @@
       "when": 1776401794541,
       "tag": "0012_clear_shinko_yamashiro",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1776405664878,
+      "tag": "0013_stormy_the_watchers",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1776415817400,
+      "tag": "0014_ambitious_squadron_sinister",
+      "breakpoints": true
     }
   ]
 }
