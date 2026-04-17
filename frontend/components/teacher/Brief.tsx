@@ -8,11 +8,11 @@ type Props = {
     address: string,
     gender: string,
     school: string,
-    department: string,
+    qualification: string,
     dob: string,
 }
 
-export const BriefBlock = ({ name, imageUrl, address, gender, school, department, dob }: Props) => {
+export const BriefBlock = ({ name, imageUrl, address, gender, school, qualification, dob }: Props) => {
     return (
         <div className="w-full flex justify-center border my-5 py-10 rounded-lg bg-white">
             <div className="flex justify-around lg:gap-12 md:gap-4 sm:gap-4 gap-4 items-center md:flex-row flex-col">
@@ -29,7 +29,7 @@ export const BriefBlock = ({ name, imageUrl, address, gender, school, department
                             classNames="!m-0 !text-center md:!text-left"
                         />
                         <PG
-                            text={department}
+                            text={qualification}
                             classNames="!m-0 text-center md:!text-left"
                         />
                     </div>
