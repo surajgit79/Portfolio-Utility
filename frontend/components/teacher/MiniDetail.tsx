@@ -6,7 +6,7 @@ type Props = {
 }
 
 export const MiniDetail = ({category, detail}: Props) => {
-    const iconClass = 'h-5 text-[#2D84C4]'
+    const iconClass='h-5 text-[#2D84C4] sm:h-6! sm:w-6!'
     return (
         <div className='flex gap-2 items-center'>
             {

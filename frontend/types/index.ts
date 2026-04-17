@@ -91,6 +91,9 @@ export type Teachers = {
     dob: string,
     createdAt: string,
     updatedAt: string,
+    qualification: string,
+    tenure: number,
+    currentOrganization: string,
 }
 
 export type TrainingEvents = {

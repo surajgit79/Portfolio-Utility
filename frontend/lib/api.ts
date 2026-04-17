@@ -1,17 +1,5 @@
 import type { Teachers, Training, Program, EventRecords, Career, TrainingAttended } from "@/types"
 
-export async function getUsers() {
-    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL
-    if (!BASE_URL)
-        throw new Error('BACKEND_URL not set')
-    const res = await fetch(BASE_URL)
-
-    if (!res.ok)
-        throw new Error('Unable to fetch data')
-
-    return res.json()
-}
-
 export type TeachersResponse = {
     success: boolean,
     message: string,
@@ -21,17 +9,23 @@ export type TeachersResponse = {
 export async function getTeachers(): Promise<Teachers[]> {
     const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL
 
-    if (!BASE_URL)
-        throw new Error('BACKEND_URL not set')
+    if (!BASE_URL) {
+        throw new Error('NEXT_PUBLIC_BACKEND_URL not set')
+    }
 
-    const res = await fetch(`${BASE_URL}/teachers`)
+    try {
+        const res = await fetch(`${BASE_URL}/teachers`)
 
-    if (!res.ok)
-        throw new Error('Unable to fetch data')
+        if (!res.ok) {
+            throw new Error(`Unable to fetch data: ${res.status}`)
+        }
 
-    const json: TeachersResponse = await res.json()
-
-    return json.data
+        const json: TeachersResponse = await res.json()
+        return json.data
+    } catch (error) {
+        console.error('Fetch teachers failed:', error)
+        throw error
+    }
 }
 
 export async function getTeacher(id: string): Promise<Teachers> {
@@ -147,8 +141,10 @@ export async function getTrainings(id: string): Promise<TrainingAttended[]> {
     try {
         const res = await fetch(`${BASE_URL}/training-records/teacher/${id}`)
 
-        if (!res.ok)
-            throw new Error(`HTTP error: ${res.status}`)
+        if (!res.ok) {
+            // throw new Error(`HTTP error: ${res.status}`)
+            return dummyTrainingAttended
+        }
 
         const json: TrainingResponse = await res.json()
         console.log(json.data)

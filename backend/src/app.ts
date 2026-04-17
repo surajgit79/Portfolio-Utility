@@ -21,7 +21,7 @@ const app = Fastify({
 
 app.register(helmet);
 app.register(cors, {
-    origin: process.env.FRONTEND_URL,
+    origin: true,
     credentials: true
 });
 app.register(rateLimit, {
