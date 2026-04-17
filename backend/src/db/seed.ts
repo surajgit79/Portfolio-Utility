@@ -64,6 +64,7 @@ const seed = async () => {
       gender:        "Male" as const,
       dob:           "1985-03-15",
       imageUrl:      "https://api.dicebear.com/7.x/avataaars/svg?seed=Ram",
+      qualification: "M.Sc. in Mathematics",
       teachingSince: 2010,
     },
     {
@@ -76,6 +77,7 @@ const seed = async () => {
       gender:        "Female" as const,
       dob:           "1990-07-22",
       imageUrl:      "https://api.dicebear.com/7.x/avataaars/svg?seed=Sita",
+      qualification: "B.Ed. in Science",
       teachingSince: 2015,
     },
     {
@@ -88,6 +90,7 @@ const seed = async () => {
       gender:        "Male" as const,
       dob:           "1988-11-10",
       imageUrl:      "https://api.dicebear.com/7.x/avataaars/svg?seed=Hari",
+      qualification: "M.A. in English Literature",
       teachingSince: 2012,
     },
     {
@@ -100,6 +103,7 @@ const seed = async () => {
       gender:        "Female" as const,
       dob:           "1992-05-18",
       imageUrl:      "https://api.dicebear.com/7.x/avataaars/svg?seed=Gita",
+      qualification: "B.A. in Education",
       teachingSince: 2018,
     },
     {
@@ -112,6 +116,7 @@ const seed = async () => {
       gender:        "Male" as const,
       dob:           "1987-09-25",
       imageUrl:      "https://api.dicebear.com/7.x/avataaars/svg?seed=Bikash",
+      qualification: "M.Ed. in Educational Leadership",
       teachingSince: 2011,
     },
   ];
@@ -188,6 +193,7 @@ const seed = async () => {
       trainingEventId:   record.trainingEventId,
       rating:            record.rating,
       certificateNumber,
+      skills:            ["Communication", "Leadership", "Curriculum Design"],
     });
   }
 
@@ -199,6 +205,7 @@ const seed = async () => {
       teacherId:    "TCH-2026-0001",
       role:         "Mathematics Teacher",
       organization: "Hetauda School of Management",
+      grade:        "Grade 10" as const,
       startDate:    new Date("2020-01-01"),
       stillWorking: 1,
       achievements: "Best teacher award 2022",
@@ -209,6 +216,7 @@ const seed = async () => {
       teacherId:    "TCH-2026-0002",
       role:         "Science Teacher",
       organization: "Lalitpur Public School",
+      grade:        "Grade 8" as const,
       startDate:    new Date("2018-04-01"),
       endDate:      new Date("2022-12-31"),
       stillWorking: 0,
@@ -220,6 +228,7 @@ const seed = async () => {
       teacherId:    "TCH-2026-0003",
       role:         "English Teacher",
       organization: "Bhaktapur Secondary School",
+      grade:        "Grade 6" as const,
       startDate:    new Date("2019-07-01"),
       stillWorking: 1,
       achievements: "100% pass rate in 2023",
