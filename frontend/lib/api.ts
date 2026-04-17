@@ -141,9 +141,9 @@ export async function getTrainings(id: string): Promise<TrainingAttended[]> {
     try {
         const res = await fetch(`${BASE_URL}/training-records/teacher/${id}`)
 
-        if (!res.ok){
+        if (!res.ok) {
+            // throw new Error(`HTTP error: ${res.status}`)
             return dummyTrainingAttended
-            // throw new Error(`HTTP error: ${res.status} ...`)
         }
 
         const json: TrainingResponse = await res.json()
