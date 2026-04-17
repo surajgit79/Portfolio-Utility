@@ -6,7 +6,7 @@ export const trainingEventService = {
     getAll: async(category?: string, sector?: string, phase?: string)=>{
         const events = trainingEventRepository.findAll(category, sector, phase);
         if((await events).length === 0){
-            throw new AppError(200, ErrorCode.NOT_FOUND, "No training events found");
+            throw new AppError(404, ErrorCode.NOT_FOUND, "No training events found");
         }
         return events;
     },

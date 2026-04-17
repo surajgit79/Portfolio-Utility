@@ -6,7 +6,7 @@ import os from "os";
 import { pipeline } from "stream/promises";
 import { AppError, ErrorCode } from "./errorHandler";
 
-const MAX_FILE_SIZE = 10*1024*1024; // 10mb
+const MAX_FILE_SIZE = 5*1024*1024; // 5mb
 const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
 
 export const uploadSingleImage = async(
