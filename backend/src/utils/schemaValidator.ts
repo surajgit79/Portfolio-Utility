@@ -41,6 +41,19 @@ export type RegisterTeacherRequest = z.infer<typeof registerTeacherSchema>;
 export const updateTeacherSchema = registerTeacherSchema.partial();
 export type UpdateTeacherRequest = z.infer<typeof updateTeacherSchema>;
 
+export const bulkTeacherRowSchema = z.object({
+  email: z.string().email("Invalid email format"),
+  name: z.string().min(1, "Name is required"),
+  address: z.string().min(1, "Address is required"),
+  contact: z.string().min(1, "Contact is required"),
+  gender: z.enum(["Male", "Female", "Others"]),
+  dob: z.coerce.date(), // Converts the CSV string like "1990-05-15" to a Date object
+  highest_qualification: z.string().optional(),
+  teaching_since: z.coerce.number().optional(),
+});
+
+export type BulkTeacherRow = z.infer<typeof bulkTeacherRowSchema>;
+
 
 // Training-Event
 const sectorPhaseMap:Record<string, {sectors: string[], hasPhase: boolean}> = {
