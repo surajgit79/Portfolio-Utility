@@ -26,6 +26,7 @@ export const teachers = pgTable("teachers",{
     gender: genderEnum("gender").notNull(),
     imageUrl: text("image_url"),
     dob: date("dob").notNull(),
+    qualification: text("highest_qualification"),
     teachingSince: integer("teaching_since"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),    
@@ -105,3 +106,7 @@ export const eventRecords = pgTable("event_records",{
 }, (table) => ({
     teacherIdIdx: index("event_records_teacher_id_idx").on(table.teacherId),
 }));
+
+// export const refreshTokens = pgTable("refresh_tokens",{
+//     id: crypto.randomUUID().prim
+// })
