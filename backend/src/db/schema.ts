@@ -29,7 +29,7 @@ export const teachers = pgTable("teachers",{
     gender: genderEnum("gender").notNull(),
     imageUrl: text("image_url"),
     dob: date("dob").notNull(),
-    qualification: text("highest_qualification"),
+    qualification: text("qualification"),
     teachingSince: integer("teaching_since"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),    

@@ -1,0 +1,1 @@
+ALTER TABLE "teachers" RENAME COLUMN "highest_qualification" TO "qualification";
