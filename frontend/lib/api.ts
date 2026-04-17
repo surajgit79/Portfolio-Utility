@@ -1,17 +1,5 @@
 import type { Teachers, Training, Program, EventRecords, Career, TrainingAttended } from "@/types"
 
-export async function getUsers() {
-    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL
-    if (!BASE_URL)
-        throw new Error('BACKEND_URL not set')
-    const res = await fetch(BASE_URL)
-
-    if (!res.ok)
-        throw new Error('Unable to fetch data')
-
-    return res.json()
-}
-
 export type TeachersResponse = {
     success: boolean,
     message: string,
@@ -22,7 +10,7 @@ export async function getTeachers(): Promise<Teachers[]> {
     const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL
 
     if (!BASE_URL)
-        throw new Error('BACKEND_URL not set')
+        throw new Error('NEXT_PUBLIC_BACKEND_URL not set')
 
     const res = await fetch(`${BASE_URL}/teachers`)
 

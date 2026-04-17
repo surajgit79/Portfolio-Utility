@@ -35,7 +35,7 @@ export default function AddTeacher() {
                 <div className="w-full col-span-8">
                     <H3
                         text="Basic Information"
-                        classNames="font-medium"
+                        classNames="font-bold"
                     />
                     <hr />
                     <FieldGroup className="grid grid-cols-2 bg-white p-5 mt-4 rounded-lg">
@@ -59,7 +59,7 @@ export default function AddTeacher() {
                             <Input
                                 id="fieldgroup-email"
                                 type="email"
-                                placeholder="name@example.com"
+                                placeholder="Enter email"
                                 className="h-10"
                             />
                             <FieldDescription></FieldDescription>
@@ -72,7 +72,7 @@ export default function AddTeacher() {
                         <Field>
                             <FieldLabel htmlFor="form-gender">Gender</FieldLabel>
                             <Select defaultValue="Male">
-                                <SelectTrigger id="form-gender" className="h-10">
+                                <SelectTrigger id="form-gender" className="h-10 min-h-10">
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
