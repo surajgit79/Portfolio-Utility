@@ -17,6 +17,7 @@ export const teacherRepository = {
         contact:             teachers.contact,
         email:               teachers.email,
         gender:              teachers.gender,
+        qualification:       teachers.qualification,
         imageUrl:            teachers.imageUrl,
         dob:                 teachers.dob,
         teachingSince:       teachers.teachingSince,
