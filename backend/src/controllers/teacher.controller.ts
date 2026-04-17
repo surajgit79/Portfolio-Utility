@@ -29,17 +29,15 @@ export const bulkUploadTeachers = async (
   request: FastifyRequest,
   reply:FastifyReply
 )=>{
-  console.log("CP1");
   if(!request.isMultipart()){
     throw new AppError(400, ErrorCode.VALIDATION_ERROR, 'Request must be multipart/form-data');
   }
-  console.log("CP2");
   const fileData = await request.file();
   if(!fileData || !fileData.filename.endsWith('.csv')){
     throw new AppError(400, ErrorCode.VALIDATION_ERROR, 'Please upload a valid .csv file');
   }
 
-  const result = teacherService.processBulkCSV(fileData.file);
+  const result = await teacherService.processBulkCSV(fileData.file);
   return reply.status(200).send({
     success: true,
     message: "Bulk CSV processing completed",
