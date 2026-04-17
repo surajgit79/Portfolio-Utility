@@ -36,7 +36,7 @@ export const trainingRecordService = {
         if(request.isMultipart()){
             const urls = await uploadMultipleImages(request, "portfolio-utility/training-records");
             if(urls.length>0){
-                urls.join(",");
+                refPhotos = urls.join(",");
             }
         }
 
