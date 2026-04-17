@@ -91,7 +91,7 @@ export type Teachers = {
     dob: string,
     createdAt: string,
     updatedAt: string,
-    highestQualification: string,
+    qualification: string,
     tenure: number,
     currentOrganization: string,
 }
