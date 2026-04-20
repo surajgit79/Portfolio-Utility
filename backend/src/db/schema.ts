@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, pgEnum, integer, date, index, boolean, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, pgEnum, integer, date, index } from "drizzle-orm/pg-core";
 
 export const genderEnum = pgEnum("gender", ["Male", "Female", "Others"]);
 export const categoryEnum = pgEnum("category", ["Activity-based Mathematics", "Pre-School", "Reading"]);
@@ -110,6 +110,13 @@ export const eventRecords = pgTable("event_records",{
     teacherIdIdx: index("event_records_teacher_id_idx").on(table.teacherId),
 }));
 
-// export const refreshTokens = pgTable("refresh_tokens",{
-//     id: crypto.randomUUID().prim
-// })
+export const refreshTokens = pgTable("refresh_tokens",{
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull().references(()=> users.id, { onDelete: "cascade"}),
+    token: text("token").notNull().unique(),
+    expiresAt: timestamp("expires_at").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table)=>({
+    userIdIdx: index("refresh_tokens_user_id_idx").on(table.userId),
+    tokenIdx: index("refresh_tokens_token_idx").on(table.token)
+}));
