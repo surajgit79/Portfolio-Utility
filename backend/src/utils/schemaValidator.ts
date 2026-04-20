@@ -173,3 +173,14 @@ export const updateEventRecordSchema = createEventRecordSchema.partial();
 
 export type CreateEventRecordRequest = z.infer<typeof createEventRecordSchema>;
 export type UpdateEventRecordRequest = z.infer<typeof updateEventRecordSchema>;
+
+export const refreshTokenSchema = z.object({
+  refreshToken: z.string().min(1, "Refresh token is required"),
+});
+
+export const logoutSchema = z.object({
+  refreshToken: z.string().min(1, "Refresh token is required"),
+});
+
+export type RefreshTokenRequest = z.infer<typeof refreshTokenSchema>
+export type LogoutRequest = z.infer<typeof logoutSchema>

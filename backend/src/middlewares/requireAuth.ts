@@ -8,7 +8,7 @@ export const requireAuth = async (
     const authHeader = request.headers.authorization;
 
     if(!authHeader || !authHeader.startsWith("Bearer")){
-            return reply.status(401).send({success:false, message:"Authentication required"});
+        return reply.status(401).send({success:false, message:"Authentication required"});
     }
 
     const token = authHeader.split(" ")[1];
@@ -17,6 +17,6 @@ export const requireAuth = async (
         const payload = verifyToken(token);
         request.user = payload;
     } catch (error) {
-        return reply.status(401).send({success: false, message: "Invalid or expired token"});
+        return reply.status(401).send({success: false, message: "Invalid or expired token - refresh your token"});
     }
 }
