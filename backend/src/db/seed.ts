@@ -79,7 +79,7 @@ const seed = async () => {
       gender:        genders[i % genders.length],
       imageUrl:      `https://api.dicebear.com/7.x/avataaars/svg?seed=${name.replace(/ /g, "")}`,
       qualification: qualifications[i % qualifications.length],
-      teachingSince: 2005 + i,
+      teachingSince: Math.min(2005 + i, new Date().getFullYear()),
       dob:           `${1980 + (i % 15)}-${String((i % 12) + 1).padStart(2, "0")}-${String((i % 28) + 1).padStart(2, "0")}`,
     };
   });
