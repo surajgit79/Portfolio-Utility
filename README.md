@@ -169,7 +169,9 @@ Authorization: Bearer <token>
 | Method | Endpoint | Description | Auth |
 |--------|----------|-------------|------|
 | POST | `/auth/register` | Register admin user | Public |
-| POST | `/auth/login` | Login & get token | Public |
+| POST | `/auth/login` | Login & get tokens | Public |
+| POST | `/auth/refresh` | Refresh access token | Public |
+| POST | `/auth/logout` | Logout & invalidate refresh token | Public |
 
 **Register Request:**
 ```json
@@ -187,14 +189,22 @@ Authorization: Bearer <token>
 }
 ```
 
-**Response:**
+**Login/Refresh Response:**
 ```json
 {
   "success": true,
   "message": "Login successful",
   "data": {
-    "token": "eyJhbGciOiJIUzI1NiIs..."
+    "accessToken": "eyJhbGciOiJIUzI1NiIs...",
+    "refreshToken": "a1b2c3d4e5f6..."
   }
+}
+```
+
+**Logout Request:**
+```json
+{
+  "refreshToken": "a1b2c3d4e5f6..."
 }
 ```
 
@@ -449,6 +459,15 @@ Content-Type: multipart/form-data
 | created_at | TIMESTAMP | NOT NULL |
 | updated_at | TIMESTAMP | NOT NULL |
 
+### Refresh Tokens
+| Column | Type | Constraints |
+|--------|------|-------------|
+| id | TEXT | PK |
+| user_id | TEXT | FK → users, NOT NULL |
+| token | TEXT | UNIQUE, NOT NULL |
+| expires_at | TIMESTAMP | NOT NULL |
+| created_at | TIMESTAMP | NOT NULL |
+
 ---
 
 ## ID Generation
@@ -552,7 +571,8 @@ docs(readme): update API docs
 | PORT | Server port | No (default: 3000) |
 | DATABASE_URL | PostgreSQL connection string | Yes |
 | JWT_SECRET | JWT signing secret | Yes |
-| JWT_EXPIRES_IN | Token expiry | No (default: 7d) |
+| JWT_EXPIRES_IN | Access token expiry | No (default: 7d) |
+| JWT_REFRESH_EXPIRES_IN | Refresh token expiry | No (default: 7d) |
 | FRONTEND_URL | CORS origin | No |
 | CLOUDINARY_CLOUD_NAME | Cloud storage | Yes |
 | CLOUDINARY_API_KEY | Cloud storage | Yes |
