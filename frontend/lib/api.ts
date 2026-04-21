@@ -6,7 +6,7 @@ export type TeachersResponse = {
     data: Teachers[]
 }
 
-export async function getTeachers(): Promise<Teachers[]> {
+export async function getTeachers(page: number): Promise<Teachers[]> {
     const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL
 
     if (!BASE_URL) {
@@ -14,7 +14,7 @@ export async function getTeachers(): Promise<Teachers[]> {
     }
 
     try {
-        const res = await fetch(`${BASE_URL}/teachers`)
+        const res = await fetch(`${BASE_URL}/teachers?page=${page}`)
 
         if (!res.ok) {
             throw new Error(`Unable to fetch data: ${res.status}`)
@@ -43,6 +43,35 @@ export async function getTeacher(id: string): Promise<Teachers> {
     console.log(json.data)
 
     return json.data
+}
+
+export async function bulkUploadTeachers(file: File) {
+    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL
+
+    if (!BASE_URL) {
+        throw new Error('NEXT_PUBLIC_BACKEND_URL not set')
+    }
+
+    const formData = new FormData()
+    formData.append('file', file)
+
+    try {
+        const res = await fetch(`${BASE_URL}/teachers/bulk`, {
+            method: 'POST',
+            body: formData,
+        })
+
+        const data = await res.json()
+
+        if (!res.ok) {
+            throw new Error(data?.message || 'Upload failed')
+        }
+
+        return data
+    } catch (err) {
+        console.error('Upload failed:', err)
+        throw err
+    }
 }
 
 export type TrainingResponse = {

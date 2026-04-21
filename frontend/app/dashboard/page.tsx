@@ -27,7 +27,7 @@ export default function Dashboard() {
     const router = useRouter()
     const [teachers, setTeachers] = useState<Teachers[]>([])
     useEffect(() => {
-        getTeachers().then(res => {
+        getTeachers(1).then(res => {
             setTeachers(res)
         })
     }, [])
@@ -43,7 +43,7 @@ export default function Dashboard() {
                         <DropdownMenuGroup>
                             <DropdownMenuLabel>Teacher</DropdownMenuLabel>
                             <DropdownMenuItem className="cursor-pointer" onClick={() => router.push('/teacher/add')}>Individual</DropdownMenuItem>
-                            <DropdownMenuItem>Bulk</DropdownMenuItem>
+                            <DropdownMenuItem onClick={()=> router.push('teacher/add/bulk')}>Bulk</DropdownMenuItem>
                             <DropdownMenuSeparator />
                         </DropdownMenuGroup>
                         <DropdownMenuGroup>
@@ -75,7 +75,7 @@ export default function Dashboard() {
                             <TableCell>{name}</TableCell>
                             <TableCell>N/A</TableCell>
                             <TableCell>N/A</TableCell>
-                            <TableCell>{tenure === 1 ? '1 year': `${tenure} years`}</TableCell>
+                            <TableCell>{tenure < 1 ? '<1 year' : tenure === 1 ? '1 year': `${tenure} years`}</TableCell>
                             <TableCell>{address}</TableCell>
 
                             <TableCell className="font-medium text-[#2D84C4]">
