@@ -35,14 +35,17 @@ export const careerRecordService = {
     });
   },
 
-  getByTeacher: async (teacherId: string) => {
+  getByTeacher: async (teacherId: string, page = 1, limit = 10) => {
     const teacher = await teacherRepository.findById(teacherId);
-
     if (!teacher) {
       throw new AppError(404, ErrorCode.NOT_FOUND, "Teacher not found");
     }
+    const [data, total]= await Promise.all([
+      careerRecordRepository.findByTeacherId(teacherId, page, limit),
+      careerRecordRepository.countByTeacherId(teacherId),
+    ]);
 
-    return careerRecordRepository.findByTeacherId(teacherId);
+    return { data, total};
   },
 
   getById: async (id: string) => {

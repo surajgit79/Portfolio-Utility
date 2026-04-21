@@ -52,14 +52,12 @@ export const getTeachers = async (
   const { search } = request.query as { search?: string };
   const { page, limit } = getPaginationParams(request.query as Record<string, unknown>);
 
-  const all = await teacherService.getAll(search);
-  const total = all.length;
-  const paginated = all.slice((page-1)*limit, page*limit );
+  const { data, total } = await teacherService.getAll(search, page, limit);
 
   return reply.send({
     success: true,
-    message: paginated.length === 0? "No teachers found" : "Teachers fetched successfully",
-    data: paginated,
+    message: data.length === 0? "No teachers found" : "Teachers fetched successfully",
+    data,
     pagination: calculatePagination(total, page, limit),
   });
 };

@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { db } from "../db/client";
 import { careerRecords } from "../db/schema"
 
@@ -16,9 +16,14 @@ export const careerRecordRepository = {
         return record;
     },
 
-    findByTeacherId: async (teacherId: string): Promise<Career[]>=>{
-        const record = await db.select().from(careerRecords).where(eq(careerRecords.teacherId, teacherId));
-        return record;
+    findByTeacherId: async (teacherId: string, page = 1, limit = 10)=>{
+        const offset = (page -1)*limit;
+        return db.select().from(careerRecords).where(eq(careerRecords.teacherId, teacherId)).limit(limit).offset(offset);
+    },
+
+    countByTeacherId: async(teacherId: string): Promise<number>=>{
+        const [result] = await db.select({ count: sql<number>`count(*)`}).from(careerRecords).where(eq(careerRecords.teacherId, teacherId));
+        return Number(result.count); 
     },
 
     update: async(id:string, data:Partial<Career>): Promise<Career | undefined>=>{

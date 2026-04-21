@@ -94,22 +94,32 @@ export const trainingRecordService = {
         return { created, skipped };
     },
 
-    getByTeacher: async(teacherId: string)=>{
+    getByTeacher: async(teacherId: string, page = 1, limit = 10)=>{
         const teacher = await teacherRepository.findById(teacherId);
         if(!teacher){
             throw new AppError(404, ErrorCode.NOT_FOUND, "Teacher not found");
         }
 
-       return trainingRecordRepository.findByTeacherIdWithEvent(teacherId);
+        const [data, total] = await Promise.all([
+            trainingRecordRepository.findByTeacherId(teacherId, page, limit),
+            trainingRecordRepository.countByTeacherId(teacherId),
+        ]);
+
+        return {data, total};
     },
 
-    getByEvent: async(eventId: string)=>{
+    getByEvent: async(eventId: string, page = 1, limit = 10)=>{
         const event = await trainingEventRepository.findById(eventId);
         if(!event){
             throw new AppError(404, ErrorCode.NOT_FOUND, "Training event not found");
         }
 
-        return trainingRecordRepository.findByEventId(eventId);
+        const [data, total] = await Promise.all([
+            trainingRecordRepository.findByEventId(eventId, page, limit),
+            trainingRecordRepository.countByEventId(eventId),
+        ]);
+
+        return { data, total};
     },
 
     update: async (id: string, data: {

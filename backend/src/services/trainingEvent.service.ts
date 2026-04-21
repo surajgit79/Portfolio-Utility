@@ -3,12 +3,12 @@ import { AppError, ErrorCode } from "../utils/errorHandler";
 import { generateId } from "../utils/idGenerator";
 
 export const trainingEventService = {
-    getAll: async(category?: string, sector?: string, phase?: string)=>{
-        const events = trainingEventRepository.findAll(category, sector, phase);
-        if((await events).length === 0){
-            throw new AppError(404, ErrorCode.NOT_FOUND, "No training events found");
-        }
-        return events;
+    getAll: async(category?: string, sector?: string, phase?: string, page = 1, limit = 10)=>{
+        const [data, total] = await Promise.all([
+            trainingEventRepository.findAll(category, sector, phase, page, limit),
+            trainingEventRepository.countAll(category, sector, phase)
+        ]);
+        return { data, total};
     },
 
     getById: async(id: string)=>{

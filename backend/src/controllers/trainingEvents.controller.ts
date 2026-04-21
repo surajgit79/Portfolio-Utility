@@ -35,15 +35,12 @@ export const getTrainingEvents = async(
     };
 
     const { page, limit } = getPaginationParams(request.query as Record<string, unknown>);
-
-    const all = await trainingEventService.getAll(category, sector, phase);
-    const total = all.length;
-    const paginated = all.slice((page -1) * limit, page * limit);
+    const {data, total } = await trainingEventService.getAll(category, sector, phase, page, limit);
 
     return reply.send({
         success: true,
-        message: "Training events fetched successfully",
-        data: paginated,
+        message: data.length === 0? "No training events found":"Training events fetched successfully",
+        data,
         pagination: calculatePagination(total, page, limit),
     });
 };

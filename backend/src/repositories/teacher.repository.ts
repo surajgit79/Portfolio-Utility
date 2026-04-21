@@ -1,6 +1,6 @@
 import { db } from "../db/client";
 import { teachers, users } from "../db/schema";
-import { eq, ilike, and } from "drizzle-orm";
+import { eq, ilike, and, sql } from "drizzle-orm";
 import { careerRecords } from "../db/schema";
 
 type Teacher = typeof teachers.$inferSelect;
@@ -54,7 +54,8 @@ export const teacherRepository = {
     return teacher;
   },
 
-  findAll: async (search?: string): Promise<Teacher[]> => {
+  findAll: async (search?: string, page = 1, limit = 10): Promise<Teacher[]> => {
+    const offset = (page -1)*limit;
     const query = db
       .select({
         id:                  teachers.id,
@@ -79,7 +80,8 @@ export const teacherRepository = {
           eq(careerRecords.teacherId, teachers.id),
           eq(careerRecords.stillWorking, 1)
         )
-      );
+      ).limit(limit)
+      .offset(offset);
 
     if (search) {
       return query.where(ilike(teachers.name, `%${search}%`));
@@ -113,4 +115,16 @@ export const teacherRepository = {
       await db.delete(users).where(eq(users.id, teacher.userId));
     }
   },
+
+  countAll: async(search?: string): Promise<number>=>{
+    const query = db.select({ count: sql<number>`count(*)`}).from(teachers);
+
+    if(search){
+      const [result] = await query.where(ilike(teachers.name, `%${search}%`));
+      return Number(result.count);
+    }
+
+    const [result] = await query;
+    return Number(result.count);
+  }
 };

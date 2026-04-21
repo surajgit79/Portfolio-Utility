@@ -1,6 +1,6 @@
 import { db } from "../db/client";
 import { trainingRecords, trainingEvents } from "../db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 
 type TrainingRecord = typeof trainingRecords.$inferInsert;
 type NewTrainingRecord = typeof trainingRecords.$inferInsert;
@@ -16,10 +16,16 @@ export const trainingRecordRepository = {
         return record;
     },
 
-    findByTeacherId: async(teacherId: string): Promise<TrainingRecord[]>=>{
-        const record = await db.select().from(trainingRecords).where(eq(trainingRecords.teacherId, teacherId));
-        return record;
+    findByTeacherId: async(teacherId: string, page = 1, limit = 10) => {
+        const offset = (page -1 )*limit;
+        return db.select().from(trainingRecords).where(eq(trainingRecords.teacherId, teacherId)).limit(limit).offset(offset);
     },
+
+    countByTeacherId: async(teacherId: string): Promise<number> =>{
+        const [result] = await db.select({ count: sql<number>`count(*)`}).from(trainingRecords).where(eq(trainingRecords.teacherId, teacherId));
+        return Number(result.count);
+    },
+
 
     findByTeacherIdWithEvent: async(teacherId: string) =>{
         return db.select({
@@ -49,9 +55,14 @@ export const trainingRecordRepository = {
         .where(eq(trainingRecords.teacherId, teacherId));
     },
 
-    findByEventId: async(eventId: string): Promise<TrainingRecord[]>=>{
-        const record = await db.select().from(trainingRecords).where(eq(trainingRecords.trainingEventId, eventId));
-        return record;
+    findByEventId: async(eventId: string, page = 1, limit = 10) =>{
+        const offset = (page -1)*limit;
+        return db.select().from(trainingRecords).where(eq(trainingRecords.trainingEventId, eventId)).limit(limit).offset(offset);
+    },
+
+    countByEventId: async(eventId: string): Promise<number> =>{
+        const [result] = await db.select({ count: sql<number>`count(*)`}).from(trainingRecords).where(eq(trainingRecords.trainingEventId, eventId));
+        return Number(result.count);
     },
 
     findByTeacherAndEvent: async(teacherId: string, trainingEventId: string): Promise<TrainingRecord | undefined>=>{

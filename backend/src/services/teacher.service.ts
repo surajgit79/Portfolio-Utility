@@ -160,12 +160,18 @@ export const teacherService = {
 
   },
 
-  getAll: async (search?: string) => {
-    const result = await teacherRepository.findAll(search);
-    return result.map((teacher) => ({
-      ...teacher,
-      tenure: calculateTenure(teacher.teachingSince),
-    }));
+  getAll: async (search?: string, page = 1, limit = 10) => {
+    const [result, total] = await Promise.all([
+      teacherRepository.findAll(search, page, limit),
+      teacherRepository.countAll(search),
+    ])
+    return {
+      data: result.map((teacher) => ({
+        ...teacher,
+        tenure: calculateTenure(teacher.teachingSince),
+      })),
+      total,
+    };
   },
 
   getById: async (id: string) => {

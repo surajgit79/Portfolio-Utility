@@ -48,14 +48,18 @@ export const eventRecordService = {
     });
   },
 
-  getByTeacher: async (teacherId: string) => {
+  getByTeacher: async (teacherId: string, page = 1, limit = 10) => {
     const teacher = await teacherRepository.findById(teacherId);
-
     if (!teacher) {
       throw new AppError(404, ErrorCode.NOT_FOUND, "Teacher not found");
     }
 
-    return eventRecordRepository.findByTeacherId(teacherId);
+    const [data, total] = await Promise.all([
+      eventRecordRepository.findByTeacherId(teacherId, page, limit),
+      eventRecordRepository.countByTeacherId(teacherId),
+    ]);
+
+    return { data, total};
   },
 
   getById: async (id: string) => {

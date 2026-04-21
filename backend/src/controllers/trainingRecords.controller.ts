@@ -54,15 +54,12 @@ export const getTrainingRecordsByTeacher = async (
     ) => {
     const { teacherId } = request.params as { teacherId: string };
     const { page, limit } = getPaginationParams(request.query as Record<string, unknown>)
-
-    const all = await trainingRecordService.getByTeacher(teacherId);
-    const total = all.length;
-    const paginated = all.slice((page - 1) * limit, page * limit);
+    const {data, total} = await trainingRecordService.getByTeacher(teacherId, page, limit);
 
     return reply.send({
         success: true,
-        message: paginated.length === 0? "No records found": "Training records fetched successfully",
-        data: paginated,
+        message: data.length === 0? "No records found": "Training records fetched successfully",
+        data,
         pagination: calculatePagination(total, page, limit),
     });
 };
@@ -73,15 +70,12 @@ export const getTrainingRecordsByEvent = async (
     ) => {
     const { eventId } = request.params as { eventId: string };
     const { page, limit } = getPaginationParams( request.query as Record<string, unknown>);
-
-    const all     = await trainingRecordService.getByEvent(eventId);
-    const total = all.length;
-    const paginated = all.slice((page - 1) * limit, page * limit);
+    const { data, total } = await trainingRecordService.getByEvent(eventId, page, limit);
 
     return reply.send({
         success: true,
-        message: paginated.length === 0? "No records found": "Training records fetched successfully",
-        data: paginated,
+        message: data.length === 0? "No records found": "Training records fetched successfully",
+        data,
         pagination: calculatePagination(total, page, limit),
     });
 };

@@ -1,6 +1,6 @@
 import { db } from "../db/client";
 import { eventRecords } from "../db/schema";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 type EventRecord    = typeof eventRecords.$inferSelect;
 type NewEventRecord = typeof eventRecords.$inferInsert;
@@ -14,11 +14,17 @@ export const eventRecordRepository = {
     return record;
   },
 
-  findByTeacherId: async (teacherId: string): Promise<EventRecord[]> => {
+  findByTeacherId: async (teacherId: string, page = 1, limit = 10) => {
+    const offset = (page - 1)* limit;
     return db
       .select()
       .from(eventRecords)
-      .where(eq(eventRecords.teacherId, teacherId));
+      .where(eq(eventRecords.teacherId, teacherId)).limit(limit).offset(offset);
+  },
+
+  countByTeacherId: async(teacherId: string): Promise<number>=>{
+    const [result] = await db.select({ count: sql<number>`count(*)`}).from(eventRecords).where(eq(eventRecords.teacherId, teacherId));
+    return Number(result.count);
   },
 
   create: async (data: NewEventRecord): Promise<EventRecord> => {
