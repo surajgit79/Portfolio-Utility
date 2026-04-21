@@ -26,7 +26,48 @@ app.register(cors, {
 });
 app.register(rateLimit, {
     max: 100,
-    timeWindow: "1 minute"
+    timeWindow: "1 minute",
+    keyGenerator: (request) =>{
+        return request.user?.userID?? request.ip;
+    },
+    hook: "preHandler",
+    allowList: ["api/v1/health"],
+    errorResponseBuilder: (_request, context)=>{
+        return {
+            success: false,
+            message: `Too many requests. Try again in ${context.after}`,
+            code: "RATE_LIMIT_EXCEEDED",
+            errors: [],
+        };
+    },
+    onExceeding: (request) => {
+        request.log.warn({
+            userId: request.user?.userId?? request.ip,
+            url: request.url,
+        }, "rate limit approaching");
+    },
+    onExceeded: (request) => {
+        request.log.warn({
+            userId: request.user?.userId?? request.ip,
+            url: request.url,
+        }, "rate limit exceeded");
+    },
+});
+// auth routes - rate limiting
+app.register(async (instance) => {
+    await instance.register(rateLimit, {
+    max: 5,
+    timeWindow: "1 minute",
+    keyGenerator: (request) => request.ip,
+    errorResponseBuilder: (_request, context) => ({
+      success: false,
+      message: `Too many login attempts. Please try again in ${context.after}`,
+      code: "RATE_LIMIT_EXCEEDED",
+      errors: [],
+    }),
+  });
+
+  instance.register(authRoutes, { prefix: "/api/v1/auth" });
 });
 app.register(multipart, {
     limits:{ 
