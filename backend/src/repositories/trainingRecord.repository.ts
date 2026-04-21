@@ -1,5 +1,5 @@
 import { db } from "../db/client";
-import { trainingRecords, trainingEvents } from "../db/schema";
+import { trainingRecords, trainingEvents, teachers } from "../db/schema";
 import { eq, and, sql } from "drizzle-orm";
 
 type TrainingRecord = typeof trainingRecords.$inferInsert;
@@ -27,32 +27,54 @@ export const trainingRecordRepository = {
     },
 
 
-    findByTeacherIdWithEvent: async(teacherId: string) =>{
+    findByTeacherIdWithEvent: async(teacherId: string, page = 1, limit = 10) =>{
+        const offset = ( page -1)*limit;
         return db.select({
-            id:                trainingRecords.id,
-            teacherId:         trainingRecords.teacherId,
-            trainingEventId:   trainingRecords.trainingEventId,
-            rating:            trainingRecords.rating,
+            id: trainingRecords.id,
+            teacherId: trainingRecords.teacherId,
+            trainingEventId: trainingRecords.trainingEventId,
+            rating: trainingRecords.rating,
             certificateNumber: trainingRecords.certificateNumber,
-            refPhotos:         trainingRecords.refPhotos,
-            createdAt:         trainingRecords.createdAt,
-            updatedAt:         trainingRecords.updatedAt,
-            // Training event details
-            trainingName:      trainingEvents.name,
-            category:          trainingEvents.category,
-            sector:            trainingEvents.sector,
-            phase:             trainingEvents.phase,
-            description:       trainingEvents.description,
-            mentorsName:       trainingEvents.mentorsName,
-            venue:             trainingEvents.venue,
-            startDate:         trainingEvents.startDate,
-            duration:          trainingEvents.duration,
+            refPhotos: trainingRecords.refPhotos,
+            createdAt: trainingRecords.createdAt,
+            updatedAt: trainingRecords.updatedAt,
+            trainingName: trainingEvents.name,
+            category: trainingEvents.category,
+            sector: trainingEvents.sector,
+            phase: trainingEvents.phase,
+            description: trainingEvents.description,
+            mentorsName: trainingEvents.mentorsName,
+            venue: trainingEvents.venue,
+            startDate: trainingEvents.startDate,
+            duration: trainingEvents.duration,
         }).from(trainingRecords)
         .innerJoin(
             trainingEvents,
             eq(trainingRecords.trainingEventId, trainingEvents.id)
         )
-        .where(eq(trainingRecords.teacherId, teacherId));
+        .where(eq(trainingRecords.teacherId, teacherId)).limit(limit).offset(offset);
+    },
+
+    findByEventIdWithTeacher: async(eventId: string, page = 1, limit = 10)=>{
+        const offset = ( page -1 ) * limit;
+        return db.select({
+            id: trainingRecords.id, 
+            teacherId: trainingRecords.teacherId,
+            trainingEventId: trainingRecords.trainingEventId,
+            rating: trainingRecords.rating,
+            certificateNumber: trainingRecords.certificateNumber,
+            refPhotos: trainingRecords.refPhotos,
+            createdAt: trainingRecords.createdAt,
+            updatedAt: trainingRecords.updatedAt,
+            teacherName: teachers.name,
+            teacherEmail: teachers.email,
+            teacherImage: teachers.imageUrl,
+        }).from(trainingRecords)
+        .innerJoin(
+            teachers,
+            eq(trainingRecords.teacherId, teachers.id)
+        ).where(eq(trainingRecords.trainingEventId, eventId))
+        .limit(limit).offset(offset);
     },
 
     findByEventId: async(eventId: string, page = 1, limit = 10) =>{

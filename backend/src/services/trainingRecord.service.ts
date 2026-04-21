@@ -101,7 +101,7 @@ export const trainingRecordService = {
         }
 
         const [data, total] = await Promise.all([
-            trainingRecordRepository.findByTeacherId(teacherId, page, limit),
+            trainingRecordRepository.findByTeacherIdWithEvent(teacherId, page, limit),
             trainingRecordRepository.countByTeacherId(teacherId),
         ]);
 
@@ -115,7 +115,7 @@ export const trainingRecordService = {
         }
 
         const [data, total] = await Promise.all([
-            trainingRecordRepository.findByEventId(eventId, page, limit),
+            trainingRecordRepository.findByEventIdWithTeacher(eventId, page, limit),
             trainingRecordRepository.countByEventId(eventId),
         ]);
 
