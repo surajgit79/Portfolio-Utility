@@ -22,10 +22,10 @@ export const register = async(
     );
 
     return reply.status(201).send({
-        success: true,
-        message: "User registered successfully",
-        data,
-    });
+    success: true,
+    message: "User registered successfully",
+    data:    { accessToken: data.accessToken, refreshToken: data.refreshToken },
+  });
 };
 
 export const login = async(
