@@ -1,5 +1,5 @@
 import { db } from "../db/client";
-import { teachers, users } from "../db/schema";
+import { teachers, trainingEvents, trainingRecords, users } from "../db/schema";
 import { eq, ilike, and, sql } from "drizzle-orm";
 import { careerRecords } from "../db/schema";
 
@@ -24,16 +24,25 @@ export const teacherRepository = {
         createdAt:           teachers.createdAt,
         updatedAt:           teachers.updatedAt,
         currentOrganization: careerRecords.organization,
+        program:             trainingEvents.program,
+        module:              trainingEvents.module,
+        unit:                trainingEvents.unit,
       })
-      .from(teachers)
+      .from(teachers).where(eq(teachers.id, id))
       .leftJoin(
         careerRecords,
         and(
           eq(careerRecords.teacherId, teachers.id),
           eq(careerRecords.stillWorking, 1)
         )
+      ).leftJoin(
+        trainingRecords,
+        eq(trainingRecords.teacherId, teachers.id)
       )
-      .where(eq(teachers.id, id));
+      .leftJoin(
+        trainingEvents,
+        eq(trainingEvents.id, trainingRecords.trainingEventId)
+      );
 
     return teacher;
   },
@@ -72,6 +81,7 @@ export const teacherRepository = {
         createdAt:           teachers.createdAt,
         updatedAt:           teachers.updatedAt,
         currentOrganization: careerRecords.organization,
+        program:             trainingEvents.program,
       })
       .from(teachers)
       .leftJoin(
@@ -80,6 +90,13 @@ export const teacherRepository = {
           eq(careerRecords.teacherId, teachers.id),
           eq(careerRecords.stillWorking, 1)
         )
+      ).leftJoin(
+        trainingRecords,
+        eq(trainingRecords.teacherId, teachers.id)
+      )
+      .leftJoin(
+        trainingEvents,
+        eq(trainingEvents.id, trainingRecords.trainingEventId)
       ).limit(limit)
       .offset(offset);
 
