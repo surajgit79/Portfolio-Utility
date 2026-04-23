@@ -46,7 +46,7 @@ export const CareerBlock = ({id, classNames}: Props) => {
                     </div>
                 ))}
             </div>
-            <Button className="bg-[#E9F4FC] text-[#2D84C4] text-md font-bold cursor-pointer">Show More &#9662;</Button>
+            {/* <Button className="bg-[#E9F4FC] text-[#2D84C4] text-md font-bold cursor-pointer">Show More &#9662;</Button> */}
         </div>
     )
 }

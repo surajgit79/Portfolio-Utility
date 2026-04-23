@@ -1,49 +1,277 @@
-import type { Teachers, Training, Program, EventRecords, Career, TrainingAttended } from "@/types"
+import Teacher from "@/app/teachers/[id]/page"
+import type { Teachers, Training, Program, EventRecords, Career, TrainingAttended, Pagination } from "@/types"
+
+const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL
+
+if (!BASE_URL) {
+    throw new Error('NEXT_PUBLIC_BACKEND_URL not set.')
+}
+
+type ApiResponse<T> = {
+    success: boolean
+    message: string
+    data: T
+    errors?: unknown[]
+}
+
+async function apiFetch<T>(
+    endpoint: string,
+    options: RequestInit = {}
+): Promise<T> {
+    try {
+        const res = await fetch(`${BASE_URL}${endpoint}`, {
+            ...options,
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                ...(options.headers || {}),
+            },
+        })
+
+        const json: ApiResponse<T> = await res.json()
+
+        if (!res.ok || !json.success) {
+            throw new Error(json.message || 'API request failed')
+        }
+
+        return json.data
+    } catch (error) {
+        console.error(`API error on ${endpoint}:`, error)
+        throw error
+    }
+}
+
+export type LoginPayload = {
+    accessToken: string
+    refreshToken: string
+}
+
+export async function login(email: string, password: string) {
+    const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+    })
+
+    const contentType = res.headers.get('content-type') || ''
+
+    if (!contentType.includes('application/json')) {
+        const text = await res.text()
+        console.error('Non-JSON response from /api/auth/login:', text)
+        throw new Error('Login route returned HTML instead of JSON')
+    }
+
+    const json = await res.json()
+
+    if (!res.ok || !json.success) {
+        throw new Error(json?.message || 'Login failed')
+    }
+
+    return json as {
+        success: boolean
+        message: string
+    }
+}
+
+export async function logout() {
+    const res = await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+    })
+
+    const json = await res.json()
+
+    if (!res.ok || !json.success) {
+        throw new Error(json?.message || 'Logout failed')
+    }
+
+    return json
+}
 
 export type TeachersResponse = {
     success: boolean,
     message: string,
     data: Teachers[]
+    pagination: Pagination
 }
 
-export async function getTeachers(): Promise<Teachers[]> {
+// Teachers APIs
+export async function getTeachers(page = 1): Promise<{
+    teachers: Teachers[]
+    pagination: Pagination
+}> {
     const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL
 
     if (!BASE_URL) {
         throw new Error('NEXT_PUBLIC_BACKEND_URL not set')
     }
 
-    try {
-        const res = await fetch(`${BASE_URL}/teachers`)
+    const res = await fetch(`${BASE_URL}/teachers?page=${page}`, {
+        credentials: 'include',
+    })
 
-        if (!res.ok) {
-            throw new Error(`Unable to fetch data: ${res.status}`)
-        }
+    const json: TeachersResponse = await res.json()
 
-        const json: TeachersResponse = await res.json()
-        return json.data
-    } catch (error) {
-        console.error('Fetch teachers failed:', error)
-        throw error
+    if (!res.ok || !json.success) {
+        throw new Error(json?.message || 'Unable to fetch teachers')
+    }
+
+    return {
+        teachers: json.data,
+        pagination: json.pagination,
     }
 }
 
-export async function getTeacher(id: string): Promise<Teachers> {
-    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL
+export async function getTeacher(id: string) {
+    return apiFetch<Teachers>(`/teachers/${id}`)
+}
 
-    if (!BASE_URL)
-        throw new Error('BACKEND_URL not set')
+export type RegisterTeacherPayload = {
+    name: string
+    dob: string
+    contact: string
+    email: string
+    address: string
+    gender: 'Male' | 'Female' | 'Others'
+    password: string
+}
 
-    const res = await fetch(`${BASE_URL}/teachers/${id}`)
-
-    if (!res.ok)
-        throw new Error('Unable to fetch data')
+export async function registerTeacher(data: RegisterTeacherPayload) {
+    const res = await fetch('/api/teachers/register', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    })
 
     const json = await res.json()
-    console.log(json.data)
 
-    return json.data
+    if (!res.ok || !json.success) {
+        console.log('Register teacher validation errors:', json)
+        throw new Error(json?.message || 'Failed to register teacher')
+    }
+
+    return json
 }
+
+export async function searchTeachers(search: string) {
+    return apiFetch<Teachers[]>(
+        `/teachers?search=${encodeURIComponent(search)}`
+    )
+}
+
+export async function updateTeacher(id: string, data: any) {
+    return apiFetch(`/teachers/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+    })
+}
+
+export async function deleteTeacher(id: string) {
+    const res = await fetch(`/api/teachers/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+    })
+
+    const json = await res.json()
+
+    if (!res.ok || !json.success) {
+        throw new Error(json?.message || 'Delete failed')
+    }
+
+    return json
+}
+
+export async function uploadTeachersCSV(file: File) {
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const res = await fetch('/api/teachers/bulk', {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+    })
+
+    const json = await res.json()
+
+    if (!res.ok || !json.success) {
+        throw new Error(json?.message || 'Bulk upload failed')
+    }
+
+    return json
+}
+
+// export async function searchTeachers(search: string): Promise<Teachers[]> {
+//     try {
+//         const res = await fetch(`${BASE_URL}/teachers?search=${search}`)
+//         if (!res.ok) {
+//             throw new Error('Unable to fetch data')
+//         }
+//         const json: TeachersResponse = await res.json()
+//         return json.data
+//     } catch (error) {
+//         console.error('Fetch teachers failed: ', error)
+//         throw error
+//     }
+// }
+
+// export async function getTeachers(page: number): Promise<Teachers[]> {
+
+//     try {
+//         const res = await fetch(`${BASE_URL}/teachers?page=${page}`)
+
+//         if (!res.ok) {
+//             throw new Error(`Unable to fetch data: ${res.status}`)
+//         }
+
+//         const json: TeachersResponse = await res.json()
+//         return json.data
+//     } catch (error) {
+//         console.error('Fetch teachers failed:', error)
+//         throw error
+//     }
+// }
+
+// export async function getTeacher(id: string): Promise<Teachers> {
+//     const res = await fetch(`${BASE_URL}/teachers/${id}`)
+
+//     if (!res.ok)
+//         throw new Error('Unable to fetch data')
+
+//     const json = await res.json()
+//     console.log(json.data)
+
+//     return json.data
+// }
+
+// export async function bulkUploadTeachers(file: File) {
+
+//     const formData = new FormData()
+//     formData.append('file', file)
+
+//     try {
+//         const res = await fetch(`${BASE_URL}/teachers/bulk`, {
+//             method: 'POST',
+//             body: formData,
+//         })
+
+//         const data = await res.json()
+
+//         if (!res.ok) {
+//             throw new Error(data?.message || 'Upload failed')
+//         }
+
+//         return data
+//     } catch (err) {
+//         console.error('Upload failed:', err)
+//         throw err
+//     }
+// }
 
 export type TrainingResponse = {
     success: boolean,
@@ -131,13 +359,6 @@ export const dummyTrainingAttended: TrainingAttended[] = [
 ]
 
 export async function getTrainings(id: string): Promise<TrainingAttended[]> {
-    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL
-
-    if (!BASE_URL) {
-        console.warn("BACKEND_URL not set, using dummy data")
-        return dummyTrainingAttended
-    }
-
     try {
         const res = await fetch(`${BASE_URL}/training-records/teacher/${id}`)
 
@@ -276,10 +497,7 @@ export async function getCareers(id: string): Promise<Career[]> {
 
 // Get user by id
 export async function getUser(id: number) {
-    const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL + '/' + id
-    if (!BASE_URL)
-        throw new Error('BACKEND_URL not set')
-    const res = await fetch(BASE_URL)
+    const res = await fetch(`${BASE_URL}/${id}`)
 
     if (!res.ok)
         throw new Error('Unable to fetch data')

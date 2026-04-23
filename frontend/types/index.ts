@@ -1,4 +1,4 @@
-type BuildRange<N extends number, Result extends number[] = []> 
+type BuildRange<N extends number, Result extends number[] = []>
     = Result['length'] extends N ? Result[number] : BuildRange<N, [...Result, Result['length']]>
 
 type Range<F extends number, T extends number> =
@@ -19,7 +19,7 @@ export type Training = {
 
 export type TrainingAttended = {
     id: string,
-    trainingEventId:  string,
+    trainingEventId: string,
     trainingName: string,
     certificateNumber: string,
     venue?: string,
@@ -94,6 +94,20 @@ export type Teachers = {
     qualification: string,
     tenure: number,
     currentOrganization: string,
+}
+
+export type Pagination = {
+    total: number
+    page: number
+    limit: number
+    pages: number
+}
+
+export type TeachersResponse = {
+    success: boolean
+    message: string
+    data: Teachers[]
+    pagination: Pagination
 }
 
 export type TrainingEvents = {
