@@ -6,14 +6,14 @@ type TrainingEvent = typeof trainingEvents.$inferSelect;
 type NewTrainingEvent = typeof trainingEvents.$inferInsert;
 
 export const trainingEventRepository = {
-    findAll: async (category?: string, sector?: string, phase?: string, page = 1, limit = 10) =>{
+    findAll: async (program?: string, module?: string, unit?: string, page = 1, limit = 10) =>{
         const offset = (page -1)*limit;
         const query = db.select().from(trainingEvents).limit(limit).offset(offset);
 
         const conditions = [];
-        if(category) conditions.push(eq(trainingEvents.category, category as any));
-        if(sector) conditions.push(eq(trainingEvents.sector, sector));
-        if(phase) conditions.push(eq(trainingEvents.phase, phase));
+        if(program) conditions.push(eq(trainingEvents.program, program as any));
+        if(module) conditions.push(eq(trainingEvents.module, module));
+        if(unit) conditions.push(eq(trainingEvents.unit, unit));
 
         if(conditions.length > 0){
             return query.where(and(...conditions));
@@ -22,13 +22,13 @@ export const trainingEventRepository = {
         return query;
     },
 
-    countAll: async(category?: string, sector?: string, phase?: string): Promise<number> =>{
+    countAll: async(program?: string, module?: string, unit?: string): Promise<number> =>{
         const query = db.select({ count: sql<number>`count(*)`}).from(trainingEvents);
         
         const conditions = [];
-        if (category) conditions.push(eq(trainingEvents.category, category as any));
-        if (sector)   conditions.push(eq(trainingEvents.sector, sector));
-        if (phase)    conditions.push(eq(trainingEvents.phase, phase));
+        if (program) conditions.push(eq(trainingEvents.program, program as any));
+        if (module)   conditions.push(eq(trainingEvents.module, module));
+        if (unit)    conditions.push(eq(trainingEvents.unit, unit));
 
         if (conditions.length > 0) {
         const [result] = await query.where(and(...conditions));
@@ -59,18 +59,20 @@ export const trainingEventRepository = {
     },
 
     findDuplicate: async(
-        category: string,
-        sector: string,
-        phase: string | null | undefined,
+        program: string,
+        module: string,
+        unit: string | null | undefined,
         startDate: Date
     ): Promise<TrainingEvent | undefined> =>{
-        const [duplicate] = await db.select().from(trainingEvents).where(
-            and(
-                eq(trainingEvents.category, category as any),
-                eq(trainingEvents.sector, sector),
-                eq(trainingEvents.startDate, startDate)
-            )
-        );
-        return duplicate;
+        const conditions = [
+        eq(trainingEvents.program, program as any),
+        eq(trainingEvents.module, module),
+        eq(trainingEvents.startDate, startDate),
+        ];
+
+        if (unit) conditions.push(eq(trainingEvents.unit, unit));
+
+        const [result] = await db.select().from(trainingEvents).where(and(...conditions));
+        return result;
     }
-}
+};

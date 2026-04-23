@@ -1,7 +1,7 @@
 import { pgTable, text, timestamp, pgEnum, integer, date, index } from "drizzle-orm/pg-core";
 
 export const genderEnum = pgEnum("gender", ["Male", "Female", "Others"]);
-export const categoryEnum = pgEnum("category", ["Activity-based Mathematics", "Pre-School", "Reading"]);
+export const programEnum = pgEnum("program", ["Activity-based Mathematics", "Reading & Language", "Pre-School Transformation"]);
 export const eventEnum = pgEnum("event_type", ["Seminar", "Conference", "Panel Discussion","Podcast"]);
 export const gradeEnum = pgEnum("grade", ["Nursery", "LKG", "UKG", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6", "Grade 7", "Grade 8", "Grade 9", "Grade 10"]);
 
@@ -10,9 +10,6 @@ export const users = pgTable("users", {
     email: text("email").notNull().unique(),
     password: text("password").notNull(),
     role: text("role", {enum:["admin", "teacher"]}).notNull().default("teacher"),
-    // is_verified: boolean("is_verified").default(false).notNull(),
-    // resetToken: varchar("reset_token"),
-    // resetTokenExpiration: timestamp("reset_token_expiration"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
 },(table)=>({
@@ -41,9 +38,9 @@ export const teachers = pgTable("teachers",{
 
 export const trainingEvents = pgTable("training_events", {
     id: text("id").primaryKey(),
-    category: categoryEnum("category").notNull(),
-    sector: text("sector").notNull(),
-    phase: text("phase"),
+    program: programEnum("program").notNull(),
+    module: text("module").notNull(),
+    unit: text("unit"),
     name: text("name").notNull(),
     mentorsName: text("mentors_name"),
     venue: text("venue"),
@@ -53,9 +50,9 @@ export const trainingEvents = pgTable("training_events", {
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (table) => ({
-    categoryIdx:  index("training_events_category_idx").on(table.category),
-    sectorIdx:    index("training_events_sector_idx").on(table.sector),
-    phaseIdx:     index("training_events_phase_idx").on(table.phase),
+    programIdx:  index("training_events_category_idx").on(table.program),
+    moduleIdx:    index("training_events_sector_idx").on(table.module),
+    unitIdx:     index("training_events_phase_idx").on(table.unit),
     startDateIdx: index("training_events_start_date_idx").on(table.startDate),
 }));
 

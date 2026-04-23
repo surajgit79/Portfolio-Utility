@@ -1,5 +1,5 @@
 import { db } from "../db/client";
-import { desc, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 
 type TableName = | "users" | "teachers" | "training_events" | "training_records" | "career_records" | "event_records";
 
@@ -38,43 +38,61 @@ export const generateId = async (table: TableName) : Promise<string>=>{
 };
 
 export const generateCertificateNumber = async(
-    category: string,
-    sector: string,
-    phase: string | null
+    program: string,
+    module: string,
+    unit: string | null
 ): Promise<string> =>{
     const year = new Date().getFullYear();
 
 
-    const categoryCode = category === "Activity-based Mathematics" ? "ABM"
-        : category === "Reading"? "RED"
-        : "PRE";
+    const programCode = program === "Activity-based Mathematics" ? "ABM"
+        : program === "Reading & Learning"? "R&L"
+        : "PST";
 
-    const sectorCode = sector === "Book 1"? "B1"
-        : sector === "Book 2"? "B2"
-        : sector === "Book 3"? "B3"
-        : sector === "Phonics" ? "PHO"
-        : sector === "Guided Reading" ? "GR"
-        : sector === "Book-based Activities" ? "BBA"
-        : sector === "Writing Workshop" ? "WW"
-        : "";
+    const moduleCode =
+        module === "Class 4"    ? "C4" :
+        module === "Class 5"    ? "C5" :
+        module === "Class 6"    ? "C6" :
+        module === "Phonics"    ? "PHO" :
+        module === "Writer Workshop"    ? "WW" :
+        module === "Guided Reading"     ? "GR" :
+        module === "Book-based Activity" ? "BBA" :
+        module === "Coffee House"        ? "CH" :
+        module === "Circle Time"         ? "CT" :
+        module === "Setting and Development of Communication" ? "SD" :
+        module === "Material Development"                     ? "MD" :
+        module === "Story Telling Session"                    ? "ST" :
+        module === "Music and Movement Session"               ? "MM" :
+        module === "Continuous Assessment System"             ? "CA" :
+        module === "Curriculum Development Training"          ? "CD" :
+        module.substring(0, 3).toUpperCase();
 
-    const phaseCode = phase === "Phase 1" ? "P1"
-        : phase === "Phase 2" ? "P2"
-        : null;
+    const unitCode =
+        !unit                ? "" :
+        unit === "Book 1"    ? "B1" :
+        unit === "Book 2"    ? "B2" :
+        unit === "Book 3"    ? "B3" :
+        unit === "Set 1"     ? "S1" :
+        unit === "Set 2"     ? "S2" :
+        unit === "Set 3"     ? "S3" :
+        unit === "Set 4"     ? "S4" :
+        unit === "Set 5"     ? "S5" :
+        unit === "Set 6"     ? "S6" :
+        unit === "Set 7"     ? "S7" :
+        unit === "Chop and blend of Short Vowel Words (CVC word)" ? "CVC" :
+        unit === "Chop and blend of Long Vowel Words"             ? "LVW" :
+        unit === "Consonant Blending (Chop and Blend)"            ? "CB"  :
+        unit === "R-controlled Blending (Chop and Blend)"         ? "RCB" :
+        unit.substring(0, 3).toUpperCase();
 
-    const prefix = phaseCode
-        ? `${categoryCode}-${sectorCode}${phaseCode}`
-        : sectorCode
-        ? `${categoryCode}-${sectorCode}`
-        : categoryCode;
-
+    const prefix = unitCode ? `${programCode}-${moduleCode}${unitCode}` : `${programCode}-${moduleCode}`;
 
     const pattern = `${prefix}-${year}-%`;
 
     const result = await db.execute(
         sql `SELECT certificate_number FROM training_records
                 WHERE certificate_number LIKE ${pattern}
-                ORDER BY id DESC
+                ORDER BY certificate_number DESC
                 LIMIT 1`
     );
 

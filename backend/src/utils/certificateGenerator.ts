@@ -1,352 +1,324 @@
 import puppeteer from "puppeteer";
 import { PDFDocument } from "pdf-lib";
+import QRCode from "qrcode";
 
 interface CertificateData {
   teacherName:       string;
+  teacherId:         string;
   trainingName:      string;
-  category:          string;
-  sector:            string;
-  phase:             string | null;
+  program:           string;
+  module:            string;
+  unit:              string | null;
   venue:             string | null;
   startDate:         Date;
   duration:          string;
   description:       string | null;
   mentorName:        string | null;
   certificateNumber: string;
+  issuedAt:          Date;
 }
 
-const generateHTML = (data: CertificateData): string => {
-  const formattedDate = new Date(data.startDate).toLocaleDateString("en-US", {
+const getCoordinator = (program: string): { name: string; title: string } => {
+  switch (program) {
+    case "Activity-based Mathematics":
+      return { name: "Nikita Bhattarai",    title: "ABM Co-ordinator"  };
+    case "Reading & Language":
+      return { name: "Sita Thing", title: "R&L Co-ordinator"  };
+    case "Pre-School Transformation":
+      return { name: "Hari Acharya", title: "PST Co-ordinator"  };
+    default:
+      return { name: "Co-ordinator",  title: "Program Co-ordinator" };
+  }
+};
+
+const getProgramDescription = (
+  program: string,
+  module:  string,
+  unit:    string | null
+): { title: string; bullets: string[] } => {
+  const bullets = unit
+    ? [`${module} - ${unit}`]
+    : [module];
+
+  return {
+    title:   `for completing ${program} Program`,
+    bullets,
+  };
+};
+
+const generateHTML = async (data: CertificateData): Promise<string> => {
+  const coordinator = getCoordinator(data.program);
+  const { title, bullets } = getProgramDescription(
+    data.program,
+    data.module,
+    data.unit
+  );
+
+  const issuedDate = new Date(data.issuedAt).toLocaleDateString("en-US", {
     day:   "numeric",
     month: "long",
     year:  "numeric",
   });
 
-  const sectorPhase = data.phase
-    ? `${data.sector} - ${data.phase}`
-    : data.sector;
+  const profileUrl = `${process.env.FRONTEND_URL}/teachers/${data.teacherId}`;
+  const qrCodeDataUrl = await QRCode.toDataURL(profileUrl, {
+    width:  120,
+    margin: 1,
+    color: {
+      dark:  "#1a1a4e",
+      light: "#ffffff",
+    },
+  });
 
   return `
     <!DOCTYPE html>
     <html lang="en">
     <head>
       <meta charset="UTF-8"/>
-      <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap');
 
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
           font-family: 'Inter', sans-serif;
-          background: #ffffff;
-          width: 1000px;
-          min-height: 1414px;
-          position: relative;
+          width:  1000px;
+          height: 700px;
+          display: flex;
           overflow: hidden;
+          background: #ffffff;
         }
 
-        /* Background geometric shapes */
-        .bg-top-right {
-          position: absolute;
-          top: 0;
-          right: 0;
-          width: 200px;
-          height: 200px;
-          background: #1a1a4e;
-          clip-path: polygon(100% 0, 100% 100%, 0 0);
-          z-index: 0;
-        }
-
-        .bg-top-right-gold {
-          position: absolute;
-          top: 0;
-          right: 0;
-          width: 160px;
-          height: 120px;
-          background: #c9a84c;
-          clip-path: polygon(100% 0, 100% 100%, 40% 0);
-          z-index: 0;
-        }
-
-        .bg-bottom-left {
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          width: 200px;
-          height: 200px;
-          background: #1a1a4e;
-          clip-path: polygon(0 0, 0 100%, 100% 100%);
-          z-index: 0;
-        }
-
-        .bg-bottom-left-gold {
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          width: 120px;
-          height: 160px;
-          background: #c9a84c;
-          clip-path: polygon(0 0, 0 100%, 100% 100%);
-          z-index: 0;
-        }
-
-        .content {
+        /* Left gray sidebar */
+        .sidebar {
+          width: 80px;
+          background: #e8e8e8;
+          flex-shrink: 0;
           position: relative;
-          z-index: 1;
-          padding: 50px 80px;
         }
 
-        /* Header */
-        .header {
+        .sidebar-circle {
+          width:  60px;
+          height: 60px;
+          background: #d0d0d0;
+          border-radius: 50%;
+          position: absolute;
+          bottom: 80px;
+          left: 10px;
+        }
+
+        /* Main content */
+        .main {
+          flex: 1;
           display: flex;
-          justify-content: space-between;
+          flex-direction: column;
+        }
+
+        /* Top section */
+        .top {
+          display: flex;
+          padding: 30px 40px 20px;
           align-items: flex-start;
-          margin-bottom: 40px;
-        }
-
-        .date {
-          font-size: 14px;
-          font-weight: 600;
-          color: #1a1a4e;
-        }
-
-        .logo-section {
-          display: flex;
-          align-items: center;
-          gap: 12px;
+          gap: 20px;
+          border-bottom: 1px solid #eee;
         }
 
         .logo {
-          height: 60px;
-          width: auto;
+          width:  80px;
+          height: 80px;
+          object-fit: contain;
         }
 
-        /* Title */
-        .title-section {
-          text-align: center;
-          margin-bottom: 30px;
+        .org-info {
+          flex: 1;
         }
 
-        .certificate-title {
-          font-family: 'Playfair Display', serif;
-          font-size: 48px;
-          font-weight: 700;
-          color: #1a1a4e;
-          letter-spacing: 2px;
+        .org-presents {
+          font-size:   13px;
+          color:       #555;
+          margin-bottom: 6px;
+        }
+
+        .cert-title {
+          font-size:      28px;
+          font-weight:    700;
+          color:          #1a6eb5;
+          letter-spacing: 1px;
+          font-family:    'Playfair Display', serif;
+        }
+
+        /* Body section */
+        .body {
+          padding:    30px 40px;
+          flex:       1;
+        }
+
+        .to-text {
+          font-size:     13px;
+          color:         #555;
+          margin-bottom: 8px;
+        }
+
+        .teacher-name {
+          font-size:      42px;
+          font-weight:    700;
+          color:          #2c2c2c;
+          font-family:    'Playfair Display', serif;
+          margin-bottom:  12px;
+        }
+
+        .program-title {
+          font-size:      14px;
+          color:          #555;
+          font-style:     italic;
+          margin-bottom:  16px;
+        }
+
+        .bullets {
+          list-style: none;
           margin-bottom: 20px;
         }
 
-        .divider {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 16px;
-          margin-bottom: 16px;
+        .bullets li {
+          font-size:     13px;
+          color:         #444;
+          margin-bottom: 6px;
+          display:       flex;
+          align-items:   center;
+          gap:           8px;
         }
 
-        .divider-line {
-          width: 120px;
-          height: 1px;
-          background: #1a1a4e;
+        .bullets li::before {
+          content:          "•";
+          color:            #1a6eb5;
+          font-size:        16px;
+          font-weight:      bold;
         }
 
-        .certify-text {
-          font-size: 14px;
-          color: #333;
-          font-weight: 500;
-        }
-
-        /* Teacher name */
-        .teacher-name {
-          font-family: 'Playfair Display', serif;
-          font-size: 36px;
-          font-weight: 700;
-          color: #1a1a4e;
-          text-align: center;
-          margin-bottom: 30px;
-        }
-
-        /* Body */
-        .body-text {
-          font-size: 15px;
-          line-height: 1.8;
-          color: #333;
-          text-align: justify;
-          margin-bottom: 30px;
-        }
-
-        .body-text em {
-          font-style: italic;
-          font-weight: 600;
-        }
-
-        /* Description */
-        .description {
-          font-size: 14px;
-          line-height: 1.8;
-          color: #444;
-          margin-bottom: 30px;
-          text-align: justify;
-        }
-
-        /* Divider */
-        .section-divider {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 16px;
-          margin: 30px 0;
-        }
-
-        .section-divider-line {
-          flex: 1;
-          height: 1px;
-          background: #1a1a4e;
-        }
-
-        .section-divider-title {
-          font-size: 16px;
-          font-weight: 600;
-          color: #1a1a4e;
-          letter-spacing: 1px;
-        }
-
-        /* Mentor section */
-        .mentor-section {
-          margin-bottom: 40px;
-        }
-
-        .mentor-name {
-          font-size: 15px;
-          color: #333;
-          font-weight: 500;
-        }
-
-        /* Certificate number */
-        .certificate-footer {
-          display: flex;
+        /* Footer section */
+        .footer {
+          padding:        20px 40px;
+          display:        flex;
+          align-items:    flex-end;
           justify-content: space-between;
-          align-items: flex-end;
-          margin-top: 60px;
-          padding-top: 20px;
-          border-top: 1px solid #ddd;
         }
 
-        .cert-number {
-          font-size: 13px;
-          color: #666;
+        .signer {
+          text-align: center;
+          min-width:  140px;
         }
 
-        .cert-number span {
+        .signature-line {
+          width:         120px;
+          height:        50px;
+          border-bottom: 1.5px solid #1a6eb5;
+          margin-bottom: 6px;
+        }
+
+        .signer-name {
+          font-size:   13px;
           font-weight: 600;
-          color: #1a1a4e;
+          color:       #2c2c2c;
         }
 
-        .footer-links {
-          font-size: 13px;
-          color: #666;
-          text-align: right;
+        .signer-title {
+          font-size: 11px;
+          color:     #777;
         }
 
-        .footer-links a {
-          color: #1a1a4e;
-          text-decoration: none;
-          font-weight: 500;
+        .qr-section {
+          text-align: center;
         }
 
-        /* Watermark */
-        .watermark {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%) rotate(-30deg);
-          font-size: 120px;
-          font-weight: 900;
-          color: rgba(26, 26, 78, 0.04);
-          white-space: nowrap;
-          z-index: 0;
-          pointer-events: none;
-          font-family: 'Playfair Display', serif;
+        .qr-id {
+          font-size:     10px;
+          color:         #777;
+          margin-bottom: 4px;
+        }
+
+        .qr-image {
+          width:  100px;
+          height: 100px;
+        }
+
+        .cert-issued {
+          font-size:  11px;
+          color:      #555;
+          margin-top: 6px;
+        }
+
+        .cert-issued strong {
+          color:       #1a6eb5;
+          font-weight: 600;
+        }
+
+        /* Bottom teal bar */
+        .bottom-bar {
+          height:     18px;
+          background: #1a9b8a;
+          flex-shrink: 0;
         }
       </style>
     </head>
     <body>
 
-      <!-- Background shapes -->
-      <div class="bg-top-right"></div>
-      <div class="bg-top-right-gold"></div>
-      <div class="bg-bottom-left"></div>
-      <div class="bg-bottom-left-gold"></div>
+      <!-- Left sidebar -->
+      <div class="sidebar">
+        <div class="sidebar-circle"></div>
+      </div>
 
-      <!-- Watermark -->
-      <div class="watermark">PORTFOLIO</div>
+      <!-- Main content -->
+      <div class="main">
 
-      <div class="content">
-
-        <!-- Header -->
-        <div class="header">
-          <div class="date"><strong>Date:</strong> ${formattedDate}</div>
-          <div class="logo-section">
-            <img
-              class="logo"
-              src="https://your-logo-url.com/logo.png"
-              alt="Logo"
-            />
+        <!-- Top -->
+        <div class="top">
+          <img
+            class="logo"
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Navodaya_Vidyalaya_Samiti_logo.png/120px-Navodaya_Vidyalaya_Samiti_logo.png"
+            alt="Logo"
+          />
+          <div class="org-info">
+            <div class="org-presents">Navodaya Innovation Center presents this</div>
+            <div class="cert-title">CERTIFICATE OF COMPLETION</div>
           </div>
         </div>
-
-        <!-- Title -->
-        <div class="title-section">
-          <h1 class="certificate-title">CERTIFICATE OF PARTICIPATION</h1>
-          <div class="divider">
-            <div class="divider-line"></div>
-            <span class="certify-text">This is to certify that</span>
-            <div class="divider-line"></div>
-          </div>
-        </div>
-
-        <!-- Teacher name -->
-        <div class="teacher-name">${data.teacherName}</div>
 
         <!-- Body -->
-        <p class="body-text">
-          attended the <strong>${data.duration}</strong>
-          <em>${data.trainingName}</em> (${data.category} — ${sectorPhase}),
-          ${data.venue ? `held at <strong>${data.venue}</strong>,` : ""}
-          commencing <strong>${formattedDate}</strong>.
-        </p>
-
-        ${data.description ? `
-        <p class="description">${data.description}</p>
-        ` : ""}
-
-        <!-- Mentor section -->
-        ${data.mentorName ? `
-        <div class="section-divider">
-          <div class="section-divider-line"></div>
-          <span class="section-divider-title">MENTOR / TRAINER</span>
-          <div class="section-divider-line"></div>
+        <div class="body">
+          <div class="to-text">to</div>
+          <div class="teacher-name">${data.teacherName}</div>
+          <div class="program-title">${title}</div>
+          <ul class="bullets">
+            ${bullets.map((b) => `<li>${b}</li>`).join("")}
+          </ul>
         </div>
-        <div class="mentor-section">
-          <p class="mentor-name">${data.mentorName}</p>
-        </div>
-        ` : ""}
 
-        <!-- Certificate footer -->
-        <div class="certificate-footer">
-          <div class="cert-number">
-            Certificate No: <span>${data.certificateNumber}</span>
+        <!-- Footer -->
+        <div class="footer">
+          <div class="signer">
+            <div class="signature-line"></div>
+            <div class="signer-name">Abyekta Khanal</div>
+            <div class="signer-title">Chief Executive Officer</div>
           </div>
-          <div class="footer-links">
-            <div>Web: <a href="https://your-website.com">your-website.com</a></div>
-            <div>Email: <a href="mailto:info@your-org.com">info@your-org.com</a></div>
+
+          <div class="signer">
+            <div class="signature-line"></div>
+            <div class="signer-name">${coordinator.name}</div>
+            <div class="signer-title">${coordinator.title}</div>
+          </div>
+
+          <div class="qr-section">
+            <div class="qr-id">ID: ${data.certificateNumber}</div>
+            <img class="qr-image" src="${qrCodeDataUrl}" alt="QR Code"/>
+            <div class="cert-issued">
+              Certificate Issued<br/>
+              <strong>${issuedDate}</strong>
+            </div>
           </div>
         </div>
+
+        <!-- Bottom bar -->
+        <div class="bottom-bar"></div>
 
       </div>
     </body>
@@ -363,16 +335,15 @@ export const generateCertificatePDF = async (
   });
 
   const page = await browser.newPage();
-  await page.setContent(generateHTML(data), { waitUntil: "networkidle0" });
+  await page.setContent(await generateHTML(data), { waitUntil: "networkidle0" });
 
   const pdf = await page.pdf({
-    width:            "1000px",
-    height:           "1414px",
-    printBackground:  true,
+    width:           "1000px",
+    height:          "700px",
+    printBackground: true,
   });
 
   await browser.close();
-
   return Buffer.from(pdf);
 };
 
