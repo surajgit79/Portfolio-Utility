@@ -41,7 +41,7 @@ export const trainingRecordService = {
         }
 
         const id = await generateId("training_records");
-        const certificateNumber = await generateCertificateNumber(event.category, event.sector, event.phase?? null);
+        const certificateNumber = await generateCertificateNumber(event.program, event.module, event.unit?? null);
 
         return trainingRecordRepository.create({
             id, ...data, certificateNumber, refPhotos
@@ -78,7 +78,7 @@ export const trainingRecordService = {
                 }
 
                 const id = await generateId("training_records");
-                const certificateNumber = await generateCertificateNumber(event.category, event.sector, event.phase?? null);
+                const certificateNumber = await generateCertificateNumber(event.program, event.module, event.unit?? null);
 
                 const [record] = await tx.insert(trainingRecords).values({
                     id,

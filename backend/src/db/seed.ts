@@ -91,36 +91,42 @@ const seed = async () => {
   console.log("🌱 Seeding training events...");
 
   const trainingEventData = [
-    { id: "TRN-2026-0001", category: "Activity-based Mathematics" as const, sector: "Book 1", phase: "Phase 1", name: "ABM Book 1 Phase 1 Training", mentorsName: "John Doe", venue: "Hetauda, Bagmati Province", description: "Comprehensive training on Activity-based Mathematics Book 1 Phase 1", startDate: new Date("2026-01-15"), duration: "3 days" },
-    { id: "TRN-2026-0002", category: "Activity-based Mathematics" as const, sector: "Book 1", phase: "Phase 2", name: "ABM Book 1 Phase 2 Training", mentorsName: "Jane Doe", venue: "Kathmandu, Bagmati Province", description: "Comprehensive training on Activity-based Mathematics Book 1 Phase 2", startDate: new Date("2026-02-10"), duration: "3 days" },
-    { id: "TRN-2026-0003", category: "Reading" as const, sector: "Phonics", phase: null, name: "Reading Phonics Training", mentorsName: "Mary Smith", venue: "Pokhara, Gandaki Province", description: "Training on Reading Enhancement through Phonics", startDate: new Date("2026-03-05"), duration: "2 days" },
-    { id: "TRN-2026-0004", category: "Activity-based Mathematics" as const, sector: "Book 2", phase: "Phase 1", name: "ABM Book 2 Phase 1 Training", mentorsName: "Robert Brown", venue: "Chitwan, Bagmati Province", description: "Advanced mathematics teaching techniques", startDate: new Date("2026-01-20"), duration: "4 days" },
-    { id: "TRN-2026-0005", category: "Reading" as const, sector: "Guided Reading", phase: null, name: "Guided Reading Strategies", mentorsName: "Sarah Wilson", venue: "Lalitpur, Bagmati Province", description: "Implementing guided reading in classrooms", startDate: new Date("2026-02-15"), duration: "2 days" },
-    { id: "TRN-2026-0006", category: "Pre-School" as const, sector: "Pre-School", phase: "Phase 1", name: "Pre-School Teaching Methods", mentorsName: "Emily Davis", venue: "Bhaktapur, Bagmati Province", description: "Early childhood education techniques", startDate: new Date("2026-03-01"), duration: "3 days" },
-    { id: "TRN-2026-0007", category: "Activity-based Mathematics" as const, sector: "Book 3", phase: "Phase 1", name: "ABM Book 3 Phase 1 Training", mentorsName: "Michael Chen", venue: "Hetauda, Bagmati Province", description: "Advanced ABM methodologies", startDate: new Date("2026-02-01"), duration: "5 days" },
-    { id: "TRN-2026-0008", category: "Reading" as const, sector: "Book-based Activities", phase: null, name: "Book-based Activity Planning", mentorsName: "Lisa Anderson", venue: "Pokhara, Gandaki Province", description: "Creative book activities for young learners", startDate: new Date("2026-03-10"), duration: "2 days" },
-    { id: "TRN-2026-0009", category: "Pre-School" as const, sector: "Pre-School", phase: "Phase 2", name: "Pre-School Advanced Techniques", mentorsName: "David Thompson", venue: "Kathmandu, Bagmati Province", description: "Advanced early childhood methods", startDate: new Date("2026-01-25"), duration: "3 days" },
-    { id: "TRN-2026-0010", category: "Activity-based Mathematics" as const, sector: "Book 1", phase: "Phase 1", name: "ABM Refreshers Training", mentorsName: "Jennifer White", venue: "Biratnagar, Province 1", description: "Refreshers course for ABM Book 1", startDate: new Date("2026-02-20"), duration: "2 days" },
-    { id: "TRN-2026-0011", category: "Reading" as const, sector: "Writing Workshop", phase: null, name: "Writing Workshop Facilitation", mentorsName: "Christopher Lee", venue: "Birgunj, Province 2", description: "Teaching creative writing to students", startDate: new Date("2026-03-15"), duration: "3 days" },
-    { id: "TRN-2026-0012", category: "Activity-based Mathematics" as const, sector: "Book 2", phase: "Phase 2", name: "ABM Book 2 Phase 2 Training", mentorsName: "Amanda Martinez", venue: "Nepalgunj, Lumbini Province", description: "Phase 2 advanced concepts", startDate: new Date("2026-01-30"), duration: "4 days" },
-    { id: "TRN-2026-0013", category: "Reading" as const, sector: "Phonics", phase: null, name: "Phonics Mastery Workshop", mentorsName: "Richard Brown", venue: "Dang, Lumbini Province", description: "Deep dive into phonics instruction", startDate: new Date("2026-02-25"), duration: "3 days" },
-    { id: "TRN-2026-0014", category: "Pre-School" as const, sector: "Pre-School", phase: "Phase 1", name: "Montessori Methods Training", mentorsName: "Patricia Green", venue: "Chitwan, Bagmati Province", description: "Montessori-inspired teaching", startDate: new Date("2026-03-08"), duration: "5 days" },
-    { id: "TRN-2026-0015", category: "Activity-based Mathematics" as const, sector: "Book 3", phase: "Phase 2", name: "ABM Book 3 Phase 2 Training", mentorsName: "Thomas Jackson", venue: "Hetauda, Bagmati Province", description: "Phase 2 advanced mathematics", startDate: new Date("2026-02-05"), duration: "4 days" },
-    { id: "TRN-2026-0016", category: "Reading" as const, sector: "Guided Reading", phase: null, name: "Guided Reading Assessment", mentorsName: "Barbara Harris", venue: "Lalitpur, Bagmati Province", description: "Assessment in guided reading", startDate: new Date("2026-03-12"), duration: "2 days" },
-    { id: "TRN-2026-0017", category: "Activity-based Mathematics" as const, sector: "Book 1", phase: "Phase 2", name: "ABM Book 1 Phase 2 Refreshers", mentorsName: "Daniel Clark", venue: "Pokhara, Gandaki Province", description: "Phase 2 refresher course", startDate: new Date("2026-01-18"), duration: "3 days" },
-    { id: "TRN-2026-0018", category: "Reading" as const, sector: "Book-based Activities", phase: null, name: "Storytelling Techniques", mentorsName: "Nancy Lewis", venue: "Bhaktapur, Bagmati Province", description: "Effective storytelling in classrooms", startDate: new Date("2026-02-28"), duration: "2 days" },
-    { id: "TRN-2026-0019", category: "Pre-School" as const, sector: "Pre-School", phase: "Phase 2", name: "Pre-School Assessment Methods", mentorsName: "Paul Robinson", venue: "Kathmandu, Bagmati Province", description: "Assessment techniques for preschoolers", startDate: new Date("2026-03-18"), duration: "3 days" },
-    { id: "TRN-2026-0020", category: "Activity-based Mathematics" as const, sector: "Book 2", phase: "Phase 1", name: "ABM Book 2 Phase 1 Advanced", mentorsName: "Margaret Walker", venue: "Biratnagar, Province 1", description: "Advanced phase 1 concepts", startDate: new Date("2026-02-12"), duration: "4 days" },
-    { id: "TRN-2026-0021", category: "Reading" as const, sector: "Writing Workshop", phase: null, name: "Creative Writing Workshop", mentorsName: "Steven Hall", venue: "Birgunj, Province 2", description: "Teaching creative writing", startDate: new Date("2026-01-22"), duration: "3 days" },
-    { id: "TRN-2026-0022", category: "Activity-based Mathematics" as const, sector: "Book 3", phase: "Phase 1", name: "ABM Book 3 Phase 1 Fundamentals", mentorsName: "Laura Allen", venue: "Nepalgunj, Lumbini Province", description: "Fundamentals of Book 3", startDate: new Date("2026-03-02"), duration: "5 days" },
-    { id: "TRN-2026-0023", category: "Reading" as const, sector: "Phonics", phase: null, name: "Advanced Phonics Training", mentorsName: "Mark Young", venue: "Dang, Lumbini Province", description: "Advanced phonics instruction", startDate: new Date("2026-02-08"), duration: "3 days" },
-    { id: "TRN-2026-0024", category: "Pre-School" as const, sector: "Pre-School", phase: "Phase 1", name: "Play-based Learning Training", mentorsName: "Susan King", venue: "Chitwan, Bagmati Province", description: "Implementing play-based learning", startDate: new Date("2026-03-20"), duration: "4 days" },
-    { id: "TRN-2026-0025", category: "Activity-based Mathematics" as const, sector: "Book 1", phase: "Phase 1", name: "ABM Book 1 Introduction", mentorsName: "Edward Wright", venue: "Hetauda, Bagmati Province", description: "Introduction to ABM methods", startDate: new Date("2026-01-28"), duration: "3 days" },
-    { id: "TRN-2026-0026", category: "Reading" as const, sector: "Guided Reading", phase: null, name: "Guided Reading Groups", mentorsName: "Dorothy Scott", venue: "Lalitpur, Bagmati Province", description: "Managing guided reading groups", startDate: new Date("2026-02-18"), duration: "2 days" },
-    { id: "TRN-2026-0027", category: "Activity-based Mathematics" as const, sector: "Book 2", phase: "Phase 2", name: "ABM Book 2 Phase 2 Workshop", mentorsName: "George Hill", venue: "Pokhara, Gandaki Province", description: "Phase 2 workshop session", startDate: new Date("2026-03-06"), duration: "4 days" },
-    { id: "TRN-2026-0028", category: "Reading" as const, sector: "Book-based Activities", phase: null, name: "Drama in Education", mentorsName: "Carol Adams", venue: "Bhaktapur, Bagmati Province", description: "Using drama for literacy", startDate: new Date("2026-01-12"), duration: "3 days" },
-    { id: "TRN-2026-0029", category: "Pre-School" as const, sector: "Pre-School", phase: "Phase 2", name: "Early Literacy Development", mentorsName: "Brian Nelson", venue: "Kathmandu, Bagmati Province", description: "Developing early literacy skills", startDate: new Date("2026-02-22"), duration: "3 days" },
-    { id: "TRN-2026-0030", category: "Activity-based Mathematics" as const, sector: "Book 3", phase: "Phase 2", name: "ABM Book 3 Phase 2 Advanced", mentorsName: "Helen Baker", venue: "Biratnagar, Province 1", description: "Advanced Phase 2 techniques", startDate: new Date("2026-03-14"), duration: "5 days" },
+    {
+      id:          "TRN-2026-0001",
+      program:     "Activity-based Mathematics" as const,
+      module:      "Class 4",
+      unit:        "Book 1",
+      name:        "ABM Class 4 Book 1 Training",
+      mentorsName: "John Doe",
+      venue:       "Hetauda, Bagmati Province",
+      description: "Comprehensive training on Activity-based Mathematics Class 4 Book 1",
+      startDate:   new Date("2026-01-15"),
+      duration:    "3 days",
+    },
+    {
+      id:          "TRN-2026-0002",
+      program:     "Activity-based Mathematics" as const,
+      module:      "Class 4",
+      unit:        "Book 2",
+      name:        "ABM Class 4 Book 2 Training",
+      mentorsName: "Jane Doe",
+      venue:       "Kathmandu, Bagmati Province",
+      description: "Comprehensive training on Activity-based Mathematics Class 4 Book 2",
+      startDate:   new Date("2026-02-10"),
+      duration:    "3 days",
+    },
+    {
+      id:          "TRN-2026-0003",
+      program:     "Reading & Language" as const,
+      module:      "Phonics",
+      unit:        "Set 1",
+      name:        "R&L Phonics Set 1 Training",
+      mentorsName: "Mary Smith",
+      venue:       "Pokhara, Gandaki Province",
+      description: "Training on Reading & Language Phonics Set 1",
+      startDate:   new Date("2026-03-05"),
+      duration:    "2 days",
+    },
   ];
 
   for (const event of trainingEventData) {
@@ -142,8 +148,46 @@ const seed = async () => {
     ["Formative Assessment", "Feedback Methods"],
   ];
 
-  const trainingRecordData = [];
-  let recIdx = 1;
+  const trainingRecordData = [
+    {
+      id:      "REC-2026-0001",
+      teacherId: "TCH-2026-0002",
+      trainingEventId: "TRN-2026-0001",
+      rating:  4,
+    },
+    {
+      id:      "REC-2026-0002",
+      teacherId: "TCH-2026-0003",
+      trainingEventId: "TRN-2026-0001",
+      rating:  5,
+    },
+    {
+      id:      "REC-2026-0003",
+      teacherId: "TCH-2026-0004",
+      trainingEventId: "TRN-2026-0001",
+      rating:  3,
+    },
+    {
+      id:      "REC-2026-0004",
+      teacherId: "TCH-2026-0002",
+      trainingEventId: "TRN-2026-0002",
+      rating:  4,
+    },
+    {
+      id:      "REC-2026-0005",
+      teacherId: "TCH-2026-0005",
+      trainingEventId: "TRN-2026-0003",
+      rating:  5,
+    },
+    {
+      id:      "REC-2026-0006",
+      teacherId: "TCH-2026-0006",
+      trainingEventId: "TRN-2026-0003",
+      rating:  4,
+    },
+  ];
+
+  let recIdx = 7;
 
   for (let tIdx = 0; tIdx < teacherProfiles.length; tIdx++) {
     for (let eIdx = 0; eIdx < Math.min(3, trainingEventData.length); eIdx++) {
@@ -154,19 +198,17 @@ const seed = async () => {
         teacherId: teacher.id,
         trainingEventId: event.id,
         rating: ((tIdx + eIdx) % 5) + 1,
-        category: event.category,
-        sector: event.sector,
-        phase: event.phase,
       });
       recIdx++;
     }
   }
 
   for (const record of trainingRecordData) {
+    const event = trainingEventData.find(e => e.id === record.trainingEventId)!;
     const certificateNumber = await generateCertificateNumber(
-      record.category,
-      record.sector,
-      record.phase
+      event.program,
+      event.module,
+      event.unit
     );
 
     await db.insert(trainingRecords).values({

@@ -28,14 +28,14 @@ export const getTrainingEvents = async(
     request: FastifyRequest,
     reply: FastifyReply
 ) =>{
-    const { category, sector, phase } = request.query as {
-        category?: string,
-        sector?: string,
-        phase?: string
+    const { program, module, unit } = request.query as {
+        program?: string,
+        module?: string,
+        unit?: string
     };
 
     const { page, limit } = getPaginationParams(request.query as Record<string, unknown>);
-    const {data, total } = await trainingEventService.getAll(category, sector, phase, page, limit);
+    const {data, total } = await trainingEventService.getAll(program, module, unit, page, limit);
 
     return reply.send({
         success: true,
