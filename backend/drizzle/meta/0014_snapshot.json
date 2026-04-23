@@ -1,5 +1,5 @@
 {
-  "id": "0655896b-afea-4932-b3f0-57b7340333e4",
+  "id": "ce21610d-cda6-40fb-b44a-4e48078e1e01",
   "prevId": "97f4144a-0477-402f-af11-bd8b1446b00d",
   "version": "7",
   "dialect": "postgresql",
@@ -525,21 +525,21 @@
           "primaryKey": true,
           "notNull": true
         },
-        "category": {
-          "name": "category",
-          "type": "category",
+        "program": {
+          "name": "program",
+          "type": "program",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
         },
-        "sector": {
-          "name": "sector",
+        "module": {
+          "name": "module",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "phase": {
-          "name": "phase",
+        "unit": {
+          "name": "unit",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -600,7 +600,7 @@
           "name": "training_events_category_idx",
           "columns": [
             {
-              "expression": "category",
+              "expression": "program",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -615,7 +615,7 @@
           "name": "training_events_sector_idx",
           "columns": [
             {
-              "expression": "sector",
+              "expression": "module",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -630,7 +630,7 @@
           "name": "training_events_phase_idx",
           "columns": [
             {
-              "expression": "phase",
+              "expression": "unit",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -899,15 +899,6 @@
     }
   },
   "enums": {
-    "public.category": {
-      "name": "category",
-      "schema": "public",
-      "values": [
-        "Activity-based Mathematics",
-        "Pre-School",
-        "Reading"
-      ]
-    },
     "public.event_type": {
       "name": "event_type",
       "schema": "public",
@@ -944,6 +935,15 @@
         "Grade 8",
         "Grade 9",
         "Grade 10"
+      ]
+    },
+    "public.program": {
+      "name": "program",
+      "schema": "public",
+      "values": [
+        "Activity-based Mathematics",
+        "Reading & Language",
+        "Pre-School"
       ]
     }
   },

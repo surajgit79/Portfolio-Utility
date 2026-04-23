@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { date, z } from "zod";
 
 // Auth
 export const registerSchema = z.object({
@@ -56,63 +56,107 @@ export type BulkTeacherRow = z.infer<typeof bulkTeacherRowSchema>;
 
 
 // Training-Event
-const sectorPhaseMap:Record<string, {sectors: string[], hasPhase: boolean}> = {
-  "Activity-based Mathematics" : {
-    sectors: ["Book 1", "Book 2", "Book 3"],
-    hasPhase: true
+const programModuleMap: Record<string, {
+  modules: string[],
+  units?: Record<string, string[]>,
+  requiresUnit: boolean
+}> = {
+  "Activity-based Mathematics":{
+    modules: ["Class 4", "Class 5", "Class 6"],
+    units: {
+      "Class 4" : ["Book 1", "Book 2", "Book 3"],
+      "Class 5" : ["Book 1", "Book 2", "Book 3"],
+      "Class 6" : ["Book 1", "Book 2", "Book 3"],
+    },
+    requiresUnit: true,
   },
-  "Reading": {
-    sectors: ["Phonics", "Guided Reading", "Book-based Activities", "Writing workshop"],
-    hasPhase: false
+  "Reading & Language":{
+    modules: ["Phonics", "Writer Workshop", "Guided Reading", "Book-based Activity", "Coffee house"],
+    units: {
+      "Phonics": [
+        "Set 1", "Set 2", "Set 3", "Set 4", "Set 5", "Set 6", "Set 7",
+        "Chop and blend of Short Vowel Words (CVC word)",
+        "Chop and blend pf Long Vowel Words",
+        "Consonant Blending (Chop and Blend)",
+        "R-controlled Blending (Chop and Blend)"
+      ],
+    },
+    requiresUnit: false,
   },
-  "Pre-School": {
-    sectors: [],
-    hasPhase: true
+  "Pre-School Transformation":{
+    modules: [
+      "Circle Time",
+      "Setting and Development of Communication",
+      "Material Development",
+      "Story Telling Session",
+      "Music and Movement Session",
+      "Continuous Assessment System",
+      "Curriculum Development Training",
+    ],
+    requiresUnit: false,
   },
-}
-const baseTrainingEventSchema = z.object({
-  category:    z.enum(["Activity-based Mathematics", "Reading", "Pre-School"]),
-  sector:      z.string().min(2, "Sector is required"),
-  phase:       z.string().optional(),
-  name:        z.string().min(3, "Name must be at least 3 characters"),
+};
+
+export const baseTrainingEventSchema = z.object({
+  program: z.enum(["Activity-based Mathematics", "Reading & Language", "Pre-School Transformation"]),
+  module: z.string().min(2, "Module is required"),
+  unit: z.string().optional(),
+  name: z.string().min(2, "Name must be at least 2 characters"),
   mentorsName: z.string().optional(),
-  venue:       z.string().optional(),
+  venue: z.string().optional(),
   description: z.string().optional(),
-  startDate:   z.string().refine(
-                 (date) => !isNaN(Date.parse(date)),
-                 "Invalid date format"
-               ),
-  duration:    z.string().min(1, "Duration is required"),
+  startDate: z.string().refine((date) => !isNaN(Date.parse(date)),"Invalid date format"),
+  duration: z.string().min(1, "Duration is required"),
 });
 
-export const createTrainingEventSchema = baseTrainingEventSchema
-  .superRefine((data, ctx) => {
-    const rule = sectorPhaseMap[data.category];
+export const createTrainingEventSchema = z.object({
+  program: z.enum(["Activity-based Mathematics", "Reading & Language", "Pre-School Transformation"]),
+  module: z.string().min(2, "Module is required"),
+  unit: z.string().optional(),
+  name: z.string().min(2, "Name must be atleast 2 characters"),
+  mentorsName: z.string().optional(),
+  venue: z.string().optional(),
+  description: z.string().optional(),
+  startDate: z.string().refine((date) => !isNaN(Date.parse(date)), "Invalid date format"),
+  duration: z.string().min(1, "Duration is required"),
+}).superRefine((data, ctx) =>{
+  const rule = programModuleMap[data.program];
 
-    if (rule.sectors.length > 0 && !rule.sectors.includes(data.sector)) {
-      ctx.addIssue({
-        code:    z.ZodIssueCode.custom,
-        path:    ["sector"],
-        message: `Invalid sector for ${data.category}. Must be one of: ${rule.sectors.join(", ")}`,
-      });
-    }
+  if(!rule.modules.includes(data.module)){
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["module"],
+      message: `Invalid module for ${data.program}. Must be one of: ${rule.modules.join(", ")}`
+    });
+    return;
+  }
 
-    if (rule.hasPhase && !data.phase) {
-      ctx.addIssue({
-        code:    z.ZodIssueCode.custom,
-        path:    ["phase"],
-        message: `Phase is required for ${data.category}`,
-      });
-    }
+  if (rule.requiresUnit && !data.unit) {
+    ctx.addIssue({
+      code:    z.ZodIssueCode.custom,
+      path:    ["unit"],
+      message: `Unit is required for ${data.program}`,
+    });
+    return;
+  }
 
-    if (!rule.hasPhase && data.phase) {
-      ctx.addIssue({
+  if (rule.requiresUnit && !data.unit) {
+    ctx.addIssue({
+      code:    z.ZodIssueCode.custom,
+      path:    ["unit"],
+      message: `Unit is required for ${data.program}`,
+    });
+    return;
+  }
+
+  if (!rule.requiresUnit && !rule.units?.[data.module] && data.unit) {
+    ctx.addIssue({
         code:    z.ZodIssueCode.custom,
-        path:    ["phase"],
-        message: `Phase is not applicable for ${data.category}`,
+        path:    ["unit"],
+        message: `Unit is not applicable for ${data.module}`,
       });
-    }
-  });
+  }
+});
 
 export const updateTrainingEventSchema = baseTrainingEventSchema.partial();
 

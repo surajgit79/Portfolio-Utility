@@ -16,8 +16,20 @@ export const authService = {
         const id = await generateId("users");
 
         const user = await userRepository.create({id, email, password: hashed, role: "admin"});
-        const token = signToken({ userId: user.id, role: "admin"});
-        return {token}; 
+        const accessToken  = signAccessToken({
+            userId: user.id,
+            role:   user.role as "admin" | "teacher",
+        });
+
+        const refreshToken = signRefreshToken();
+
+        await refreshTokenRepository.create({
+        userId:    user.id,
+        token:     refreshToken,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        });
+
+        return { accessToken, refreshToken }; 
     },
 
     login: async (email: string, password:string)=>{

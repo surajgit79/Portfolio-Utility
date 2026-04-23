@@ -16,9 +16,9 @@ export const certificateService = {
             certificateNumber: record.certificateNumber,
             teacherName: teacher.name,
             trainingName: event.name,
-            category: event.category,
-            sector: event.sector,
-            phase: event.phase,
+            program: event.program,
+            module: event.module,
+            unit: event.unit,
             venue: event.venue,
             startDate: event.startDate,
             duration: event.duration,
@@ -39,16 +39,18 @@ export const certificateService = {
 
         return generateCertificatePDF({
             teacherName: teacher.name,
+            teacherId: teacher.id,
             trainingName: event.name,
-            category: event.category,
-            sector: event.sector,
-            phase: event.phase ?? null,
+            program: event.program,
+            module: event.module,
+            unit: event.unit ?? null,
             venue: event.venue ?? null,
             startDate: event.startDate,
             duration: event.duration,
             description: event.description,
             mentorName: event.mentorsName,
             certificateNumber: record.certificateNumber,
+            issuedAt: record.createdAt,
         });
     },
 
@@ -65,19 +67,21 @@ export const certificateService = {
 
       // Generate individual PDFs
       const pdfs = await Promise.all(
-        records.map(({ teacherName, certificateNumber }) =>
+        records.map(({ teacherName, teacherId, certificateNumber, createdAt }) =>
           generateCertificatePDF({
             teacherName,
+            teacherId,
             trainingName: event.name,
-            category: event.category,
-            sector: event.sector,
-            phase: event.phase ?? null,
+            program: event.program,
+            module: event.module,
+            unit: event.unit ?? null,
             venue: event.venue     ?? null,
             startDate: event.startDate,
             duration: event.duration,
             description: event.description ?? null,
             mentorName: event.mentorsName  ?? null,
             certificateNumber,
+            issuedAt: createdAt,
           })
         )
       );
