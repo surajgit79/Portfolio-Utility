@@ -84,7 +84,7 @@ app.get('/api/v1/health',async ()=>{
     return {status: "ok"};
 });
 
-app.register(authRoutes, { prefix: "/api/v1/auth" });
+// app.register(authRoutes, { prefix: "/api/v1/auth" });
 app.register(teacherRoutes, {prefix: "/api/v1/teachers"});
 app.register(trainingEventRoutes, {prefix: "/api/v1/training-events"});
 app.register(trainingRecordRoutes, {prefix: "/api/v1/training-records"});

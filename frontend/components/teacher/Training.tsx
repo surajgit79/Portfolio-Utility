@@ -41,7 +41,7 @@ export const TrainingBlock = ({ id, classNames }: Props) => {
                                 <div className='w-40'>
                                     <img src="https://plus.unsplash.com/premium_photo-1664474653221-8412b8dfca3e?q=80&w=1469&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Training Image"/>
                                 </div>
-                                <div className="flex flex-col">
+                                <div className="flex flex-col w-full">
                                     <div className="flex justify-between">
                                         <H3
                                             text={training.category}
@@ -65,7 +65,7 @@ export const TrainingBlock = ({ id, classNames }: Props) => {
                             </div>
                         ))
                     }
-                <Button className="bg-[#E9F4FC] text-md text-[#2D84C4] font-bold cursor-pointer">Show More &#9662;</Button>
+                {/* <Button className="bg-[#E9F4FC] text-md text-[#2D84C4] font-bold cursor-pointer">Show More &#9662;</Button> */}
                 </div>
             </div>
 

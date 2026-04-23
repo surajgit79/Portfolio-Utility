@@ -41,7 +41,7 @@ export const EventBlock = ({ id, classNames }: Props) => {
                         </div>
                     ))}
                 </div>
-                <Button className="bg-[#E9F4FC] text-md text-[#2D84C4] font-bold cursor-pointer">Show More &#9662;</Button>
+                {/* <Button className="bg-[#E9F4FC] text-md text-[#2D84C4] font-bold cursor-pointer">Show More &#9662;</Button> */}
             </div>
         </div>
     )
