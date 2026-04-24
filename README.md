@@ -8,13 +8,15 @@ A full-stack Teacher Portfolio Management System for managing teacher profiles, 
 
 - **Authentication** — JWT-based auth with role-based access control (Admin/Teacher)
 - **Teacher Management** — CRUD operations with profile images via Cloudinary
-- **Training Events** — Create and manage training programs with categories and phases
+- **Training Programs** — Create and manage training programs with modules and units
 - **Training Records** — Track teacher participation with auto-generated certificate numbers
 - **Career Records** — Manage professional history and achievements
 - **Event Records** — Track seminar, conference, podcast participation
 - **Certificate Generation** — PDF certificates with professional templates using Puppeteer
 - **Image Upload** — Cloudinary integration for image storage
-- **Search & Filter** — Search teachers and filter training events
+- **Search & Filter** — Search teachers and filter training programs
+- **Rate Limiting** — API protection with Fastify rate-limit
+- **CSV Bulk Import** — Bulk teacher registration via CSV upload
 
 ---
 
@@ -152,7 +154,7 @@ Frontend runs at `http://localhost:3001`
 
 ### Base URL
 ```
-http://localhost:3000/api
+http://localhost:3000/api/v1
 ```
 
 ### Authentication
@@ -219,6 +221,7 @@ Authorization: Bearer <token>
 | POST | `/teachers/register` | Create teacher | Admin |
 | PATCH | `/teachers/:id` | Update teacher | Admin |
 | DELETE | `/teachers/:id` | Delete teacher | Admin |
+| POST | `/teachers/bulk` | Bulk import via CSV | Admin |
 
 **Create Teacher (Multipart):**
 ```
@@ -234,26 +237,28 @@ Content-Type: multipart/form-data
 | contact | string (10 digits) | Yes |
 | gender | Male/Female/Others | Yes |
 | dob | ISO date string | Yes |
+| qualification | string | No |
+| teachingSince | number | No |
 | image | file | No |
 
 ---
 
-### Training Events
+### Training Programs
 
 | Method | Endpoint | Description | Auth |
 |--------|----------|-------------|------|
-| GET | `/training-events` | List all events | Protected |
-| GET | `/training-events/:id` | Get event by ID | Protected |
-| POST | `/training-events` | Create event | Admin |
-| PATCH | `/training-events/:id` | Update event | Admin |
-| DELETE | `/training-events/:id` | Delete event | Admin |
+| GET | `/training-events` | List all programs | Protected |
+| GET | `/training-events/:id` | Get program by ID | Protected |
+| POST | `/training-events` | Create program | Admin |
+| PATCH | `/training-events/:id` | Update program | Admin |
+| DELETE | `/training-events/:id` | Delete program | Admin |
 
-**Create Event Request:**
+**Create Program Request:**
 ```json
 {
-  "category": "Activity-based Mathematics",
-  "sector": "Book 1",
-  "phase": "Phase 1",
+  "program": "Activity-based Mathematics",
+  "module": "Book 1",
+  "unit": "Phase 1",
   "name": "Training on Basic Math Concepts",
   "mentorsName": "John Doe",
   "venue": "Conference Hall A",
@@ -263,7 +268,7 @@ Content-Type: multipart/form-data
 }
 ```
 
-**Categories:** `Activity-based Mathematics`, `Pre-School`, `Reading`
+**Programs:** `Activity-based Mathematics`, `Reading & Language`, `Pre-School Transformation`
 
 ---
 
@@ -365,7 +370,7 @@ Content-Type: multipart/form-data
 |--------|----------|-------------|------|
 | GET | `/certificates/:certificateNumber` | View certificate | Protected |
 | GET | `/certificates/:certificateNumber/download` | Download PDF | Protected |
-| GET | `/certificates/bulk/:eventId/download` | Bulk download PDFs for an event | Protected |
+| GET | `/certificates/bulk/:eventId/download` | Bulk download PDFs | Protected |
 
 ---
 
@@ -393,6 +398,7 @@ Content-Type: multipart/form-data
 | gender | ENUM | NOT NULL |
 | image_url | TEXT | |
 | dob | DATE | NOT NULL |
+| qualification | TEXT | |
 | teaching_since | INTEGER | |
 | created_at | TIMESTAMP | NOT NULL |
 | updated_at | TIMESTAMP | NOT NULL |
@@ -401,9 +407,9 @@ Content-Type: multipart/form-data
 | Column | Type | Constraints |
 |--------|------|-------------|
 | id | TEXT | PK |
-| category | ENUM | NOT NULL |
-| sector | TEXT | NOT NULL |
-| phase | TEXT | |
+| program | ENUM | NOT NULL |
+| module | TEXT | NOT NULL |
+| unit | TEXT | |
 | name | TEXT | NOT NULL |
 | mentors_name | TEXT | |
 | venue | TEXT | |
@@ -487,12 +493,12 @@ Format: `{PREFIX}-{YEAR}-{SEQUENCE}`
 **Examples:** `TCH-2026-0001`, `CAR-2026-0001`
 
 ### Certificate Numbers
-Format: `{CATEGORY}-{SECTOR}{PHASE?}-{YEAR}-{SEQUENCE}`
+Format: `{PROGRAM}-{MODULE}{UNIT?}-{YEAR}-{SEQUENCE}`
 
 **Examples:**
-- `ABM-B1P1-2026-0001` — Activity-based Math, Book 1, Phase 1
-- `RED-GR-2026-0001` — Reading, Guided Reading
-- `PRE-BBA-2026-0001` — Pre-School, Book-based Activities
+- `ABM-B1P1-2026-0001` — Activity-based Mathematics, Book 1, Phase 1
+- `RL-GR-2026-0001` — Reading & Language, Guided Reading
+- `PRE-BBA-2026-0001` — Pre-School Transformation, Book-based Activities
 
 ---
 
@@ -589,34 +595,31 @@ docs(readme): update API docs
 
 ### Planned Features
 
-- **Teacher Tenure Tracking** — Add functionality to track and manage teacher tenure periods, including appointment dates, contract periods, and tenure history
-- **Dashboard Analytics** — Visual statistics and insights for admin and teachers
+- **Teacher Tenure Tracking** — Track and manage teacher tenure periods
+- **Dashboard Analytics** — Visual statistics and insights
 - **Bulk Export** — Export teacher data and records to CSV/Excel
-- **Email Notifications** — Automated email alerts for training events and certificate generation
-- **Multi-year Archive** — Archive and retrieve historical training records by academic year
-- **Role-based Views** — Customized dashboards for different user roles
-- **Progress Reports** — Generate comprehensive teacher performance reports
+- **Email Notifications** — Automated email alerts
+- **Multi-year Archive** — Archive historical training records
+- **Role-based Views** — Customized dashboards
+- **Progress Reports** — Generate performance reports
 
 ---
 
 ## Troubleshooting
 
 ### Database Tables Not Found
-If tables are missing after setup:
 ```bash
 npm run db:push
 ```
 
 ### Migration Conflicts
-If you encounter schema conflicts:
 ```bash
 npm run db:generate
-# Then manually apply SQL or use:
 npm run db:push --force
 ```
 
 ### Cloudinary Upload Fails
-Ensure your Cloudinary credentials are correct and the cloud name matches exactly.
+Ensure your Cloudinary credentials are correct.
 
 ---
 
