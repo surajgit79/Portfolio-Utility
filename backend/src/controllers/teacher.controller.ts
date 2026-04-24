@@ -82,8 +82,40 @@ export const updateTeacher = async (
 ) => {
   const { id } = request.params as { id: string };
 
-  const body = updateTeacherSchema.safeParse(request.body);
+  let fields: Record<string, string> = {};
+  let imageUrl: string | undefined;
 
+  if (request.isMultipart()) {
+    const parts = request.parts();
+
+    for await (const part of parts) {
+      if (part.type === "file" && part.filename) {
+        const os       = await import("os");
+        const path     = await import("path");
+        const fs       = await import("fs");
+        const { pipeline } = await import("stream/promises");
+        const { uploadImage } = await import("../utils/cloudinaryImageHandler");
+
+        const tempPath = path.join(
+          os.tmpdir(),
+          `${Date.now()}-${part.filename}`
+        );
+
+        await pipeline(part.file, fs.createWriteStream(tempPath));
+        imageUrl = await uploadImage(tempPath, "portfolio-utility/teachers");
+        fs.unlinkSync(tempPath);
+      } else if (part.type === "field") {
+        fields[part.fieldname] = part.value as string;
+      } else {
+        // fields[part.fieldname] = part.value as string;
+        console.log("You are stucked");
+      }
+    }
+  } else {
+    fields = request.body as Record<string, string>;
+  }
+
+  const body = updateTeacherSchema.safeParse(fields);
   if (!body.success) {
     return reply.status(400).send({
       success: false,
@@ -92,8 +124,7 @@ export const updateTeacher = async (
     });
   }
 
-  const teacher = await teacherService.update(id, body.data, request);
-
+  const teacher = await teacherService.update(id, body.data, imageUrl);
   return reply.send({
     success: true,
     message: "Teacher updated successfully",

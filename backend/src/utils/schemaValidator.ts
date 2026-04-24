@@ -38,7 +38,21 @@ export const registerTeacherSchema = z.object({
 
 export type RegisterTeacherRequest = z.infer<typeof registerTeacherSchema>;
 
-export const updateTeacherSchema = registerTeacherSchema.partial();
+export const updateTeacherSchema = z.object({
+  name:          z.string().min(2).optional(),
+  address:       z.string().min(5).optional(),
+  contact:       z.string().regex(/^[0-9]{10}$/).optional(),
+  email:         z.string().email().optional(),
+  gender:        z.enum(["Male", "Female", "Others"]).optional(),
+  dob:           z.string().refine(
+                   (date) => !isNaN(Date.parse(date)),
+                   "Invalid date format"
+                 ).optional(),
+  teachingSince: z.number().int()
+                  .min(1950)
+                  .max(new Date().getFullYear())
+                  .optional(),
+});
 export type UpdateTeacherRequest = z.infer<typeof updateTeacherSchema>;
 
 export const bulkTeacherRowSchema = z.object({

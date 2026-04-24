@@ -196,19 +196,11 @@ export const teacherService = {
       gender:   "Male" | "Female" | "Others";
       dob:      string;
     }>,
-    request: FastifyRequest
+    imageUrl?: string,
   ) => {
     const existing = await teacherRepository.findById(id);
-
     if (!existing) {
       throw new AppError(404, ErrorCode.NOT_FOUND, "Teacher not found");
-    }
-
-    let imageUrl: string | undefined;
-
-    if (request.isMultipart()) {
-      const url = await uploadSingleImage(request, "portfolio-utility/teachers");
-      if (url) imageUrl = url;
     }
 
     const { dob, ...rest } = data;
