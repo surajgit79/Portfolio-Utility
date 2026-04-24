@@ -21,6 +21,7 @@ export default function Teacher() {
     return (
         <div>
             <BriefBlock
+                id={params.id}
                 name={teacher?.name ?? 'NO NAME'}
                 imageUrl={
                     teacher?.imageUrl ??

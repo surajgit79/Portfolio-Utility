@@ -165,11 +165,51 @@ export async function searchTeachers(search: string) {
     )
 }
 
-export async function updateTeacher(id: string, data: any) {
-    return apiFetch(`/teachers/${id}`, {
-        method: 'PUT',
+export const getTeacherById = async (id: string) => {
+    const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL
+
+    const res = await fetch(`${baseUrl}/teachers/${id}`, {
+        credentials: "include",
+    })
+
+    if (!res.ok) {
+        throw new Error("Failed to fetch teacher")
+    }
+
+    return res.json()
+}
+
+type UpdateTeacherPayload = {
+    name: string
+    email: string
+    contact: string
+    address: string
+    gender: string
+    imageUrl: string
+    dob: string
+    qualification: string
+    teachingSince: number
+}
+
+export const updateTeacher = async (
+    id: string,
+    data: UpdateTeacherPayload
+) => {
+    const res = await fetch(`/api/teachers/${id}`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+        },
         body: JSON.stringify(data),
     })
+
+    const responseText = await res.text()
+
+    if (!res.ok) {
+        throw new Error(`Update failed: ${res.status} ${responseText}`)
+    }
+
+    return responseText ? JSON.parse(responseText) : null
 }
 
 export async function deleteTeacher(id: string) {
@@ -206,73 +246,6 @@ export async function uploadTeachersCSV(file: File) {
     return json
 }
 
-// export async function searchTeachers(search: string): Promise<Teachers[]> {
-//     try {
-//         const res = await fetch(`${BASE_URL}/teachers?search=${search}`)
-//         if (!res.ok) {
-//             throw new Error('Unable to fetch data')
-//         }
-//         const json: TeachersResponse = await res.json()
-//         return json.data
-//     } catch (error) {
-//         console.error('Fetch teachers failed: ', error)
-//         throw error
-//     }
-// }
-
-// export async function getTeachers(page: number): Promise<Teachers[]> {
-
-//     try {
-//         const res = await fetch(`${BASE_URL}/teachers?page=${page}`)
-
-//         if (!res.ok) {
-//             throw new Error(`Unable to fetch data: ${res.status}`)
-//         }
-
-//         const json: TeachersResponse = await res.json()
-//         return json.data
-//     } catch (error) {
-//         console.error('Fetch teachers failed:', error)
-//         throw error
-//     }
-// }
-
-// export async function getTeacher(id: string): Promise<Teachers> {
-//     const res = await fetch(`${BASE_URL}/teachers/${id}`)
-
-//     if (!res.ok)
-//         throw new Error('Unable to fetch data')
-
-//     const json = await res.json()
-//     console.log(json.data)
-
-//     return json.data
-// }
-
-// export async function bulkUploadTeachers(file: File) {
-
-//     const formData = new FormData()
-//     formData.append('file', file)
-
-//     try {
-//         const res = await fetch(`${BASE_URL}/teachers/bulk`, {
-//             method: 'POST',
-//             body: formData,
-//         })
-
-//         const data = await res.json()
-
-//         if (!res.ok) {
-//             throw new Error(data?.message || 'Upload failed')
-//         }
-
-//         return data
-//     } catch (err) {
-//         console.error('Upload failed:', err)
-//         throw err
-//     }
-// }
-
 export type TrainingResponse = {
     success: boolean,
     message: string,
@@ -287,7 +260,7 @@ export const dummyTrainingAttended: TrainingAttended[] = [
         certificateNumber: 'CERT-ABL-2023-001',
         venue: 'Kathmandu Training Center',
         category: 'Pedagogy',
-        description: 'Focused on activity-based teaching methods for primary students.',
+        description: 'DUMMY: Focused on activity-based teaching methods for primary students.',
         duration: '3 days',
         mentorsName: 'Dr. Ramesh Sharma',
         phase: 'Phase 1',
@@ -306,7 +279,7 @@ export const dummyTrainingAttended: TrainingAttended[] = [
         certificateNumber: 'CERT-DTT-2023-002',
         venue: 'Pokhara Learning Hub',
         category: 'Technology',
-        description: 'Introduction to digital platforms and smart teaching tools.',
+        description: 'DUMMY: Introduction to digital platforms and smart teaching tools.',
         duration: '5 days',
         mentorsName: 'Anita Karki',
         phase: 'Phase 2',
@@ -325,7 +298,7 @@ export const dummyTrainingAttended: TrainingAttended[] = [
         certificateNumber: 'CERT-IET-2022-045',
         venue: 'Biratnagar Education Office',
         category: 'Special Education',
-        description: 'Training on inclusive classrooms and supporting diverse learners.',
+        description: 'DUMMY: Training on inclusive classrooms and supporting diverse learners.',
         duration: '2 days',
         mentorsName: 'Sita Gurung',
         phase: 'Phase 1',
@@ -344,7 +317,7 @@ export const dummyTrainingAttended: TrainingAttended[] = [
         certificateNumber: 'CERT-CDW-2024-010',
         venue: 'Lalitpur Resource Center',
         category: 'Curriculum',
-        description: 'Advanced curriculum planning and assessment strategies.',
+        description: 'DUMMY: Advanced curriculum planning and assessment strategies.',
         duration: '4 days',
         mentorsName: 'Prof. Kiran Adhikari',
         phase: 'Phase 3',
@@ -360,19 +333,22 @@ export const dummyTrainingAttended: TrainingAttended[] = [
 
 export async function getTrainings(id: string): Promise<TrainingAttended[]> {
     try {
-        const res = await fetch(`${BASE_URL}/training-records/teacher/${id}`)
+        const res = await fetch(`/api/training-records/teacher/${id}`, {
+            method: 'GET',
+            credentials: 'include',
+            cache: 'no-store',
+        })
 
-        if (!res.ok) {
-            // throw new Error(`HTTP error: ${res.status}`)
+        const json: TrainingResponse = await res.json()
+
+        if (!res.ok || !json.success) {
+            console.warn('Training fetch failed:', json?.message)
             return dummyTrainingAttended
         }
 
-        const json: TrainingResponse = await res.json()
-        console.log(json.data)
         return json.data
-
     } catch (error) {
-        console.error("Failed to fetch careers:", error)
+        console.error('Failed to fetch trainings:', error)
         return dummyTrainingAttended
     }
 }

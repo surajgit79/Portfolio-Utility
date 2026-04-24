@@ -1,8 +1,11 @@
 import { MiniDetail } from "./MiniDetail"
 import { H2, PG } from "../defaults/Typography"
 import { getDOB } from "@/utils/GetDate"
+import { useRouter } from "next/navigation"
+import { PencilSquareIcon } from '@heroicons/react/24/outline'
 
 type Props = {
+    id: string,
     name: string,
     imageUrl: string,
     address: string,
@@ -12,7 +15,8 @@ type Props = {
     dob: string,
 }
 
-export const BriefBlock = ({ name, imageUrl, address, gender, school, qualification, dob }: Props) => {
+export const BriefBlock = ({ id, name, imageUrl, address, gender, school, qualification, dob }: Props) => {
+    const router = useRouter()
     return (
         <div className="w-full flex justify-center border my-5 py-10 rounded-lg bg-white">
             <div className="flex justify-around lg:gap-12 md:gap-4 sm:gap-4 gap-4 items-center md:flex-row flex-col">
@@ -23,17 +27,25 @@ export const BriefBlock = ({ name, imageUrl, address, gender, school, qualificat
                 />
 
                 <div className="grid gap-4">
-                    <div>
+                    <div className="relative">
                         <H2
                             text={name}
                             classNames="!m-0 !text-center md:!text-left"
                         />
+                        <PencilSquareIcon
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                router.push(`/teachers/${id}/edit`)
+                            }}
+                            className='text-[#2D84C4] absolute right-0 top-0 h-6 w-6 cursor-pointer'
+                        />
+
                         <PG
                             text={qualification}
                             classNames="!m-0 text-center md:!text-left"
                         />
                     </div>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 gap-x-10 md:px-0">
                         <MiniDetail category="school" detail={school} />
                         <MiniDetail category="location" detail={address} />
