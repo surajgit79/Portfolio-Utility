@@ -82,6 +82,8 @@ export const teacherRepository = {
         updatedAt:           teachers.updatedAt,
         currentOrganization: careerRecords.organization,
         program:             trainingEvents.program,
+        module:              trainingEvents.module,
+        unit:                trainingEvents.unit,
       })
       .from(teachers)
       .leftJoin(
