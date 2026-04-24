@@ -65,7 +65,7 @@ export const teacherRepository = {
 
   findAll: async (search?: string, page = 1, limit = 10): Promise<Teacher[]> => {
     const offset = (page -1)*limit;
-    const query = db
+    let query = db
       .select({
         id:                  teachers.id,
         userId:              teachers.userId,
@@ -80,34 +80,44 @@ export const teacherRepository = {
         teachingSince:       teachers.teachingSince,
         createdAt:           teachers.createdAt,
         updatedAt:           teachers.updatedAt,
-        currentOrganization: careerRecords.organization,
-        program:             trainingEvents.program,
-        module:              trainingEvents.module,
-        unit:                trainingEvents.unit,
       })
-      .from(teachers)
-      .leftJoin(
-        careerRecords,
-        and(
-          eq(careerRecords.teacherId, teachers.id),
-          eq(careerRecords.stillWorking, 1)
-        )
-      ).leftJoin(
-        trainingRecords,
-        eq(trainingRecords.teacherId, teachers.id)
-      )
-      .leftJoin(
-        trainingEvents,
-        eq(trainingEvents.id, trainingRecords.trainingEventId)
-      ).limit(limit)
-      .offset(offset);
+      .from(teachers);
 
     if (search) {
-      return query.where(ilike(teachers.name, `%${search}%`));
+      return query.where(ilike(teachers.name, `%${search}%`)).limit(limit).offset(offset);
     }
 
-    return query;
+    return query.limit(limit).offset(offset);
 
+  },
+
+  findCareerAndTraining: async (teacherId: string) => {
+    const career = await db
+      .select({
+        organization: careerRecords.organization,
+      })
+      .from(careerRecords)
+      .where(and(
+        eq(careerRecords.teacherId, teacherId),
+        eq(careerRecords.stillWorking, 1)
+      ))
+      .limit(1);
+
+    const training = await db
+      .select({
+        program: trainingEvents.program,
+        module: trainingEvents.module,
+        unit:   trainingEvents.unit,
+      })
+      .from(trainingRecords)
+      .leftJoin(trainingEvents, eq(trainingEvents.id, trainingRecords.trainingEventId))
+      .where(eq(trainingRecords.teacherId, teacherId))
+      .limit(1);
+
+    return {
+      currentOrganization: career[0]?.organization,
+      ...training[0],
+    };
   },
 
   create: async (data: NewTeacher): Promise<Teacher> => {
