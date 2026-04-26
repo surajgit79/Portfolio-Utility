@@ -65,3 +65,35 @@ export async function DELETE(_: Request, context: RouteContext) {
         )
     }
 }
+
+export async function PATCH(
+    req: Request,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    const { id } = await params
+    const body = await req.json()
+
+    const token = (await cookies()).get("accessToken")?.value
+
+    if (!token) {
+        return NextResponse.json(
+            { message: "Unauthorized" },
+            { status: 401 }
+        )
+    }
+
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL
+
+    const res = await fetch(`${backendUrl}/teachers/${id}`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(body),
+    })
+
+    const data = await res.json()
+
+    return NextResponse.json(data, { status: res.status })
+}

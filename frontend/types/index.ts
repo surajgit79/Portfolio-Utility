@@ -26,6 +26,7 @@ export type TrainingAttended = {
     category: string,
     description: string,
     duration: string,
+    program: string,
     mentorsName: string,
     phase: string,
     sector: string,
