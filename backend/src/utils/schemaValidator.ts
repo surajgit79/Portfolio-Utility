@@ -34,6 +34,7 @@ export const registerTeacherSchema = z.object({
               "Invalid date format"
             ),
   teachingSince: z.number().int().min(1950, "Invalid year").max(new Date().getFullYear(), "Year cannot be in the future").optional(),
+  imageUrl:      z.string().url("Invalid image URL").optional(),
 });
 
 export type RegisterTeacherRequest = z.infer<typeof registerTeacherSchema>;

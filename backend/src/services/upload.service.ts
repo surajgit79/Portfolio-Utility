@@ -4,7 +4,6 @@ import { AppError, ErrorCode } from "../utils/errorHandler";
 import { hashedPassword } from "../utils/passwordHasherVerifier";
 import { generateCertificateNumber, generateId } from "../utils/idGenerator";
 import { uploadRepository } from "../repositories/upload.repository";
-import { buffer } from "node:stream/consumers";
 import { teacherRepository } from "../repositories/teacher.repository";
 import { careerRecordRepository } from "../repositories/careerRecord.repository";
 import { eventRecordRepository } from "../repositories/eventRecord.repository";
@@ -14,47 +13,59 @@ import { db } from "../db/client";
 import { trainingRecords } from "../db/schema";
 
 export const uploadService = {
-    processTeacherCSV: async(buffer:Buffer) =>{
+    processTeacherCSV: async (buffer: Buffer) => {
         const rows = parseCSV(buffer);
 
-        const { valid, missing } = validateCSVHeaders(rows, ["name", "email", "dob", "gender", "contact", "address"]);
-        if(!valid){
-            throw new AppError(400, ErrorCode.VALIDATION_ERROR, `Missing required columns: ${missing.join(", ")}`);
+        const { valid, missing } = validateCSVHeaders(rows, ["Full Name","Email Address","Date of Birth","Gender","Contact Number","Address",]);
+        if (!valid) {
+            throw new AppError(400,ErrorCode.VALIDATION_ERROR,`Missing required columns: ${missing.join(", ")}`);
         }
 
         const created = [];
         const skipped = [];
-        const errors = [];
+        const errors  = [];
 
-        for(const row of rows){
-            try {
-                const existingUser = await userRepository.findByEmail(row.email);
-                if(existingUser){
-                    skipped.push({ email: row.email, reason: `Email already exists` });
-                    continue;
-                }
+        for (const row of rows) {
+        try {
+            const existingUser = await userRepository.findByEmail(row["Email Address"]);
 
-                const hashed = await hashedPassword("Teacher1234"); // Default password for now
-                const userId = await generateId("users");
-                const teacherId = await generateId("teachers");
-
-                const teacher = await uploadRepository.createTeacherWithUser({
-                    userId, teacherId, 
-                    email: row.email,
-                    hashedPassword: hashed,
-                    name: row.name,
-                    address: row.address,
-                    contact: row.contact,
-                    gender: row.gender as "Male" | "Female" | "Others",
-                    dob: new Date(row.dob),
-                    teachingSince: row.teachingSince? Number(row.teachingSince) : null,
-                });
-
-                created.push({ email: row.email, teacherId: row.teacherId});
-            } catch (error) {
-                errors.push({ email: row.email, reason: "Failed to create teacher"});
+            if (existingUser) {
+            skipped.push({
+                email:  row["Email Address"],
+                reason: "Email already exists",
+            });
+            continue;
             }
+
+            const hashed    = await hashedPassword("Teacher1234");
+            const userId    = await generateId("users");
+            const teacherId = await generateId("teachers");
+
+            const teacher = await uploadRepository.createTeacherWithUser({
+                userId,
+                teacherId,
+                email:          row["Email Address"],
+                hashedPassword: hashed,
+                name:           row["Full Name"],
+                address:        row["Address"],
+                contact:        row["Contact Number"],
+                gender:         row["Gender"] as "Male" | "Female" | "Others",
+                dob:            new Date(row["Date of Birth"]),
+                teachingSince:  row["Teaching Since (in A.D)"]
+                                    ? Number(row["Teaching Since (in A.D)"])
+                                    : null,
+                imageUrl:       row["Upload Your Passport Sized Photo"] ?? null,
+            });
+
+            created.push({ email: row["Email Address"], teacherId: teacher.id });
+        } catch (error) {
+            errors.push({
+            email:  row["Email Address"],
+            reason: "Failed to create teacher",
+            });
         }
+        }
+
         return { created, skipped, errors };
     },
 
