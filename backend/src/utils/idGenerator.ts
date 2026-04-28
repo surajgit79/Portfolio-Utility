@@ -46,8 +46,9 @@ export const generateCertificateNumber = async(
 
 
     const programCode = program === "Activity-based Mathematics" ? "ABM"
-        : program === "Reading & Learning"? "R&L"
-        : "PST";
+        : program === "Reading & Language"? "R&L"
+        : program === "Pre-School Transformation"? "PST" 
+        : "UNKNOWN";
 
     const moduleCode =
         module === "Class 4"    ? "C4" :
