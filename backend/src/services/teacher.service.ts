@@ -28,6 +28,7 @@ export const teacherService = {
       dob:      string;
       teachingSince?: number;
       qualification?: string;
+      imageUrl?: string;
     },
     request: FastifyRequest
   ) => {
@@ -66,7 +67,7 @@ export const teacherService = {
         dob:      data.dob,
         teachingSince: data.teachingSince,
         qualification: data.qualification,
-        imageUrl,
+        imageUrl: imageUrl || data.imageUrl,
       }).returning();
       return teacher;
     });

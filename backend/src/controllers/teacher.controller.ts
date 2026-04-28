@@ -4,24 +4,64 @@ import { registerTeacherSchema, updateTeacherSchema } from "../utils/schemaValid
 import { calculatePagination, getPaginationParams } from "../utils/paginationHandler";
 import { AppError, ErrorCode } from "../utils/errorHandler";
 
-export const registerTeacher = async(
+export const registerTeacher = async (
   request: FastifyRequest,
-  reply: FastifyReply
-)=>{
-  const body = registerTeacherSchema.safeParse(request.body);
-  if(!body.success){
+  reply:   FastifyReply
+) => {
+  let fields: Record<string, string> = {};
+  let imageUrl: string | undefined;
+
+  if (request.isMultipart()) {
+    const parts = request.parts();
+
+    for await (const part of parts) {
+      if (part.type === "file" && part.filename) {
+        const os      = await import("os");
+        const path    = await import("path");
+        const fs      = await import("fs");
+        const { pipeline } = await import("stream/promises");
+        const { uploadImage } = await import("../utils/cloudinaryImageHandler");
+
+        const tempPath = path.join(
+          os.tmpdir(),
+          `${Date.now()}-${part.filename}`
+        );
+
+        await pipeline(part.file, fs.createWriteStream(tempPath));
+        imageUrl = await uploadImage(tempPath, "portfolio-utility/teachers");
+        fs.unlinkSync(tempPath);
+      } else if (part.type === "field") {
+        fields[part.fieldname] = part.value as string;
+      }
+    }
+  } else {
+    fields = request.body as Record<string, string>;
+    // If imageUrl provided as text in JSON body
+    if (fields.imageUrl) imageUrl = fields.imageUrl;
+  }
+
+  const body = registerTeacherSchema.safeParse({
+    ...fields,
+    teachingSince: fields.teachingSince ? Number(fields.teachingSince) : undefined,
+  });
+
+  if (!body.success) {
     return reply.status(400).send({
       success: false,
       message: "Validation failed",
-      error: body.error.flatten().fieldErrors,
+      errors:  body.error.flatten().fieldErrors,
     });
   }
 
-  const teacher = await teacherService.register(body.data,request);
-  return reply.send({
+  const teacher = await teacherService.register(
+    { ...body.data, imageUrl },
+    request
+  );
+
+  return reply.status(201).send({
     success: true,
     message: "Teacher registered successfully",
-    data: teacher,
+    data:    teacher,
   });
 };
 

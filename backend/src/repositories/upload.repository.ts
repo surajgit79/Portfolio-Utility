@@ -13,6 +13,7 @@ export const uploadRepository = {
     gender:        "Male" | "Female" | "Others";
     dob:           Date;
     teachingSince?: number | null;
+    imageUrl?: string | null;
   }) => {
     return db.transaction(async (tx) => {
       await tx.insert(users).values({
@@ -30,8 +31,9 @@ export const uploadRepository = {
         contact:       data.contact,
         email:         data.email,
         gender:        data.gender,
-        dob:           data.dob,
+        dob:           data.dob.toISOString().split('T')[0],
         teachingSince: data.teachingSince !== undefined ? data.teachingSince : null,
+        imageUrl:      data.imageUrl?? null,
       }).returning();
 
       return teacher;
