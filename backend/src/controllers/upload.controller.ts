@@ -1,27 +1,73 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { AppError, ErrorCode } from "../utils/errorHandler";
 import { parseCSV, validateCSVHeaders } from "../utils/csvParser";
+import { uploadService } from "../services/upload.service";
+
+const getCSVBuffer = async (request: FastifyRequest): Promise<Buffer>=>{
+    const data = await request.file();
+    if(!data){
+        throw new AppError(400, ErrorCode.VALIDATION_ERROR, "No file uploaded");
+    }
+
+    if(!data.mimetype.includes("csv") && !data.mimetype.includes("text")){
+        throw new AppError(400, ErrorCode.VALIDATION_ERROR, "File must be a csv");
+    }
+
+    return data.toBuffer();
+}
 
 export const uploadTeacherCSV = async(
     request: FastifyRequest,
     reply: FastifyReply
 )=>{
-    const data = await request.file();
-    if(!data){
-        throw new AppError(404, ErrorCode.NOT_FOUND, "No file uploaded");
-    }
+    const buffer = await getCSVBuffer(request);
+    const result = await uploadService.processTeacherCSV(buffer);
 
-    if(data.mimetype !== "text/csv"){
-        throw new AppError(400, ErrorCode.VALIDATION_ERROR, "File must be a CSV");
-    }
+    return reply.status(201).send({
+        success: true,
+        message: `${result.created.length} teachers created, ${result.skipped.length} skipped, ${result.errors.length} errors`,
+        data: result,
+    });    
+};
 
-    const buffer = await data.toBuffer();
-    const rows = parseCSV(buffer);
+export const uploadCareerRecordsCSV = async (
+    request: FastifyRequest,
+    reply:   FastifyReply
+) => {
+    const buffer = await getCSVBuffer(request);
+    const result = await uploadService.processCareerRecordsCSV(buffer);
 
-    const { valid, missing } = validateCSVHeaders(rows, ["name", "email", "dob", "gender", "contact", "address", "teachingSince"]);
-    if(!valid){
-        throw new AppError(400, ErrorCode.VALIDATION_ERROR, `Missing required columns: ${missing.join(", ")}`);
-    }
+    return reply.status(201).send({
+        success: true,
+        message: `${result.created.length} career records created, ${result.skipped.length} skipped, ${result.errors.length} errors`,
+        data:    result,
+    });
+};
 
-    const created = [];
-}
+export const uploadEventRecordsCSV = async (
+    request: FastifyRequest,
+    reply:   FastifyReply
+) => {
+    const buffer = await getCSVBuffer(request);
+    const result = await uploadService.processEventRecordsCSV(buffer);
+
+    return reply.status(201).send({
+        success: true,
+        message: `${result.created.length} event records created, ${result.skipped.length} skipped, ${result.errors.length} errors`,
+        data:    result,
+    });
+};
+
+export const uploadTrainingRecordsCSV = async (
+    request: FastifyRequest,
+    reply:   FastifyReply
+) => {
+    const buffer = await getCSVBuffer(request);
+    const result = await uploadService.processTrainingRecordsCSV(buffer);
+
+    return reply.status(201).send({
+        success: true,
+        message: `${result.created.length} training records created, ${result.skipped.length} skipped, ${result.errors.length} errors`,
+        data:    result,
+    });
+};
