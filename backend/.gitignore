@@ -3,3 +3,4 @@ dist/
 .env
 *.log
 BACKEND_DOCS.md
+SKILLS_MODULE.md
