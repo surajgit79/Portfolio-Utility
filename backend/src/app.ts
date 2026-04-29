@@ -14,6 +14,7 @@ import { certificateRoutes } from "./routes/certificate.route";
 import { requestLogger, responseLogger } from "./middlewares/requestLogger";
 import { uploadRoutes } from "./routes/upload.route";
 import { skillRoutes } from "./routes/skill.route";
+import { teacherSkillRoutes } from "./routes/teacherSkill.route";
 
 const app = Fastify({
     logger: {
@@ -95,5 +96,6 @@ app.register(eventRecordRoutes, {prefix: "/api/v1/event-records"});
 app.register(certificateRoutes, {prefix: "/api/v1/certificates"});
 app.register(uploadRoutes, {prefix: "/api/v1/upload"});
 app.register(skillRoutes, {prefix: "/api/v1/skills"});
+app.register(teacherSkillRoutes, {prefix: "/api/v1/teacher-skills"});
 
 export default app;

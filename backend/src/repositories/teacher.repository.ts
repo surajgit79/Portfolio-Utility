@@ -24,6 +24,7 @@ export const teacherRepository = {
         createdAt:           teachers.createdAt,
         updatedAt:           teachers.updatedAt,
         currentOrganization: careerRecords.organization,
+        currentGrade: careerRecords.grade,
         program:             trainingEvents.program,
         module:              trainingEvents.module,
         unit:                trainingEvents.unit,

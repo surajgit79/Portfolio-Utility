@@ -12,6 +12,7 @@ import { trainingRecordRepository } from "../repositories/trainingRecord.reposit
 import { db } from "../db/client";
 import { trainingRecords } from "../db/schema";
 import { skillRepository } from "../repositories/skill.repository";
+import { teacherSkillRepository } from "../repositories/teacherSkill.repository";
 
 export const uploadService = {
     processTeacherCSV: async (buffer: Buffer) => {
@@ -252,5 +253,55 @@ export const uploadService = {
             }
         }
         return { created, skipped, errors };
-    }
+    },
+
+    processTeacherSkillsCSV: async (buffer: Buffer) => {
+        const rows = parseCSV(buffer);
+
+        const { valid, missing } = validateCSVHeaders(rows, ["email", "skillId",]);
+        if (!valid) {
+            throw new AppError(400, ErrorCode.VALIDATION_ERROR,`Missing required columns: ${missing.join(", ")}`);
+        }
+
+        const created = [];
+        const skipped = [];
+        const errors  = [];
+
+        for (const row of rows) {
+            try {
+                const teacher = await teacherRepository.findByEmail(row.email);
+                if (!teacher) {
+                    skipped.push({ email: row.email, reason: "Teacher not found" });
+                    continue;
+                }
+
+                const skill = await skillRepository.findById(row.skillId);
+                if (!skill) {
+                    skipped.push({ email: row.email, skillId: row.skillId, reason: "Skill not found" });
+                    continue;
+                }
+
+                const duplicate = await teacherSkillRepository.findDuplicate(teacher.id,row.skillId);
+                if (duplicate) {
+                    skipped.push({ email: row.email, skillId: row.skillId, reason: "Already assigned" });
+                    continue;
+                }
+
+                const id = await generateId("teacher_skills");
+
+                await teacherSkillRepository.create({
+                    id,
+                    teacherId: teacher.id,
+                    skillId: row.skillId,
+                    trainingRecordId: row.trainingRecordId ?? null,
+                });
+
+                created.push({ email: row.email, skillId: row.skillId });
+            } catch (error) {
+                errors.push({ email: row.email, reason: "Failed to assign skill" });
+            }
+        }
+
+        return { created, skipped, errors };
+    },
 };
