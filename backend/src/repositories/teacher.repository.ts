@@ -8,7 +8,7 @@ type NewTeacher = typeof teachers.$inferInsert;
 
 export const teacherRepository = {
   findById: async (id: string) => {
-    const [teacher] = await db
+    const results = await db
       .select({
         id:                  teachers.id,
         userId:              teachers.userId,
@@ -24,7 +24,7 @@ export const teacherRepository = {
         createdAt:           teachers.createdAt,
         updatedAt:           teachers.updatedAt,
         currentOrganization: careerRecords.organization,
-        currentGrade: careerRecords.grade,
+        currentGrade:        careerRecords.grade,
         program:             trainingEvents.program,
         module:              trainingEvents.module,
         unit:                trainingEvents.unit,
@@ -45,7 +45,15 @@ export const teacherRepository = {
         eq(trainingEvents.id, trainingRecords.trainingEventId)
       );
 
-    return teacher;
+    if (!results.length) return null;
+
+    const teacher = results[0];
+    const uniqueGrades = [...new Set(results.map(r => r.currentGrade).filter(Boolean))];
+
+    return {
+      ...teacher,
+      currentGrades: uniqueGrades,
+    };
   },
 
   findByUserId: async (userId: string): Promise<Teacher | undefined> => {
@@ -105,13 +113,13 @@ export const teacherRepository = {
     const career = await db
       .select({
         organization: careerRecords.organization,
+        grade: careerRecords.grade,
       })
       .from(careerRecords)
       .where(and(
         eq(careerRecords.teacherId, teacherId),
         eq(careerRecords.stillWorking, 1)
-      ))
-      .limit(1);
+      ));
 
     const training = await db
       .select({
@@ -126,6 +134,7 @@ export const teacherRepository = {
 
     return {
       currentOrganization: career[0]?.organization,
+      currentGrades: career.map(c => c.grade).filter(Boolean),
       ...training[0],
     };
   },
