@@ -12,6 +12,7 @@ import { trainingEventRepository } from "../repositories/trainingEvent.repositor
 import { trainingRecordRepository } from "../repositories/trainingRecord.repository";
 import { db } from "../db/client";
 import { trainingRecords } from "../db/schema";
+import { skillRepository } from "../repositories/skill.repository";
 
 export const uploadService = {
     processTeacherCSV: async(buffer:Buffer) =>{
@@ -205,4 +206,40 @@ export const uploadService = {
 
         return { created, skipped, errors };
     },
+
+    processSkillsCSV: async(buffer: Buffer) =>{
+        const rows = parseCSV(buffer);
+        const {valid, missing} = validateCSVHeaders(rows, ["name", "program", "module"]);
+        if(!valid){
+            throw new AppError(400, ErrorCode.VALIDATION_ERROR, `Missing required columns: ${missing.join(", ")}`);
+        }
+
+        const created = [];
+        const skipped = [];
+        const errors = [];
+
+        for(const row of rows){
+            try {
+                const duplicate = await skillRepository.findDuplicate(row.name, row.program, row.module, row.unit || undefined);
+                if(duplicate){
+                    skipped.push({name: row.name, reason: "Skill already exists"});
+                    continue;
+                }
+
+                const id = await generateId("skills");
+                const skill = await skillRepository.create({
+                    id,
+                    name: row.name,
+                    program: row.program as any,
+                    module: row.module,
+                    unit: row.unit || null,
+                });
+
+                created.push({ name: skill.name, id: skill.id});
+            } catch (error) {
+                errors.push({name: row.name, reason: "failed to create skill"});
+            }
+        }
+        return { created, skipped, errors };
+    }
 };

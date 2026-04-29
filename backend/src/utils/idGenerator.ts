@@ -1,7 +1,7 @@
 import { db } from "../db/client";
 import { sql } from "drizzle-orm";
 
-type TableName = | "users" | "teachers" | "training_events" | "training_records" | "career_records" | "event_records";
+type TableName = | "users" | "teachers" | "training_events" | "training_records" | "career_records" | "event_records" | "skills" | "teacher_skills";
 
 const prefixMap: Record <TableName, string>= {
     users: "USR",
@@ -10,6 +10,8 @@ const prefixMap: Record <TableName, string>= {
     training_records: "TRC",
     career_records: "CAR",
     event_records: "EVT",
+    skills: "SKL",
+    teacher_skills: "TSK"
 };
 
 export const generateId = async (table: TableName) : Promise<string>=>{

@@ -255,3 +255,21 @@ export const logoutSchema = z.object({
 
 export type RefreshTokenRequest = z.infer<typeof refreshTokenSchema>
 export type LogoutRequest = z.infer<typeof logoutSchema>
+
+
+// Skills
+export const createSkillSchema = z.object({
+  name:    z.string().min(2, "Skill name is required"),
+  program: z.enum(["Activity-based Mathematics", "Reading & Language", "Pre-School Transformation",]),
+  module:  z.string().min(2, "Module is required"),
+  unit:    z.string().optional(),
+});
+
+export const createTeacherSkillSchema = z.object({
+  teacherId:        z.string().min(1, "Teacher ID is required"),
+  skillIds:         z.array(z.string().min(1)).min(1, "At least one skill required"),
+  trainingRecordId: z.string().optional(),
+});
+
+export type CreateSkillRequest        = z.infer<typeof createSkillSchema>;
+export type CreateTeacherSkillRequest = z.infer<typeof createTeacherSkillSchema>;
