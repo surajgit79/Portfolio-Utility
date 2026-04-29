@@ -188,7 +188,7 @@ export default function Dashboard() {
 
                 <TableBody>
                     {teachers.length > 0 ? (
-                        teachers.map(({ id, name, address, tenure }: Teachers, index) => (
+                        teachers.map(({ id, name, address, tenure, program }: Teachers, index) => (
                             <TableRow
                                 key={id}
                                 onClick={() => router.push(`/teachers/${id}`)}
@@ -197,7 +197,7 @@ export default function Dashboard() {
                             >
                                 <TableCell>{name}</TableCell>
                                 <TableCell>N/A</TableCell>
-                                <TableCell>N/A</TableCell>
+                                <TableCell>{program}</TableCell>
                                 <TableCell>
                                     {tenure < 1 ? "<1 year" : tenure === 1 ? "1 year" : `${tenure} years`}
                                 </TableCell>

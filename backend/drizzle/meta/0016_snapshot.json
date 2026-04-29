@@ -1,6 +1,6 @@
 {
-  "id": "d891be97-9249-4506-b6d1-2bdf4df4e7da",
-  "prevId": "97f4144a-0477-402f-af11-bd8b1446b00d",
+  "id": "ede3de99-c0a1-417f-9a56-3d90b4ed621c",
+  "prevId": "ef474ce7-c0a9-4472-9cea-716374c29476",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -346,6 +346,239 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.skills": {
+      "name": "skills",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "program": {
+          "name": "program",
+          "type": "program",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "module": {
+          "name": "module",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "unit": {
+          "name": "unit",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "skills_program_idx": {
+          "name": "skills_program_idx",
+          "columns": [
+            {
+              "expression": "program",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "skills_module_idx": {
+          "name": "skills_module_idx",
+          "columns": [
+            {
+              "expression": "module",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "skills_unit_idx": {
+          "name": "skills_unit_idx",
+          "columns": [
+            {
+              "expression": "unit",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.teacher_skills": {
+      "name": "teacher_skills",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "skill_id": {
+          "name": "skill_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "teacher_id": {
+          "name": "teacher_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "training_record_id": {
+          "name": "training_record_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "teacher_id_idx": {
+          "name": "teacher_id_idx",
+          "columns": [
+            {
+              "expression": "teacher_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "skill_id_idx": {
+          "name": "skill_id_idx",
+          "columns": [
+            {
+              "expression": "skill_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "teacher_skills_unique": {
+          "name": "teacher_skills_unique",
+          "columns": [
+            {
+              "expression": "teacher_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "skill_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "teacher_skills_skill_id_skills_id_fk": {
+          "name": "teacher_skills_skill_id_skills_id_fk",
+          "tableFrom": "teacher_skills",
+          "tableTo": "skills",
+          "columnsFrom": [
+            "skill_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "teacher_skills_teacher_id_teachers_id_fk": {
+          "name": "teacher_skills_teacher_id_teachers_id_fk",
+          "tableFrom": "teacher_skills",
+          "tableTo": "teachers",
+          "columnsFrom": [
+            "teacher_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "teacher_skills_training_record_id_training_records_id_fk": {
+          "name": "teacher_skills_training_record_id_training_records_id_fk",
+          "tableFrom": "teacher_skills",
+          "tableTo": "training_records",
+          "columnsFrom": [
+            "training_record_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.teachers": {
       "name": "teachers",
       "schema": "",
@@ -525,21 +758,21 @@
           "primaryKey": true,
           "notNull": true
         },
-        "category": {
-          "name": "category",
-          "type": "category",
+        "program": {
+          "name": "program",
+          "type": "program",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
         },
-        "sector": {
-          "name": "sector",
+        "module": {
+          "name": "module",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "phase": {
-          "name": "phase",
+        "unit": {
+          "name": "unit",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -600,7 +833,7 @@
           "name": "training_events_category_idx",
           "columns": [
             {
-              "expression": "category",
+              "expression": "program",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -615,7 +848,7 @@
           "name": "training_events_sector_idx",
           "columns": [
             {
-              "expression": "sector",
+              "expression": "module",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -630,7 +863,7 @@
           "name": "training_events_phase_idx",
           "columns": [
             {
-              "expression": "phase",
+              "expression": "unit",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -899,15 +1132,6 @@
     }
   },
   "enums": {
-    "public.category": {
-      "name": "category",
-      "schema": "public",
-      "values": [
-        "Activity-based Mathematics",
-        "Pre-School",
-        "Reading"
-      ]
-    },
     "public.event_type": {
       "name": "event_type",
       "schema": "public",
@@ -944,6 +1168,15 @@
         "Grade 8",
         "Grade 9",
         "Grade 10"
+      ]
+    },
+    "public.program": {
+      "name": "program",
+      "schema": "public",
+      "values": [
+        "Activity-based Mathematics",
+        "Reading & Language",
+        "Pre-School Transformation"
       ]
     }
   },
