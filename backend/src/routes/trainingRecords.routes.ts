@@ -6,7 +6,7 @@ import { requireRole } from "../middlewares/requireRole";
 export async function trainingRecordRoutes(app: FastifyInstance) {
     // Protected — both roles
     app.get("/teacher/:teacherId", {
-        preHandler: [requireAuth],
+        // preHandler: [requireAuth],
         handler: getTrainingRecordsByTeacher,
     });
 
