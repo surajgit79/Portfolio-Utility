@@ -155,7 +155,11 @@ export const updateTeacher = async (
     fields = request.body as Record<string, string>;
   }
 
-  const body = updateTeacherSchema.safeParse(fields);
+  const body = updateTeacherSchema.safeParse({
+    ...fields,
+    teachingSince: fields.teachingSince ? Number(fields.teachingSince) : undefined,
+  });
+
   if (!body.success) {
     return reply.status(400).send({
       success: false,

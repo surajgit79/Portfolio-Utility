@@ -196,7 +196,7 @@ export const teacherService = {
     };
   },
 
-  update: async (
+update: async (
     id: string,
     data: Partial<{
       name:     string;
@@ -205,6 +205,8 @@ export const teacherService = {
       email:    string;
       gender:   "Male" | "Female" | "Others";
       dob:      string;
+      qualification: string;
+      teachingSince: number;
     }>,
     imageUrl?: string,
   ) => {
@@ -213,12 +215,13 @@ export const teacherService = {
       throw new AppError(404, ErrorCode.NOT_FOUND, "Teacher not found");
     }
 
-    const { dob, ...rest } = data;
+    const { dob, teachingSince, ...rest } = data;
 
     return teacherRepository.update(id, {
       ...rest,
-      ...(imageUrl && { imageUrl }),
       ...(dob && { dob: dob }),
+      ...(teachingSince !== undefined && { teachingSince }),
+      ...(imageUrl && { imageUrl }),
       updatedAt: new Date(),
     });
   },
