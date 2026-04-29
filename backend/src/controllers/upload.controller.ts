@@ -67,7 +67,36 @@ export const uploadTrainingRecordsCSV = async (
 
     return reply.status(201).send({
         success: true,
-        message: `${result.created.length} training records created, ${result.skipped.length} skipped, ${result.errors.length} errors`,
+message: `${result.created.length} training records created, ${result.skipped.length} skipped, ${result.errors.length} errors`,
         data:    result,
     });
+};
+
+export const uploadSkillsCSV = async(
+    request: FastifyRequest,
+    reply: FastifyReply
+) => {
+    const buffer = await getCSVBuffer(request);
+    const result = await uploadService.processSkillsCSV(buffer);
+
+    return reply.status(201).send({
+        success: true,
+        message: `${result.created.length} skills created, ${result.skipped.length} skipped, ${result.errors.length} errors`,
+        data: result,
+    });
+};
+
+export const uploadSkillsCSV = async(
+    request: FastifyRequest,
+    reply: FastifyReply
+) => {
+    const buffer = await getCSVBuffer(request);
+    const result = await uploadService.processSkillsCSV(buffer);
+
+    return reply.status(201).send({
+        success: true,
+        message: `${result.created.length} skills created, ${result.skipped.length} skipped, ${result.errors.length} errors`,
+        data: result,
+    });
+>>>>>>> feat/skills-module
 };
