@@ -190,7 +190,7 @@ export default function Dashboard() {
                     {teachers.length > 0 ? (
                         teachers.map(({ id, name, address, tenure, program }: Teachers, index) => (
                             <TableRow
-                                key={id}
+                                key={index}
                                 onClick={() => router.push(`/teachers/${id}`)}
                                 className={`cursor-pointer ${index % 2 === 0 ? "bg-white" : "bg-gray-50"
                                     } hover:bg-blue-50 transition-colors`}
