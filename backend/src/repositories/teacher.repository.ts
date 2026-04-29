@@ -81,8 +81,17 @@ export const teacherRepository = {
         teachingSince:       teachers.teachingSince,
         createdAt:           teachers.createdAt,
         updatedAt:           teachers.updatedAt,
+        currentOrganization: careerRecords.organization,
+        currentGrade:        careerRecords.grade,
       })
-      .from(teachers);
+      .from(teachers)
+      .leftJoin(
+        careerRecords,
+        and(
+          eq(careerRecords.teacherId, teachers.id),
+          eq(careerRecords.stillWorking, 1)
+        )
+      );
 
     if (search) {
       return query.where(ilike(teachers.name, `%${search}%`)).limit(limit).offset(offset);
