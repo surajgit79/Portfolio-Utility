@@ -33,7 +33,7 @@ export const registerTeacherSchema = z.object({
               (date) => !isNaN(Date.parse(date)),
               "Invalid date format"
             ),
-  teachingSince: z.number().int().min(1950, "Invalid year").max(new Date().getFullYear(), "Year cannot be in the future").optional(),
+  teachingSince: z.coerce.number().int().min(1950, "Invalid year").max(new Date().getFullYear(), "Year cannot be in the future").optional(),
   imageUrl:      z.string().url("Invalid image URL").optional(),
 });
 
@@ -49,10 +49,10 @@ export const updateTeacherSchema = z.object({
                    (date) => !isNaN(Date.parse(date)),
                    "Invalid date format"
                  ).optional(),
-  teachingSince: z.number().int()
-                  .min(1950)
-                  .max(new Date().getFullYear())
-                  .optional(),
+teachingSince: z.coerce.number().int()
+                   .min(1950)
+                   .max(new Date().getFullYear())
+                   .optional(),
 });
 export type UpdateTeacherRequest = z.infer<typeof updateTeacherSchema>;
 
