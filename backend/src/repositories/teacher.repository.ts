@@ -74,6 +74,27 @@ export const teacherRepository = {
 
   findAll: async (search?: string, page = 1, limit = 10): Promise<Teacher[]> => {
     const offset = (page -1)*limit;
+    
+    const currentCareerSubquery = db
+      .select({
+        teacherId: careerRecords.teacherId,
+        organization: careerRecords.organization,
+      })
+      .from(careerRecords)
+      .where(eq(careerRecords.stillWorking, 1))
+      .limit(1)
+      .as("current_career");
+
+    const currentGradesSubquery = db
+      .select({
+        teacherId: careerRecords.teacherId,
+        sql: sql`array_agg(${careerRecords.grade})`.as("grades"),
+      })
+      .from(careerRecords)
+      .where(eq(careerRecords.stillWorking, 1))
+      .groupBy(careerRecords.teacherId)
+      .as("current_grades");
+
     let query = db
       .select({
         id:                  teachers.id,
@@ -89,17 +110,12 @@ export const teacherRepository = {
         teachingSince:       teachers.teachingSince,
         createdAt:           teachers.createdAt,
         updatedAt:           teachers.updatedAt,
-        currentOrganization: careerRecords.organization,
-        currentGrades:       careerRecords.grade,
+        currentOrganization: currentCareerSubquery.organization,
+        currentGrades:      currentGradesSubquery.sql,
       })
       .from(teachers)
-      .leftJoin(
-        careerRecords,
-        and(
-          eq(careerRecords.teacherId, teachers.id),
-          eq(careerRecords.stillWorking, 1)
-        )
-      );
+      .leftJoin(currentCareerSubquery, eq(currentCareerSubquery.teacherId, teachers.id))
+      .leftJoin(currentGradesSubquery, eq(currentGradesSubquery.teacherId, teachers.id));
 
     if (search) {
       return query.where(ilike(teachers.name, `%${search}%`)).limit(limit).offset(offset);
