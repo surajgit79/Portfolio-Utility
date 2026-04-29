@@ -9,6 +9,8 @@ import {
   trainingRecords,
   careerRecords,
   eventRecords,
+  skills,
+  teacherSkills,
 } from "./schema";
 import { hashedPassword } from "../utils/passwordHasherVerifier";
 import { generateCertificateNumber } from "../utils/idGenerator";
@@ -241,11 +243,13 @@ const seed = async () => {
   let carIdx = 1;
 
   for (let tIdx = 0; tIdx < teacherProfiles.length; tIdx++) {
-    const numCareers = 1 + (tIdx % 3);
+    const numCareers = 1 + (tIdx % 4);
+    const numCurrentRoles = tIdx % 3 === 0 ? 2 : 1;
+    
     for (let cIdx = 0; cIdx < numCareers; cIdx++) {
       const teacher = teacherProfiles[tIdx];
       const startYear = 2010 + tIdx + cIdx;
-      const stillWorking = cIdx === numCareers - 1 ? 1 : 0;
+      const stillWorking = cIdx >= numCareers - numCurrentRoles ? 1 : 0;
       careerRecordData.push({
         id: `CAR-2026-${String(carIdx).padStart(4, "0")}`,
         teacherId: teacher.id,
@@ -307,6 +311,43 @@ const seed = async () => {
     await db.insert(eventRecords).values(record);
   }
 
+  console.log("🌱 Seeding skills...");
+
+  const skillData = [
+    { id: "SKL-2026-0001", name: "ABM Class 4 Book 1", program: "Activity-based Mathematics" as const, module: "Class 4", unit: "Book 1" },
+    { id: "SKL-2026-0002", name: "ABM Class 4 Book 2", program: "Activity-based Mathematics" as const, module: "Class 4", unit: "Book 2" },
+    { id: "SKL-2026-0003", name: "ABM Class 5 Book 1", program: "Activity-based Mathematics" as const, module: "Class 5", unit: "Book 1" },
+    { id: "SKL-2026-0004", name: "ABM Class 6 Book 1", program: "Activity-based Mathematics" as const, module: "Class 6", unit: "Book 1" },
+    { id: "SKL-2026-0005", name: "R&L Phonics Set 1", program: "Reading & Language" as const, module: "Phonics", unit: "Set 1" },
+    { id: "SKL-2026-0006", name: "R&L Writer Workshop", program: "Reading & Language" as const, module: "Writer Workshop", unit: null },
+    { id: "SKL-2026-0007", name: "R&L Guided Reading", program: "Reading & Language" as const, module: "Guided Reading", unit: null },
+    { id: "SKL-2026-0008", name: "R&L Book-based Activity", program: "Reading & Language" as const, module: "Book-based Activity", unit: null },
+    { id: "SKL-2026-0009", name: "Science Class 4", program: "Science" as const, module: "Class 4", unit: null },
+    { id: "SKL-2026-0010", name: "Science Class 5", program: "Science" as const, module: "Class 5", unit: null },
+  ];
+
+  await db.insert(skills).values(skillData).onConflictDoNothing();
+
+  console.log("🌱 Seeding teacher skills...");
+
+  const teacherSkillData = [];
+  let tskIdx = 1;
+
+  for (let tIdx = 0; tIdx < teacherProfiles.length; tIdx++) {
+    const numSkills = 2 + (tIdx % 3);
+    for (let sIdx = 0; sIdx < numSkills; sIdx++) {
+      teacherSkillData.push({
+        id: `TSK-2026-${String(tskIdx).padStart(4, "0")}`,
+        teacherId: teacherProfiles[tIdx].id,
+        skillId: skillData[(tIdx + sIdx) % skillData.length].id,
+        trainingRecordId: null,
+      });
+      tskIdx++;
+    }
+  }
+
+  await db.insert(teacherSkills).values(teacherSkillData);
+
   console.log("✅ Seeding complete!");
   console.log(`   - Users: ${1 + teacherProfiles.length}`);
   console.log(`   - Teachers: ${teacherProfiles.length}`);
@@ -314,6 +355,8 @@ const seed = async () => {
   console.log(`   - Training Records: ${trainingRecordData.length}`);
   console.log(`   - Career Records: ${careerRecordData.length}`);
   console.log(`   - Event Records: ${eventRecordData.length}`);
+  console.log(`   - Skills: ${skillData.length}`);
+  console.log(`   - Teacher Skills: ${teacherSkillData.length}`);
 
   await pool.end();
   process.exit(0);
