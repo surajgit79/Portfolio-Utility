@@ -24,7 +24,7 @@ export const teacherRepository = {
         createdAt:           teachers.createdAt,
         updatedAt:           teachers.updatedAt,
         currentOrganization: careerRecords.organization,
-        currentGrade:        careerRecords.grade,
+        currentGrades:       careerRecords.grade,
         program:             trainingEvents.program,
         module:              trainingEvents.module,
         unit:                trainingEvents.unit,
@@ -48,7 +48,7 @@ export const teacherRepository = {
     if (!results.length) return null;
 
     const teacher = results[0];
-    const uniqueGrades = [...new Set(results.map(r => r.currentGrade).filter(Boolean))];
+    const uniqueGrades = [...new Set(results.map(r => r.currentGrades).filter(Boolean))];
 
     return {
       ...teacher,
@@ -90,7 +90,7 @@ export const teacherRepository = {
         createdAt:           teachers.createdAt,
         updatedAt:           teachers.updatedAt,
         currentOrganization: careerRecords.organization,
-        currentGrade:        careerRecords.grade,
+        currentGrades:       careerRecords.grade,
       })
       .from(teachers)
       .leftJoin(

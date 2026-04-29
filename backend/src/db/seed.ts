@@ -322,8 +322,6 @@ const seed = async () => {
     { id: "SKL-2026-0006", name: "R&L Writer Workshop", program: "Reading & Language" as const, module: "Writer Workshop", unit: null },
     { id: "SKL-2026-0007", name: "R&L Guided Reading", program: "Reading & Language" as const, module: "Guided Reading", unit: null },
     { id: "SKL-2026-0008", name: "R&L Book-based Activity", program: "Reading & Language" as const, module: "Book-based Activity", unit: null },
-    { id: "SKL-2026-0009", name: "Science Class 4", program: "Science" as const, module: "Class 4", unit: null },
-    { id: "SKL-2026-0010", name: "Science Class 5", program: "Science" as const, module: "Class 5", unit: null },
   ];
 
   await db.insert(skills).values(skillData).onConflictDoNothing();
