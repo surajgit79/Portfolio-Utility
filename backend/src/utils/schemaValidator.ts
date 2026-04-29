@@ -33,12 +33,12 @@ export const registerTeacherSchema = z.object({
               (date) => !isNaN(Date.parse(date)),
               "Invalid date format"
             ),
+  qualification: z.string().optional(),
   teachingSince: z.coerce.number().int().min(1950, "Invalid year").max(new Date().getFullYear(), "Year cannot be in the future").optional(),
   imageUrl:      z.string().url("Invalid image URL").optional(),
 });
 
 export type RegisterTeacherRequest = z.infer<typeof registerTeacherSchema>;
-
 export const updateTeacherSchema = z.object({
   name:          z.string().min(2).optional(),
   address:       z.string().min(5).optional(),
@@ -49,7 +49,8 @@ export const updateTeacherSchema = z.object({
                    (date) => !isNaN(Date.parse(date)),
                    "Invalid date format"
                  ).optional(),
-teachingSince: z.coerce.number().int()
+  qualification: z.string().optional(),
+  teachingSince: z.coerce.number().int()
                    .min(1950)
                    .max(new Date().getFullYear())
                    .optional(),
@@ -226,7 +227,6 @@ export type UpdateCareerRecordRequest = z.infer<typeof updateCareerRecordSchema>
 
 
 // event 
-
 export const createEventRecordSchema = z.object({
   teacherId:   z.string().min(1, "Teacher ID is required"),
   eventType:   z.enum(["Seminar", "Conference", "Panel Discussion", "Podcast"]),
