@@ -28,7 +28,10 @@ export const registerTeacher = async (
         );
 
         await pipeline(part.file, fs.createWriteStream(tempPath));
-        imageUrl = await uploadImage(tempPath, "portfolio-utility/teachers");
+        const stats = fs.statSync(tempPath);
+        if(stats.size > 0){
+          imageUrl = await uploadImage(tempPath, "portfolio-utility/teachers");
+        }
         fs.unlinkSync(tempPath);
       } else if (part.type === "field") {
         fields[part.fieldname] = part.value as string;
@@ -36,8 +39,8 @@ export const registerTeacher = async (
     }
   } else {
     fields = request.body as Record<string, string>;
-    // If imageUrl provided as text in JSON body
-    if (fields.imageUrl) imageUrl = fields.imageUrl;
+    imageUrl = fields.imageUrl;
+    delete fields.imageUrl;
   }
 
   const body = registerTeacherSchema.safeParse({
