@@ -7,16 +7,18 @@ A full-stack Teacher Portfolio Management System for managing teacher profiles, 
 ## Features
 
 - **Authentication** — JWT-based auth with role-based access control (Admin/Teacher)
-- **Teacher Management** — CRUD operations with profile images via Cloudinary
+- **Teacher Management** — CRUD operations with profile images via Cloudinary, qualification, current grades
+- **Skills Management** — Create and manage skills with program, module, and unit
+- **Teacher Skills** — Assign skills to teachers with training record linkage
 - **Training Programs** — Create and manage training programs with modules and units
 - **Training Records** — Track teacher participation with auto-generated certificate numbers
-- **Career Records** — Manage professional history and achievements
+- **Career Records** — Manage professional history, current organization, and multiple grades
 - **Event Records** — Track seminar, conference, podcast participation
 - **Certificate Generation** — PDF certificates with professional templates using Puppeteer
 - **Image Upload** — Cloudinary integration for image storage
 - **Search & Filter** — Search teachers and filter training programs
 - **Rate Limiting** — API protection with Fastify rate-limit
-- **CSV Bulk Import** — Bulk teacher registration via CSV upload
+- **CSV Bulk Import** — Bulk teacher, training records, career records, and skills import
 
 ---
 
@@ -216,8 +218,8 @@ Authorization: Bearer <token>
 
 | Method | Endpoint | Description | Auth |
 |--------|----------|-------------|------|
-| GET | `/teachers` | List all teachers | Public |
-| GET | `/teachers/:id` | Get teacher by ID | Public |
+| GET | `/teachers` | List all teachers (with current grades) | Public |
+| GET | `/teachers/:id` | Get teacher by ID (with current grades) | Public |
 | POST | `/teachers/register` | Create teacher | Admin |
 | PATCH | `/teachers/:id` | Update teacher | Admin |
 | DELETE | `/teachers/:id` | Delete teacher | Admin |
@@ -240,6 +242,48 @@ Content-Type: multipart/form-data
 | qualification | string | No |
 | teachingSince | number | No |
 | image | file | No |
+
+---
+
+### Skills
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/skills` | List all skills | Public |
+| GET | `/skills/:id` | Get skill by ID | Public |
+| POST | `/skills` | Create skill | Admin |
+| PATCH | `/skills/:id` | Update skill | Admin |
+| DELETE | `/skills/:id` | Delete skill | Admin |
+
+**Create Skill Request:**
+```json
+{
+  "name": "ABM Class 4 Book 1",
+  "program": "Activity-based Mathematics",
+  "module": "Class 4",
+  "unit": "Book 1"
+}
+```
+
+---
+
+### Teacher Skills
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/teacher-skills/:teacherId` | Get skills for a teacher | Protected |
+| GET | `/teacher-skills/:teacherId/percentage` | Get skill completion percentage | Protected |
+| POST | `/teacher-skills/` | Assign skills to teacher | Admin |
+| DELETE | `/teacher-skills/:teacherId/:skillId` | Remove skill from teacher | Admin |
+
+**Assign Skills Request:**
+```json
+{
+  "teacherId": "TCH-2026-0001",
+  "skillIds": ["SKL-2026-0001", "SKL-2026-0002"],
+  "trainingRecordId": "REC-2026-0001"
+}
+```
 
 ---
 
@@ -465,6 +509,25 @@ Content-Type: multipart/form-data
 | created_at | TIMESTAMP | NOT NULL |
 | updated_at | TIMESTAMP | NOT NULL |
 
+### Skills
+| Column | Type | Constraints |
+|--------|------|-------------|
+| id | TEXT | PK |
+| name | TEXT | NOT NULL |
+| program | ENUM | NOT NULL |
+| module | TEXT | NOT NULL |
+| unit | TEXT | |
+| created_at | TIMESTAMP | NOT NULL |
+
+### Teacher Skills
+| Column | Type | Constraints |
+|--------|------|-------------|
+| id | TEXT | PK |
+| teacher_id | TEXT | FK → teachers |
+| skill_id | TEXT | FK → skills |
+| training_record_id | TEXT | FK → training_records |
+| created_at | TIMESTAMP | NOT NULL |
+
 ### Refresh Tokens
 | Column | Type | Constraints |
 |--------|------|-------------|
@@ -489,6 +552,8 @@ Format: `{PREFIX}-{YEAR}-{SEQUENCE}`
 | training_records | REC |
 | career_records | CAR |
 | event_records | EVT |
+| skills | SKL |
+| teacher_skills | TSK |
 
 **Examples:** `TCH-2026-0001`, `CAR-2026-0001`
 
@@ -543,10 +608,16 @@ npm run lint         # Run ESLint
 
 ---
 
-## Backend TODO
+## Release Notes
 
-- [ ] Recheck the `teachingSince` mod
-- [ ] Tenure calculation
+### v1.1.0
+- Added Skills Management module
+- Added Teacher Skills assignment
+- Added support for multiple current grades per teacher
+- Fixed duplicate teacher data in GET /teachers
+- Updated tenure calculation
+- Added CSV bulk import for skills
+- Updated seeder with skills and teacher_skills
 
 ---
 
