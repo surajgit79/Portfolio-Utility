@@ -136,7 +136,7 @@ export const teacherSkills = pgTable("teacher_skills", {
     id: text("id").primaryKey(),
     skillId: text("skill_id").notNull().references(()=>skills.id, {onDelete: "cascade"}),
     teacherId: text("teacher_id").notNull().references(()=>teachers.id, { onDelete: "cascade"}),
-    trainingRecordId: text("training_record_id").notNull().references(()=> trainingRecords.id, { onDelete: "set null"}),
+    trainingRecordId: text("training_record_id").references(()=> trainingRecords.id, { onDelete: "set null"}),
     createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (table) => ({
     teacherIdIdx: index("teacher_id_idx").on(table.teacherId),

@@ -149,9 +149,6 @@ export const updateTeacher = async (
         fs.unlinkSync(tempPath);
       } else if (part.type === "field") {
         fields[part.fieldname] = part.value as string;
-      } else {
-        // fields[part.fieldname] = part.value as string;
-        console.log("You are stucked");
       }
     }
   } else {
