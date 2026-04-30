@@ -20,7 +20,7 @@ export const Footer = () => {
                  <div>
                     <h1 className="text-lg font-bold my-2.5">Location</h1>
                     <p>C29J+PW9, Prajatantrik Marg, Hetauda 44107</p>
-                    <Button className="bg-white text-black p-2 mt-2 rounded-none" >
+                    <Button className="bg-white text-black p-2 mt-2 border rounded-none hover:bg-[#2D84C4] hover:text-white " >
                         <a href="https://maps.app.goo.gl/37cR2EEAEckVDEKUA" target="blank">Open in Google Maps</a>
                     </Button>
                  </div>

@@ -125,13 +125,13 @@ export default function Dashboard() {
                                     variant="outline"
                                     className="bg-[#2D84C4] text-white cursor-pointer"
                                 >
-                                    Add +
+                                    Options +
                                 </Button>
                             </DropdownMenuTrigger>
 
                             <DropdownMenuContent>
                                 <DropdownMenuGroup>
-                                    <DropdownMenuLabel>Teacher</DropdownMenuLabel>
+                                    <DropdownMenuLabel>Add Teacher</DropdownMenuLabel>
                                     <DropdownMenuItem
                                         className="cursor-pointer"
                                         onClick={() => router.push("/teachers/add")}
@@ -148,7 +148,7 @@ export default function Dashboard() {
                                 </DropdownMenuGroup>
 
                                 <DropdownMenuGroup>
-                                    <DropdownMenuLabel>Trainings</DropdownMenuLabel>
+                                    <DropdownMenuLabel>Add Training</DropdownMenuLabel>
                                     <DropdownMenuItem 
                                         className="cursor-pointer"
                                         onClick={() => router.push("/trainings/add/bulk")}
