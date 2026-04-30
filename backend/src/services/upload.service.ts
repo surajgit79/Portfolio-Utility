@@ -13,6 +13,7 @@ import { db } from "../db/client";
 import { trainingRecords } from "../db/schema";
 import { skillRepository } from "../repositories/skill.repository";
 import { teacherSkillRepository } from "../repositories/teacherSkill.repository";
+import { createSkillSchema } from "../utils/schemaValidator";
 
 export const uploadService = {
     processTeacherCSV: async (buffer: Buffer) => {
@@ -221,7 +222,7 @@ export const uploadService = {
 
     processSkillsCSV: async(buffer: Buffer) =>{
         const rows = parseCSV(buffer);
-        const {valid, missing} = validateCSVHeaders(rows, ["name", "program", "module"]);
+        const {valid, missing} = validateCSVHeaders(rows, ["name", "program", "module", "unit"]);
         if(!valid){
             throw new AppError(400, ErrorCode.VALIDATION_ERROR, `Missing required columns: ${missing.join(", ")}`);
         }
@@ -232,6 +233,20 @@ export const uploadService = {
 
         for(const row of rows){
             try {
+                // Validate program -> module -> unit hierarchy using Zod schema
+                const validation = createSkillSchema.safeParse({
+                    name: row.name,
+                    program: row.program,
+                    module: row.module,
+                    unit: row.unit || undefined,
+                });
+
+                if (!validation.success) {
+                    const errorMsg = Object.values(validation.error.flatten().fieldErrors).flat().join(", ");
+                    skipped.push({name: row.name, reason: `Validation failed: ${errorMsg}`});
+                    continue;
+                }
+
                 const duplicate = await skillRepository.findDuplicate(row.name, row.program, row.module, row.unit || undefined);
                 if(duplicate){
                     skipped.push({name: row.name, reason: "Skill already exists"});
