@@ -1,5 +1,5 @@
 import { db } from "../db/client";
-import { teachers, trainingEvents, trainingRecords, users } from "../db/schema";
+import { teachers, trainingEvents, trainingRecords, users, teacherSkills, skills } from "../db/schema";
 import { eq, ilike, and, sql, desc } from "drizzle-orm";
 import { careerRecords } from "../db/schema";
 
@@ -50,6 +50,20 @@ export const teacherRepository = {
     if (!results.length) return null;
 
     const base = results[0];
+
+    // Get teacher's skills
+    const teacherSkillsResult = await db
+      .select({
+        id: skills.id,
+        name: skills.name,
+        program: skills.program,
+        module: skills.module,
+        unit: skills.unit,
+      })
+      .from(teacherSkills)
+      .leftJoin(skills, eq(skills.id, teacherSkills.skillId))
+      .where(eq(teacherSkills.teacherId, id));
+
     const currentGrades = [
       ...new Set(results.map((r) => r.currentGrade).filter(Boolean))
     ];
@@ -75,6 +89,7 @@ export const teacherRepository = {
 
     return {
       ...base,
+      skills: teacherSkillsResult,
       currentGrades,
       currentOrganizations,
       trainings: [...trainings],
