@@ -12,7 +12,7 @@ export const trainingEventService = {
     },
 
     getById: async(id: string)=>{
-        const event = trainingEventRepository.findById(id);
+        const event = await trainingEventRepository.findById(id);
         if(!event){
             throw new AppError(404, ErrorCode.NOT_FOUND, "Training event not found");
         }
