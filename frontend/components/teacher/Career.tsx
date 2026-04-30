@@ -8,25 +8,32 @@ import { getCareers } from "@/lib/api"
 type Props = {
     id: string,
     classNames: string
+    tenure: number
 }
 
-export const CareerBlock = ({id, classNames}: Props) => {
+export const CareerBlock = ({ id, classNames, tenure }: Props) => {
     const [careers, setCareers] = useState<Career[]>([])
     useEffect(() => {
         getCareers(id).then(setCareers)
     }, [id])
     return (
         <div className={`flex flex-col align-middle gap-4 ${classNames}`}>
-            <HI
-                text="Career"
-                classNames=""
-                icon={<BriefcaseIcon className="h-7"/>}
-            />
+            <div className="flex justify-between ">
+                <HI
+                    text="Career"
+                    classNames=""
+                    icon={<BriefcaseIcon className="h-7" />}
+                />
+                <span>
+                    {tenure > 1 ? `${tenure} years` : tenure == 1 ? `${tenure} year` : '< 1 year'}
+                </span>
+            </div>
+
             <div className="grid grid-cols-2 gap-3">
                 {careers.map((career) => (
-                    <div key={career.id} className="col-span-1 bg-white rounded-lg p-5 flex flex-col gap-2">
+                    <div key={career.id} className="bg-white rounded-lg flex flex-col gap-2 col-span-2 md:col-span-1 shadow-sm px-10 py-8 cursor-not-allowed">
                         <div className="flex gap-2 justify-between items-baseline">
-                            <H3 
+                            <H3
                                 text={career.designation}
                                 classNames="!p-0 !m-0 !text-sm"
                             />

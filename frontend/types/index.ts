@@ -96,6 +96,7 @@ export type Teachers = {
     tenure: number,
     currentOrganization: string,
     program: string,
+    currentGrades: string[]
 }
 
 export type Pagination = {

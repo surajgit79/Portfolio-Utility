@@ -39,7 +39,7 @@ export default function Teacher() {
             <div className="grid grid-cols-10 gap-5">
                 <div className="col-span-10 lg:col-span-7 flex flex-col gap-8">
                     <TrainingBlock id={params.id} classNames="" />
-                    <CareerBlock id={params.id} classNames="" />
+                    <CareerBlock id={params.id} classNames="" tenure={teacher?.tenure || 0}/>
                 </div>
 
                 <div className="col-span-10 lg:col-span-3">

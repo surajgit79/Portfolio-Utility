@@ -4,12 +4,15 @@ import { useState } from 'react'
 import { H1, H3 } from '@/components/defaults/Typography'
 import { Button } from '@/components/ui/button'
 import { uploadTeachersCSV } from '@/lib/api'
+import { useRouter } from 'next/navigation'
 
 export default function BulkAddTeacherPage() {
   const [file, setFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+
+  const router = useRouter()
 
   async function handleUpload() {
     setError('')
@@ -38,8 +41,19 @@ export default function BulkAddTeacherPage() {
 
   return (
     <div className="mt-10">
-      <H1 text="Bulk Upload Teachers" classNames="font-bold" />
-
+      <div className='flex justify-between items-center'>
+        <H1 text="Bulk Upload Teachers" classNames="font-bold" />
+        <Button
+          variant="outline"
+          className="bg-[#2D84C4] text-white cursor-pointer"
+          onClick={(e)=> {
+            router.back() 
+            router.refresh()
+          }}
+        >
+          Back
+        </Button>
+      </div>
       <div className="bg-white rounded-lg p-6 mt-6">
         <H3 text="Upload CSV File" classNames="font-bold mb-4" />
 

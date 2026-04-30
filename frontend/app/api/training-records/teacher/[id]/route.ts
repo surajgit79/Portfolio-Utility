@@ -44,3 +44,7 @@ export async function GET(_: Request, context: RouteContext) {
         )
     }
 }
+
+// export async function GET(_: Request, { params }: { params: Promise<{ id: string }>}){
+        
+// }

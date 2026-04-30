@@ -269,6 +269,13 @@ export type TrainingResponse = {
     data: TrainingAttended[]
 }
 
+// export async function getTrainingById(id: string): Promise<TrainingAttended | null> {
+//     try{
+//         const res = await fetch()
+//     }
+//     return null
+// }
+
 export const dummyTrainingAttended: TrainingAttended[] = [
     {
         id: 'TA-001',
@@ -372,6 +379,25 @@ export async function getTrainings(id: string): Promise<TrainingAttended[]> {
         console.error('Failed to fetch trainings:', error)
         return dummyTrainingAttended
     }
+}
+
+export async function uploadTrainingRecordsCSV(file: File) {
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const res = await fetch('/api/training-records/upload', {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+    })
+
+    const json = await res.json()
+
+    if (!res.ok || !json.success) {
+        throw new Error(json?.message || 'Training records bulk upload failed')
+    }
+
+    return json
 }
 
 export type EventRecordsResponse = {
