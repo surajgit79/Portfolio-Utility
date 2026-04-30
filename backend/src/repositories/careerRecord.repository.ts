@@ -18,7 +18,7 @@ export const careerRecordRepository = {
 
     findByTeacherId: async (teacherId: string, page = 1, limit = 10)=>{
         const offset = (page -1)*limit;
-        return db.select().from(careerRecords).where(eq(careerRecords.teacherId, teacherId)).orderBy(desc(careerRecords.updatedAt)).limit(limit).offset(offset);
+        return db.select().from(careerRecords).where(eq(careerRecords.teacherId, teacherId)).orderBy(desc(careerRecords.createdAt)).limit(limit).offset(offset);
     },
 
     countByTeacherId: async(teacherId: string): Promise<number>=>{

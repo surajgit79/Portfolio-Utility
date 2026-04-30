@@ -14,6 +14,8 @@ export const trainingRecordService = {
             teacherId: string,
             trainingEventId: string,
             rating: number,
+            feedback?: string,
+            trainingDate?: string,
         },
         request:FastifyRequest,
     )=>{
@@ -44,7 +46,8 @@ export const trainingRecordService = {
         const certificateNumber = await generateCertificateNumber(event.program, event.module, event.unit?? null);
 
         return trainingRecordRepository.create({
-            id, ...data, certificateNumber, refPhotos
+            id, ...data, certificateNumber, refPhotos,
+            trainingDate: data.trainingDate || undefined,
         });
     },
 
@@ -53,6 +56,8 @@ export const trainingRecordService = {
             trainingEventId:string,
             teacherIds: string[],
             rating: number,
+            feedback?: string,
+            trainingDate?: string,
         }
     )=>{
         const event = await trainingEventRepository.findById(data.trainingEventId);
@@ -86,6 +91,8 @@ export const trainingRecordService = {
                     trainingEventId: data.trainingEventId,
                     rating: data.rating,
                     certificateNumber,
+                    feedback: data.feedback,
+                    trainingDate: data.trainingDate || undefined,
                 }).returning();
 
                 created.push(record);
@@ -125,6 +132,8 @@ export const trainingRecordService = {
     update: async (id: string, data: {
         rating?:    number;
         refPhotos?: string;
+        feedback?: string;
+        trainingDate?: string;
     }) => {
         const existing = await trainingRecordRepository.findById(id);
         if (!existing) {
@@ -132,8 +141,9 @@ export const trainingRecordService = {
         }
 
         return trainingRecordRepository.update(id, {
-        ...data,
-        updatedAt: new Date(),
+            ...data,
+            trainingDate: data.trainingDate || undefined,
+            updatedAt: new Date(),
         });
     },
 

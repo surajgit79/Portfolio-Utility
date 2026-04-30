@@ -185,17 +185,23 @@ export const createTrainingRecordSchema = z.object({
   teacherId:       z.string().min(1, "Teacher ID is required"),
   trainingEventId: z.string().min(1, "Training event ID is required"),
   rating:          z.number().int().min(1, "Rating must be at least 1").max(5, "Rating must not exceed 5"),
+  feedback:        z.string().optional(),
+  trainingDate:    z.string().refine((date) => !isNaN(Date.parse(date)), "Invalid date format").optional(),
 });
 
 export const bulkCreateTrainingRecordSchema = z.object({
   trainingEventId: z.string().min(1, "Training event ID is required"),
   teacherIds:      z.array(z.string().min(1)).min(1, "At least one teacher required"),
   rating:          z.number().int().min(1, "Rating must be at least 1").max(5, "Rating must not exceed 5"),
+  feedback:        z.string().optional(),
+  trainingDate:    z.string().refine((date) => !isNaN(Date.parse(date)), "Invalid date format").optional(),
 });
 
 export const updateTrainingRecordSchema = z.object({
-  rating:    z.number().int().min(1).max(5).optional(),
-  refPhotos: z.string().optional(),
+  rating:       z.number().int().min(1).max(5).optional(),
+  refPhotos:    z.string().optional(),
+  feedback:     z.string().optional(),
+  trainingDate: z.string().refine((date) => !isNaN(Date.parse(date)), "Invalid date format").optional(),
 });
 
 export type CreateTrainingRecordRequest     = z.infer<typeof createTrainingRecordSchema>;
