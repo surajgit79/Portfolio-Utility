@@ -44,7 +44,7 @@ export const teacherSkillRepository = {
   },
 
   getPercentageByTeacher: async (teacherId: string) => {
-    return db.execute(
+    const result = await db.execute(
       sql`
         SELECT
           s.program,
@@ -61,6 +61,15 @@ export const teacherSkillRepository = {
         ORDER BY s.program, s.module, s.unit
       `
     );
+
+    return result.rows as {
+      program: string;
+      module: string;
+      unit: string | null;
+      totalSkills: number;
+      acquiredSkills: number;
+      percentage: string;
+    }[];
   },
 
   delete: async (teacherId: string, skillId: string): Promise<void> => {

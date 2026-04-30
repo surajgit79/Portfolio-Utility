@@ -1,4 +1,4 @@
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, sql, desc } from "drizzle-orm";
 import { db } from "../db/client";
 import { trainingEvents } from "../db/schema";
 
@@ -8,7 +8,7 @@ type NewTrainingEvent = typeof trainingEvents.$inferInsert;
 export const trainingEventRepository = {
     findAll: async (program?: string, module?: string, unit?: string, page = 1, limit = 10) =>{
         const offset = (page -1)*limit;
-        const query = db.select().from(trainingEvents).limit(limit).offset(offset);
+        let query = db.select().from(trainingEvents).orderBy(desc(trainingEvents.updatedAt)).limit(limit).offset(offset);
 
         const conditions = [];
         if(program) conditions.push(eq(trainingEvents.program, program as any));

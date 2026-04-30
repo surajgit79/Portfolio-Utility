@@ -2,7 +2,6 @@ import { teacherRepository } from "../repositories/teacher.repository";
 import { userRepository } from "../repositories/user.repository";
 import { generateId } from "../utils/idGenerator";
 import { AppError, ErrorCode } from "../utils/errorHandler";
-import { uploadSingleImage } from "../utils/imageUploader";
 import { FastifyRequest } from "fastify";
 import { hashedPassword } from "../utils/passwordHasherVerifier";
 import { db } from "../db/client";
@@ -10,6 +9,7 @@ import { users, teachers } from "../db/schema";
 import csv from "csv-parser";
 import { z } from "zod";
 import { bulkTeacherRowSchema } from "../utils/schemaValidator";
+import { teacherSkillRepository } from "../repositories/teacherSkill.repository";
 
 const calculateTenure = (teachingSince: number | null): number | null => {
   if (!teachingSince) return null;
@@ -37,12 +37,6 @@ export const teacherService = {
       throw new AppError(409, ErrorCode.CONFLICT, "Email already exists");
     }
 
-    let imageUrl: string | undefined;
-    if (request.isMultipart()) {
-      const url = await uploadSingleImage(request, "portfolio-utility/teachers");
-      if (url) imageUrl = url;
-    }
-
     return db.transaction( async(tx)=>{
       const hashed = await hashedPassword(data.password);
       const userId = await generateId("users");
@@ -56,19 +50,19 @@ export const teacherService = {
 
       const teacherId = await generateId("teachers");
 
-      const [teacher] = await tx.insert(teachers).values({
-        id:       teacherId,
-        userId:   user.id,
-        name:     data.name,
-        address:  data.address,
-        contact:  data.contact,
-        email:    data.email,
-        gender:   data.gender,
-        dob:      data.dob,
-        teachingSince: data.teachingSince,
-        qualification: data.qualification,
-        imageUrl: imageUrl || data.imageUrl,
-      }).returning();
+       const [teacher] = await tx.insert(teachers).values({
+         id:       teacherId,
+         userId:   user.id,
+         name:     data.name,
+         address:  data.address,
+         contact:  data.contact,
+         email:    data.email,
+         gender:   data.gender,
+         dob:      data.dob,
+         teachingSince: data.teachingSince,
+         qualification: data.qualification,
+         imageUrl: data.imageUrl,
+       }).returning();
       return teacher;
     });
   },
@@ -101,7 +95,7 @@ export const teacherService = {
           continue;
         }
 
-        const hashed = await hashedPassword('P@ssword123');
+        const hashed = await hashedPassword(validData.temporary_password || 'P@ssword123!');
         const userId = await generateId('users');
         const teacherId = await generateId('teachers');
 
@@ -190,9 +184,16 @@ export const teacherService = {
       throw new AppError(404, ErrorCode.NOT_FOUND, "Teacher not found");
     }
 
+    const skills = await teacherSkillRepository.findByTeacherIdWithSkill(id);
+    const percentage = await teacherSkillRepository.getPercentageByTeacher(id);
+
     return {
       ...teacher,
       tenure: calculateTenure(teacher.teachingSince),
+      skills: {
+        summary: percentage,
+        details: skills,
+      }
     };
   },
 
