@@ -6,8 +6,8 @@ export const register = async(
     request: FastifyRequest,
     reply: FastifyReply
  )=>{
-     const body = registerSchema.safeParse(request.body);
-     console.log("Validation result:", body);
+    const body = registerSchema.safeParse(request.body);
+    console.log("Validation result:", body);
     if (!body.success) {
         return reply.status(400).send({
         success: false,
@@ -22,9 +22,9 @@ export const register = async(
     );
 
     return reply.status(201).send({
-    success: true,
-    message: "User registered successfully",
-    data:    { accessToken: data.accessToken, refreshToken: data.refreshToken },
+        success: true,
+        message: "User registered successfully",
+        data:    { accessToken: data.accessToken, refreshToken: data.refreshToken },
   });
 };
 
