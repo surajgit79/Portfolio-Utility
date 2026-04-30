@@ -1,4 +1,4 @@
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, sql, desc } from "drizzle-orm";
 import { db } from "../db/client";
 import { skills } from "../db/schema";
 
@@ -8,7 +8,7 @@ type NewSkill = typeof skills.$inferInsert;
 export const skillRepository = {
     findAll: async ( program?: string, module?: string, unit?: string, page = 1, limit = 10)=>{
         const offset = (page - 1)*limit;
-        const query = db.select().from(skills).limit(limit).offset(offset);
+        let query = db.select().from(skills).orderBy(desc(skills.createdAt)).limit(limit).offset(offset);
 
         const conditions = [];
         if(program) conditions.push(eq(skills.program, program as any));

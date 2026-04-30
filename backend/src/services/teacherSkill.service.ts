@@ -1,6 +1,7 @@
 import { teacherSkillRepository } from "../repositories/teacherSkill.repository";
 import { skillRepository } from "../repositories/skill.repository";
 import { teacherRepository } from "../repositories/teacher.repository";
+import { trainingRecordRepository } from "../repositories/trainingRecord.repository";
 import { generateId } from "../utils/idGenerator";
 import { AppError, ErrorCode } from "../utils/errorHandler";
 
@@ -20,8 +21,7 @@ export const teacherSkillService = {
       throw new AppError(404, ErrorCode.NOT_FOUND, "Teacher not found");
     }
 
-    const result = await teacherSkillRepository.getPercentageByTeacher(teacherId);
-    return result.rows;
+    return teacherSkillRepository.getPercentageByTeacher(teacherId);
   },
 
   assign: async (data: {
@@ -33,6 +33,14 @@ export const teacherSkillService = {
 
     if (!teacher) {
       throw new AppError(404, ErrorCode.NOT_FOUND, "Teacher not found");
+    }
+
+    // Validate trainingRecordId if provided
+    if (data.trainingRecordId) {
+      const trainingRecord = await trainingRecordRepository.findById(data.trainingRecordId);
+      if (!trainingRecord) {
+        throw new AppError(404, ErrorCode.NOT_FOUND, "Training record not found");
+      }
     }
 
     const created = [];
