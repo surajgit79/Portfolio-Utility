@@ -110,7 +110,7 @@ export default function Dashboard() {
     }, [search, page])
 
     return (
-        <div className="bg-white p-5 mt-10 rounded-lg">
+        <div className="bg-white p-5 mt-10 rounded-lg shadow-lg">
             <div className="flex items-center my-5 justify-between">
                 <H1 text="Teacher Record Management" classNames="!m-0" />
                 <div className="flex gap-1 flex-col lg:flex-row">
