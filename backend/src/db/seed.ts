@@ -14,6 +14,9 @@ import {
 } from "./schema";
 import { hashedPassword } from "../utils/passwordHasherVerifier";
 import { generateCertificateNumber } from "../utils/idGenerator";
+import fs from "fs";
+import path from "path";
+import { parseCSV } from "../utils/csvParser";
 
 const seed = async () => {
   console.log("🧹 Cleaning existing data...");
@@ -311,20 +314,29 @@ const seed = async () => {
     await db.insert(eventRecords).values(record);
   }
 
-  console.log("🌱 Seeding skills...");
+  console.log("🌱 Seeding skills from CSV...");
+  const csvPath = path.join(__dirname, "../../skills_test.csv");
+  const csvBuffer = fs.readFileSync(csvPath);
+  const rows = parseCSV(csvBuffer);
 
-  const skillData = [
-    { id: "SKL-2026-0001", name: "ABM Class 4 Book 1", program: "Activity-based Mathematics" as const, module: "Class 4", unit: "Book 1" },
-    { id: "SKL-2026-0002", name: "ABM Class 4 Book 2", program: "Activity-based Mathematics" as const, module: "Class 4", unit: "Book 2" },
-    { id: "SKL-2026-0003", name: "ABM Class 5 Book 1", program: "Activity-based Mathematics" as const, module: "Class 5", unit: "Book 1" },
-    { id: "SKL-2026-0004", name: "ABM Class 6 Book 1", program: "Activity-based Mathematics" as const, module: "Class 6", unit: "Book 1" },
-    { id: "SKL-2026-0005", name: "R&L Phonics Set 1", program: "Reading & Language" as const, module: "Phonics", unit: "Set 1" },
-    { id: "SKL-2026-0006", name: "R&L Writer Workshop", program: "Reading & Language" as const, module: "Writer Workshop", unit: null },
-    { id: "SKL-2026-0007", name: "R&L Guided Reading", program: "Reading & Language" as const, module: "Guided Reading", unit: null },
-    { id: "SKL-2026-0008", name: "R&L Book-based Activity", program: "Reading & Language" as const, module: "Book-based Activity", unit: null },
-  ];
+  const skillData = [];
+  let skillIdx = 1;
+
+  for (const row of rows) {
+    const id = `SKL-2026-${String(skillIdx).padStart(4, "0")}`;
+    skillData.push({
+      id,
+      name:    row.name,
+      program: row.program as "Activity-based Mathematics" | "Reading & Language" | "Pre-School Transformation",
+      module:  row.module,
+      unit:    row.unit || null,
+    });
+    skillIdx++;
+  }
 
   await db.insert(skills).values(skillData).onConflictDoNothing();
+
+  console.log(`   - Loaded ${skillData.length} skills from CSV`);
 
   console.log("🌱 Seeding teacher skills...");
 
