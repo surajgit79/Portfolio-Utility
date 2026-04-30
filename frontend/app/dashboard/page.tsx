@@ -110,10 +110,10 @@ export default function Dashboard() {
     }, [search, page])
 
     return (
-        <div className="bg-white p-5 mt-10 rounded-lg">
+        <div className="bg-white p-5 mt-10 rounded-lg shadow-lg">
             <div className="flex items-center my-5 justify-between">
                 <H1 text="Teacher Record Management" classNames="!m-0" />
-                <div className="flex gap-1">
+                <div className="flex gap-1 flex-col lg:flex-row">
                     {!loading && !session.isAuthenticated && (<Button className='bg-[#2D84C4] text-white cursor-pointer' onClick={(e) => {
                         router.replace('/login')
                         router.refresh()
@@ -125,13 +125,13 @@ export default function Dashboard() {
                                     variant="outline"
                                     className="bg-[#2D84C4] text-white cursor-pointer"
                                 >
-                                    Add +
+                                    Options +
                                 </Button>
                             </DropdownMenuTrigger>
 
                             <DropdownMenuContent>
                                 <DropdownMenuGroup>
-                                    <DropdownMenuLabel>Teacher</DropdownMenuLabel>
+                                    <DropdownMenuLabel>Add Teacher</DropdownMenuLabel>
                                     <DropdownMenuItem
                                         className="cursor-pointer"
                                         onClick={() => router.push("/teachers/add")}
@@ -148,8 +148,12 @@ export default function Dashboard() {
                                 </DropdownMenuGroup>
 
                                 <DropdownMenuGroup>
-                                    <DropdownMenuItem className="cursor-pointer">
-                                        Trainings
+                                    <DropdownMenuLabel>Add Training</DropdownMenuLabel>
+                                    <DropdownMenuItem 
+                                        className="cursor-pointer"
+                                        onClick={() => router.push("/trainings/add/bulk")}
+                                    >
+                                        Bulk
                                     </DropdownMenuItem>
                                 </DropdownMenuGroup>
                             </DropdownMenuContent>
@@ -188,16 +192,22 @@ export default function Dashboard() {
 
                 <TableBody>
                     {teachers.length > 0 ? (
-                        teachers.map(({ id, name, address, tenure }: Teachers, index) => (
+                        teachers.map(({ id, name, address, tenure, program, currentGrades }: Teachers, index) => (
                             <TableRow
-                                key={id}
+                                key={index}
                                 onClick={() => router.push(`/teachers/${id}`)}
                                 className={`cursor-pointer ${index % 2 === 0 ? "bg-white" : "bg-gray-50"
                                     } hover:bg-blue-50 transition-colors`}
                             >
                                 <TableCell>{name}</TableCell>
-                                <TableCell>N/A</TableCell>
-                                <TableCell>N/A</TableCell>
+                                <TableCell>
+                                    {currentGrades.map((v, i)=>{
+                                        if(i === currentGrades.length - 1)
+                                            return v
+                                        return `${v}, `
+                                    })}
+                                </TableCell>
+                                <TableCell>{program}</TableCell>
                                 <TableCell>
                                     {tenure < 1 ? "<1 year" : tenure === 1 ? "1 year" : `${tenure} years`}
                                 </TableCell>

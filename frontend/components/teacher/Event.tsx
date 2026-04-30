@@ -16,19 +16,20 @@ export const EventBlock = ({ id, classNames }: Props) => {
         getEventRecords(id).then(setEvents)
     }, [id])
     return (
-        <div className={`${classNames}`}>
+        <div className={`${classNames} cursor-not-allowed`}>
             <HI
                 text="Events"
                 classNames=""
                 icon={<CalendarDaysIcon  className="h-7" />}
             />
-            <div className="flex flex-col gap-4">
-                <div className="bg-white shadow rounded-lg py-5 px-5 flex flex-col gap-3">
+            <div className="flex flex-col gap-4 shadow-sm">
+                <div className="bg-white shadow rounded-lg py-5 px-5 pl-10 flex flex-col">
                     {events.map((event)=>(
-                        <div key={event.id} className="flex flex-col gap p-1">
+                        <div key={event.id} className="flex flex-col gap pl-10 pb-5 border-l-5 border-[#D7D5F5] relative">
+                            <span className="h-4 w-4 bg-white ring-2 ring-[#6334B1] rounded-full absolute -left-2.5 top-0 "/>
                             <PG
                                 text={event.startDate}
-                                classNames='!m-0 !p-0 !text-[#6334B1] !text-sm'
+                                classNames='!m-0 !p-0 !text-[#6334B1] !text-sm font-bold'
                             />
                             <PG
                                 text={event.name}

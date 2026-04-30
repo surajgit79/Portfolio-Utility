@@ -21,22 +21,25 @@ export default function Teacher() {
     return (
         <div>
             <BriefBlock
+                id={params.id}
                 name={teacher?.name ?? 'NO NAME'}
                 imageUrl={
                     teacher?.imageUrl ??
-                    'https://m.media-amazon.com/images/S/aplus-media-library-service-media/365e5edb-7b7f-415a-81c7-a848936e9e38.__CR0,0,300,300_PT0_SX300_V1___.jpg'
+                    '/profilePlaceholder.jpg'
                 }
                 qualification={teacher?.qualification ?? "N/A"}
                 school={teacher?.currentOrganization ?? 'N/A'}
                 address={teacher?.address ?? 'N/A'}
                 gender={teacher?.gender ?? 'N/A'}
                 dob={teacher?.dob ?? 'N/A'}
+                email={teacher?.email ?? 'N/A'}
+                contact={teacher?.contact ?? 'N/A'}
             />
 
             <div className="grid grid-cols-10 gap-5">
                 <div className="col-span-10 lg:col-span-7 flex flex-col gap-8">
                     <TrainingBlock id={params.id} classNames="" />
-                    <CareerBlock id={params.id} classNames="" />
+                    <CareerBlock id={params.id} classNames="" tenure={teacher?.tenure || 0}/>
                 </div>
 
                 <div className="col-span-10 lg:col-span-3">

@@ -26,6 +26,7 @@ export type TrainingAttended = {
     category: string,
     description: string,
     duration: string,
+    program?: string,
     mentorsName: string,
     phase: string,
     sector: string,
@@ -94,6 +95,8 @@ export type Teachers = {
     qualification: string,
     tenure: number,
     currentOrganization: string,
+    program: string,
+    currentGrades: string[]
 }
 
 export type Pagination = {

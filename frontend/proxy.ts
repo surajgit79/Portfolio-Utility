@@ -8,15 +8,30 @@ export function proxy(req: NextRequest) {
     const isLoggedIn = !!token
 
     const isLoginPage = pathname === '/login'
+    const isDashboardPage = pathname === '/dashboard'
+
     const isTeacherAddPage = pathname === '/teachers/add'
     const isTeacherBulkPage = pathname === '/teachers/add/bulk'
     const isTeacherEditPage = /^\/teachers\/[^/]+\/edit$/.test(pathname)
+
+    const isTrainingAddPage = pathname === '/trainings/add'
+    const isTrainingBulkPage = pathname === '/trainings/add/bulk'
+    const isTrainingEditPage = /^\/trainings\/[^/]+\/edit$/.test(pathname)
+
+    const isProtectedPage =
+        isDashboardPage ||
+        isTeacherAddPage ||
+        isTeacherBulkPage ||
+        isTeacherEditPage ||
+        isTrainingAddPage ||
+        isTrainingBulkPage ||
+        isTrainingEditPage
 
     if (isLoggedIn && isLoginPage) {
         return NextResponse.redirect(new URL('/dashboard', req.url))
     }
 
-    if (!isLoggedIn && (isTeacherAddPage || isTeacherBulkPage || isTeacherEditPage)) {
+    if (!isLoggedIn && isProtectedPage) {
         const loginUrl = new URL('/login', req.url)
         loginUrl.searchParams.set('redirect', pathname)
         return NextResponse.redirect(loginUrl)
@@ -26,5 +41,5 @@ export function proxy(req: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/login', '/teachers/:path*'],
+    matcher: ['/login', '/dashboard', '/teachers/:path*', '/trainings/:path*'],
 }

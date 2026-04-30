@@ -1,8 +1,13 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 
-export async function POST(req: Request) {
+type RouteContext = {
+    params: Promise<{ id: string }>
+}
+
+export async function GET(_: Request, context: RouteContext) {
     try {
+        const { id } = await context.params
         const BASE_URL = process.env.BACKEND_URL
         const token = (await cookies()).get('accessToken')?.value
 
@@ -20,25 +25,26 @@ export async function POST(req: Request) {
             )
         }
 
-        const formData = await req.formData()
-
-        const res = await fetch(`${BASE_URL}/teachers/register`, {
-            method: 'POST',
+        const res = await fetch(`${BASE_URL}/training-records/teacher/${id}`, {
+            method: 'GET',
             headers: {
                 Authorization: `Bearer ${token}`,
             },
-            body: formData,
         })
 
         const json = await res.json()
 
         return NextResponse.json(json, { status: res.status })
     } catch (error) {
-        console.error('Register teacher route error:', error)
+        console.error('Training records route error:', error)
 
         return NextResponse.json(
-            { success: false, message: 'Something went wrong while registering teacher' },
+            { success: false, message: 'Failed to fetch training records' },
             { status: 500 }
         )
     }
 }
+
+// export async function GET(_: Request, { params }: { params: Promise<{ id: string }>}){
+        
+// }

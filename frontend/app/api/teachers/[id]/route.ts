@@ -65,3 +65,49 @@ export async function DELETE(_: Request, context: RouteContext) {
         )
     }
 }
+
+export async function PATCH(
+    req: Request,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    try {
+        const { id } = await params
+        const token = (await cookies()).get('accessToken')?.value
+        const backendUrl = process.env.BACKEND_URL
+
+        if (!backendUrl) {
+            return NextResponse.json(
+                { success: false, message: 'BACKEND_URL not set' },
+                { status: 500 }
+            )
+        }
+
+        if (!token) {
+            return NextResponse.json(
+                { success: false, message: 'Unauthorized' },
+                { status: 401 }
+            )
+        }
+
+        const formData = await req.formData()
+
+        const res = await fetch(`${backendUrl}/teachers/${id}`, {
+            method: 'PATCH',
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+            body: formData,
+        })
+
+        const data = await res.json()
+
+        return NextResponse.json(data, { status: res.status })
+    } catch (error) {
+        console.error('Update teacher route error:', error)
+
+        return NextResponse.json(
+            { success: false, message: 'Teacher update failed' },
+            { status: 500 }
+        )
+    }
+}

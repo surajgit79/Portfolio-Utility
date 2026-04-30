@@ -137,16 +137,38 @@ export type RegisterTeacherPayload = {
     address: string
     gender: 'Male' | 'Female' | 'Others'
     password: string
+    teachingSince?: number
+    qualification?: string
+    image?: File
 }
 
 export async function registerTeacher(data: RegisterTeacherPayload) {
+    const formData = new FormData()
+
+    formData.append('name', data.name)
+    formData.append('password', data.password)
+    formData.append('email', data.email)
+    formData.append('contact', data.contact)
+    formData.append('gender', data.gender)
+    formData.append('address', data.address)
+    formData.append('dob', data.dob)
+
+    if (data.image) {
+        formData.append('image', data.image)
+    }
+
+    if (data.teachingSince !== undefined) {
+        formData.append('teachingSince', String(data.teachingSince))
+    }
+
+    if (data.qualification) {
+        formData.append('qualification', data.qualification)
+    }
+
     const res = await fetch('/api/teachers/register', {
         method: 'POST',
         credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
+        body: formData,
     })
 
     const json = await res.json()
@@ -165,11 +187,46 @@ export async function searchTeachers(search: string) {
     )
 }
 
-export async function updateTeacher(id: string, data: any) {
-    return apiFetch(`/teachers/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(data),
+export const getTeacherById = async (id: string) => {
+    const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL
+
+    const res = await fetch(`${baseUrl}/teachers/${id}`, {
+        credentials: "include",
     })
+
+    if (!res.ok) {
+        throw new Error("Failed to fetch teacher")
+    }
+
+    return res.json()
+}
+
+type UpdateTeacherPayload = {
+    name: string
+    email: string
+    contact: string
+    address: string
+    gender: string
+    imageUrl: string
+    dob: string
+    qualification: string
+    teachingSince: number
+}
+
+export const updateTeacher = async (id: string, data: FormData) => {
+    const res = await fetch(`/api/teachers/${id}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        body: data,
+    })
+
+    const json = await res.json()
+
+    if (!res.ok || !json.success) {
+        throw new Error(json?.message || 'Update failed')
+    }
+
+    return json
 }
 
 export async function deleteTeacher(id: string) {
@@ -206,78 +263,18 @@ export async function uploadTeachersCSV(file: File) {
     return json
 }
 
-// export async function searchTeachers(search: string): Promise<Teachers[]> {
-//     try {
-//         const res = await fetch(`${BASE_URL}/teachers?search=${search}`)
-//         if (!res.ok) {
-//             throw new Error('Unable to fetch data')
-//         }
-//         const json: TeachersResponse = await res.json()
-//         return json.data
-//     } catch (error) {
-//         console.error('Fetch teachers failed: ', error)
-//         throw error
-//     }
-// }
-
-// export async function getTeachers(page: number): Promise<Teachers[]> {
-
-//     try {
-//         const res = await fetch(`${BASE_URL}/teachers?page=${page}`)
-
-//         if (!res.ok) {
-//             throw new Error(`Unable to fetch data: ${res.status}`)
-//         }
-
-//         const json: TeachersResponse = await res.json()
-//         return json.data
-//     } catch (error) {
-//         console.error('Fetch teachers failed:', error)
-//         throw error
-//     }
-// }
-
-// export async function getTeacher(id: string): Promise<Teachers> {
-//     const res = await fetch(`${BASE_URL}/teachers/${id}`)
-
-//     if (!res.ok)
-//         throw new Error('Unable to fetch data')
-
-//     const json = await res.json()
-//     console.log(json.data)
-
-//     return json.data
-// }
-
-// export async function bulkUploadTeachers(file: File) {
-
-//     const formData = new FormData()
-//     formData.append('file', file)
-
-//     try {
-//         const res = await fetch(`${BASE_URL}/teachers/bulk`, {
-//             method: 'POST',
-//             body: formData,
-//         })
-
-//         const data = await res.json()
-
-//         if (!res.ok) {
-//             throw new Error(data?.message || 'Upload failed')
-//         }
-
-//         return data
-//     } catch (err) {
-//         console.error('Upload failed:', err)
-//         throw err
-//     }
-// }
-
 export type TrainingResponse = {
     success: boolean,
     message: string,
     data: TrainingAttended[]
 }
+
+// export async function getTrainingById(id: string): Promise<TrainingAttended | null> {
+//     try{
+//         const res = await fetch()
+//     }
+//     return null
+// }
 
 export const dummyTrainingAttended: TrainingAttended[] = [
     {
@@ -287,7 +284,7 @@ export const dummyTrainingAttended: TrainingAttended[] = [
         certificateNumber: 'CERT-ABL-2023-001',
         venue: 'Kathmandu Training Center',
         category: 'Pedagogy',
-        description: 'Focused on activity-based teaching methods for primary students.',
+        description: 'DUMMY: Focused on activity-based teaching methods for primary students.',
         duration: '3 days',
         mentorsName: 'Dr. Ramesh Sharma',
         phase: 'Phase 1',
@@ -298,6 +295,7 @@ export const dummyTrainingAttended: TrainingAttended[] = [
         teacherId: 'T-001',
         createdAt: '2023-05-15T10:00:00Z',
         updatedAt: '2023-05-15T10:00:00Z',
+        program: ""
     },
     {
         id: 'TA-002',
@@ -306,7 +304,7 @@ export const dummyTrainingAttended: TrainingAttended[] = [
         certificateNumber: 'CERT-DTT-2023-002',
         venue: 'Pokhara Learning Hub',
         category: 'Technology',
-        description: 'Introduction to digital platforms and smart teaching tools.',
+        description: 'DUMMY: Introduction to digital platforms and smart teaching tools.',
         duration: '5 days',
         mentorsName: 'Anita Karki',
         phase: 'Phase 2',
@@ -317,6 +315,7 @@ export const dummyTrainingAttended: TrainingAttended[] = [
         teacherId: 'T-001',
         createdAt: '2023-07-06T09:30:00Z',
         updatedAt: '2023-07-06T09:30:00Z',
+        program: ""
     },
     {
         id: 'TA-003',
@@ -325,7 +324,7 @@ export const dummyTrainingAttended: TrainingAttended[] = [
         certificateNumber: 'CERT-IET-2022-045',
         venue: 'Biratnagar Education Office',
         category: 'Special Education',
-        description: 'Training on inclusive classrooms and supporting diverse learners.',
+        description: 'DUMMY: Training on inclusive classrooms and supporting diverse learners.',
         duration: '2 days',
         mentorsName: 'Sita Gurung',
         phase: 'Phase 1',
@@ -336,6 +335,7 @@ export const dummyTrainingAttended: TrainingAttended[] = [
         teacherId: 'T-002',
         createdAt: '2022-11-22T08:15:00Z',
         updatedAt: '2022-11-22T08:15:00Z',
+        program: ""
     },
     {
         id: 'TA-004',
@@ -344,7 +344,7 @@ export const dummyTrainingAttended: TrainingAttended[] = [
         certificateNumber: 'CERT-CDW-2024-010',
         venue: 'Lalitpur Resource Center',
         category: 'Curriculum',
-        description: 'Advanced curriculum planning and assessment strategies.',
+        description: 'DUMMY: Advanced curriculum planning and assessment strategies.',
         duration: '4 days',
         mentorsName: 'Prof. Kiran Adhikari',
         phase: 'Phase 3',
@@ -355,26 +355,49 @@ export const dummyTrainingAttended: TrainingAttended[] = [
         teacherId: 'T-003',
         createdAt: '2024-02-16T11:00:00Z',
         updatedAt: '2024-02-16T11:00:00Z',
+        program: ""
     }
 ]
 
 export async function getTrainings(id: string): Promise<TrainingAttended[]> {
     try {
-        const res = await fetch(`${BASE_URL}/training-records/teacher/${id}`)
+        const res = await fetch(`/api/training-records/teacher/${id}`, {
+            method: 'GET',
+            credentials: 'include',
+            cache: 'no-store',
+        })
 
-        if (!res.ok) {
-            // throw new Error(`HTTP error: ${res.status}`)
+        const json: TrainingResponse = await res.json()
+
+        if (!res.ok || !json.success) {
+            console.warn('Training fetch failed:', json?.message)
             return dummyTrainingAttended
         }
 
-        const json: TrainingResponse = await res.json()
-        console.log(json.data)
         return json.data
-
     } catch (error) {
-        console.error("Failed to fetch careers:", error)
+        console.error('Failed to fetch trainings:', error)
         return dummyTrainingAttended
     }
+}
+
+export async function uploadTrainingRecordsCSV(file: File) {
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const res = await fetch('/api/training-records/upload', {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+    })
+
+    const json = await res.json()
+
+    if (!res.ok || !json.success) {
+        throw new Error(json?.message || 'Training records bulk upload failed')
+    }
+
+    return json
 }
 
 export type EventRecordsResponse = {

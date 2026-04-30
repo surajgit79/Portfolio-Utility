@@ -12,6 +12,8 @@ export default function LoginPage() {
 
     const [email, setEmail] = useState('admin@portfolio.com')
     const [password, setPassword] = useState('Admin1234')
+    // const [email, setEmail] = useState('nic@navodaya.edu')
+    // const [password, setPassword] = useState('NIC@navodaya2083')
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
 
