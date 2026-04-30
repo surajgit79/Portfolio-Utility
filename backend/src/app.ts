@@ -31,7 +31,7 @@ app.register(rateLimit, {
     max: 100,
     timeWindow: "1 minute",
     keyGenerator: (request) =>{
-        return request.user?.userID?? request.ip;
+        return request.user?.userId?? request.ip;
     },
     hook: "preHandler",
     allowList: ["api/v1/health"],

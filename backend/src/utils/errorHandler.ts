@@ -29,7 +29,7 @@ export const errorHandler = (app:FastifyInstance)=>{
             return reply.status(error.statusCode).send({
                 success:false,
                 message: error.message,
-                code: error.statusCode,
+                code: error.code,
                 errors: error.errors,
             });
         }
