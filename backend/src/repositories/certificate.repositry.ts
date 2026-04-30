@@ -9,11 +9,6 @@ export const certificateRepository = {
         return record;
     },
 
-    findByRecordId: async (recordId: string)=>{
-        const [record] = await db.select().from(trainingRecords).where(eq(trainingRecords.id, recordId));
-        return record;
-    },
-
     findTrainingEvent: async (trainingEventId: string)=>{
         const [training] = await db.select().from(trainingEvents).where(eq(trainingEvents.id, trainingEventId));
         return training;

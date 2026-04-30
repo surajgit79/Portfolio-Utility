@@ -28,19 +28,6 @@ export const downloadCertificate = async (
     return reply.send(pdf);
 }
 
-export const downloadCertificateByRecord = async (
-    request: FastifyRequest,
-    reply: FastifyReply
-)=>{
-    const { recordId } = request.params as { recordId: string};
-    const pdf = await certificateService.generatePDFFromRecord(recordId);
-
-    reply.header("content-type", "application/pdf");
-    reply.header("Content-Disposition", `attachment; filename="certificate-${recordId}.pdf`);
-
-    return reply.send(pdf);
-}
-
 export const bulkDownloadCertificates = async (
   request: FastifyRequest,
   reply: FastifyReply
