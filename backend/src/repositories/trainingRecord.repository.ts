@@ -1,6 +1,6 @@
 import { db } from "../db/client";
 import { trainingRecords, trainingEvents, teachers } from "../db/schema";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and, sql, desc } from "drizzle-orm";
 
 type TrainingRecord = typeof trainingRecords.$inferInsert;
 type NewTrainingRecord = typeof trainingRecords.$inferInsert;
@@ -18,7 +18,7 @@ export const trainingRecordRepository = {
 
     findByTeacherId: async(teacherId: string, page = 1, limit = 10) => {
         const offset = (page -1 )*limit;
-        return db.select().from(trainingRecords).where(eq(trainingRecords.teacherId, teacherId)).limit(limit).offset(offset);
+        return db.select().from(trainingRecords).where(eq(trainingRecords.teacherId, teacherId)).orderBy(desc(trainingRecords.updatedAt)).limit(limit).offset(offset);
     },
 
     countByTeacherId: async(teacherId: string): Promise<number> =>{
@@ -52,7 +52,7 @@ export const trainingRecordRepository = {
             trainingEvents,
             eq(trainingRecords.trainingEventId, trainingEvents.id)
         )
-        .where(eq(trainingRecords.teacherId, teacherId)).limit(limit).offset(offset);
+        .where(eq(trainingRecords.teacherId, teacherId)).orderBy(desc(trainingRecords.updatedAt)).limit(limit).offset(offset);
     },
 
     findByEventIdWithTeacher: async(eventId: string, page = 1, limit = 10)=>{
@@ -74,12 +74,12 @@ export const trainingRecordRepository = {
             teachers,
             eq(trainingRecords.teacherId, teachers.id)
         ).where(eq(trainingRecords.trainingEventId, eventId))
-        .limit(limit).offset(offset);
+        .orderBy(desc(trainingRecords.updatedAt)).limit(limit).offset(offset);
     },
 
     findByEventId: async(eventId: string, page = 1, limit = 10) =>{
         const offset = (page -1)*limit;
-        return db.select().from(trainingRecords).where(eq(trainingRecords.trainingEventId, eventId)).limit(limit).offset(offset);
+        return db.select().from(trainingRecords).where(eq(trainingRecords.trainingEventId, eventId)).orderBy(desc(trainingRecords.updatedAt)).limit(limit).offset(offset);
     },
 
     countByEventId: async(eventId: string): Promise<number> =>{

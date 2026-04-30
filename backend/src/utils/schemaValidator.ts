@@ -66,6 +66,7 @@ export const bulkTeacherRowSchema = z.object({
   dob: z.coerce.date(), // Converts the CSV string like "1990-05-15" to a Date object
   highest_qualification: z.string().optional(),
   teaching_since: z.coerce.number().optional(),
+  temporary_password: z.string().optional(),
 });
 
 export type BulkTeacherRow = z.infer<typeof bulkTeacherRowSchema>;

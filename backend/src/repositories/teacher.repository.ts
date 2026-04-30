@@ -1,6 +1,6 @@
 import { db } from "../db/client";
 import { teachers, trainingEvents, trainingRecords, users } from "../db/schema";
-import { eq, ilike, and, sql } from "drizzle-orm";
+import { eq, ilike, and, sql, desc } from "drizzle-orm";
 import { careerRecords } from "../db/schema";
 
 type Teacher = typeof teachers.$inferSelect;
@@ -24,19 +24,21 @@ export const teacherRepository = {
         createdAt:           teachers.createdAt,
         updatedAt:           teachers.updatedAt,
         currentOrganization: careerRecords.organization,
-        currentGrades:       careerRecords.grade,
+        currentGrade:        careerRecords.grade,
         program:             trainingEvents.program,
         module:              trainingEvents.module,
         unit:                trainingEvents.unit,
       })
-      .from(teachers).where(eq(teachers.id, id))
+      .from(teachers)
+      .where(eq(teachers.id, id))
       .leftJoin(
         careerRecords,
         and(
           eq(careerRecords.teacherId, teachers.id),
           eq(careerRecords.stillWorking, 1)
         )
-      ).leftJoin(
+      )
+      .leftJoin(
         trainingRecords,
         eq(trainingRecords.teacherId, teachers.id)
       )
@@ -47,12 +49,35 @@ export const teacherRepository = {
 
     if (!results.length) return null;
 
-    const teacher = results[0];
-    const uniqueGrades = [...new Set(results.map(r => r.currentGrades).filter(Boolean))];
+    const base = results[0];
+    const currentGrades = [
+      ...new Set(results.map((r) => r.currentGrade).filter(Boolean))
+    ];
+
+    const currentOrganizations = [
+      ...new Set(results.map((r) => r.currentOrganization).filter(Boolean))
+    ];
+
+    const trainings = results
+      .filter((r) => r.program)
+      .reduce((acc, r) => {
+        const key = `${r.program}-${r.module}-${r.unit}`;
+        if (!acc.has(key)) {
+          acc.set(key, {
+            program: r.program,
+            module:  r.module,
+            unit:    r.unit,
+          });
+        }
+        return acc;
+      }, new Map())
+      .values();
 
     return {
-      ...teacher,
-      currentGrades: uniqueGrades,
+      ...base,
+      currentGrades,
+      currentOrganizations,
+      trainings: [...trainings],
     };
   },
 
@@ -118,10 +143,10 @@ export const teacherRepository = {
       .leftJoin(currentGradesSubquery, eq(currentGradesSubquery.teacherId, teachers.id));
 
     if (search) {
-      return query.where(ilike(teachers.name, `%${search}%`)).limit(limit).offset(offset);
+      return query.where(ilike(teachers.name, `%${search}%`)).orderBy(desc(teachers.updatedAt)).limit(limit).offset(offset);
     }
 
-    return query.limit(limit).offset(offset);
+    return query.orderBy(desc(teachers.updatedAt)).limit(limit).offset(offset);
 
   },
 

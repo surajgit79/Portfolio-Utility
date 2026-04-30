@@ -1,4 +1,4 @@
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, sql, desc } from "drizzle-orm";
 import { db } from "../db/client";
 import { careerRecords } from "../db/schema"
 
@@ -18,7 +18,7 @@ export const careerRecordRepository = {
 
     findByTeacherId: async (teacherId: string, page = 1, limit = 10)=>{
         const offset = (page -1)*limit;
-        return db.select().from(careerRecords).where(eq(careerRecords.teacherId, teacherId)).limit(limit).offset(offset);
+        return db.select().from(careerRecords).where(eq(careerRecords.teacherId, teacherId)).orderBy(desc(careerRecords.updatedAt)).limit(limit).offset(offset);
     },
 
     countByTeacherId: async(teacherId: string): Promise<number>=>{
