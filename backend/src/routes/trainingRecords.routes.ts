@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify";
-import { createTrainingRecord, bulkCreateTrainingRecords, getTrainingRecordsByTeacher, getTrainingRecordsByEvent, updateTrainingRecord, deleteTrainingRecord, } from "../controllers/trainingRecords.controller";
+import { createTrainingRecord, bulkCreateTrainingRecords, getTrainingRecordsByTeacher, getTrainingRecordsByEvent, updateTrainingRecord, deleteTrainingRecord } from "../controllers/trainingRecords.controller";
+import { downloadCertificateByRecord } from "../controllers/certificate.controller";
 import { requireAuth } from "../middlewares/requireAuth";
 import { requireRole } from "../middlewares/requireRole";
 
@@ -13,6 +14,12 @@ export async function trainingRecordRoutes(app: FastifyInstance) {
     app.get("/event/:eventId", {
         preHandler: [requireAuth],
         handler: getTrainingRecordsByEvent,
+    });
+
+    // Certificate endpoint
+    app.get("/:id/certificate", {
+        preHandler: [requireAuth],
+        handler: downloadCertificateByRecord,
     });
 
     // Admin only
