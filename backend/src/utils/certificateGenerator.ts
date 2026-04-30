@@ -1,6 +1,8 @@
 import puppeteer from "puppeteer";
 import { PDFDocument } from "pdf-lib";
 import QRCode from "qrcode";
+import fs from "fs";
+import path from "path";
 
 interface CertificateData {
   teacherName:       string;
@@ -18,16 +20,24 @@ interface CertificateData {
   issuedAt:          Date;
 }
 
+// Signature URLs hardcoded per person
+const SIGNATURES: Record<string, string> = {
+  "Abyekta Khanal": "https://your-cdn.com/signatures/abyekta-khanal.png",   // replace with real URL
+  "Nikita Bhattarai": "https://your-cdn.com/signatures/nikita-bhattarai.png",
+  "Sita Thing":      "https://your-cdn.com/signatures/sita-thing.png",
+  "Hari Acharya":    "https://your-cdn.com/signatures/hari-acharya.png",
+};
+
 const getCoordinator = (program: string): { name: string; title: string } => {
   switch (program) {
     case "Activity-based Mathematics":
-      return { name: "Nikita Bhattarai",    title: "ABM Co-ordinator"  };
+      return { name: "Nikita Bhattarai", title: "ABM Co-ordinator"  };
     case "Reading & Language":
-      return { name: "Sita Thing", title: "R&L Co-ordinator"  };
+      return { name: "Sita Thing",       title: "R&L Co-ordinator"  };
     case "Pre-School Transformation":
-      return { name: "Hari Acharya", title: "PST Co-ordinator"  };
+      return { name: "Hari Acharya",     title: "PST Co-ordinator"  };
     default:
-      return { name: "Co-ordinator",  title: "Program Co-ordinator" };
+      return { name: "Co-ordinator",     title: "Program Co-ordinator" };
   }
 };
 
@@ -36,23 +46,16 @@ const getProgramDescription = (
   module:  string,
   unit:    string | null
 ): { title: string; bullets: string[] } => {
-  const bullets = unit
-    ? [`${module} - ${unit}`]
-    : [module];
-
+  const bullets = unit ? [`${module} - ${unit}`] : [module];
   return {
-    title:   `for completing ${program} Program`,
+    title: `${program} Program`,
     bullets,
   };
 };
 
 const generateHTML = async (data: CertificateData): Promise<string> => {
   const coordinator = getCoordinator(data.program);
-  const { title, bullets } = getProgramDescription(
-    data.program,
-    data.module,
-    data.unit
-  );
+  const { title, bullets } = getProgramDescription(data.program, data.module, data.unit);
 
   const issuedDate = new Date(data.issuedAt).toLocaleDateString("en-US", {
     day:   "numeric",
@@ -60,15 +63,30 @@ const generateHTML = async (data: CertificateData): Promise<string> => {
     year:  "numeric",
   });
 
-  const profileUrl = `${process.env.FRONTEND_URL}/teachers/${data.teacherId}`;
+  const profileUrl  = `${process.env.FRONTEND_URL}/teachers/${data.teacherId}`;
   const qrCodeDataUrl = await QRCode.toDataURL(profileUrl, {
-    width:  120,
+    width:  100,
     margin: 1,
-    color: {
-      dark:  "#1a1a4e",
-      light: "#ffffff",
-    },
+    color: { dark: "#1a1a4e", light: "#ffffff" },
   });
+
+  const ceoName         = "Abyekta Khanal";
+  const ceoSignatureUrl = SIGNATURES[ceoName]         ?? "";
+  const cooSignatureUrl = SIGNATURES[coordinator.name] ?? "";
+
+  // Build topic grid: max 12 items (4 rows × 3 cols), flow column-first
+  const topicItems = bullets
+    .slice(0, 12)
+    .map((b) => `<li class="topic-item"><span class="bullet">•</span>${b}</li>`)
+    .join("");
+
+  // Convert local assets to base64 data URLs for Puppeteer
+  const logoPath = path.join(__dirname, "../assets/logo.svg");
+  const medalPath = path.join(__dirname, "../assets/certificateMedalPlaceholder.png");
+  const logoBase64 = fs.readFileSync(logoPath).toString("base64");
+  const medalBase64 = fs.readFileSync(medalPath).toString("base64");
+  const logoDataUrl = `data:image/svg+xml;base64,${logoBase64}`;
+  const medalDataUrl = `data:image/png;base64,${medalBase64}`;
 
   return `
     <!DOCTYPE html>
@@ -82,75 +100,126 @@ const generateHTML = async (data: CertificateData): Promise<string> => {
 
         body {
           font-family: 'Inter', sans-serif;
-          width:  1000px;
-          height: 700px;
-          display: flex;
+          width:    991px;
+          height:   700px;
+          display:  flex;
           overflow: hidden;
+          background: #ffffff;
+          border-top: 20px solid #2D84C4;
+        }
+
+        /* ── Sidebar ── */
+        aside {
+          position:   relative;
+          width:      200px;
+          flex-shrink: 0;
           background: #ffffff;
         }
 
-        /* Left gray sidebar */
-        .sidebar {
-          width: 80px;
-          background: #e8e8e8;
-          flex-shrink: 0;
-          position: relative;
+        .sidebar-inner {
+          height:        100%;
+          border-right:  1px solid #eee;
+          position:      relative;
+          overflow:      hidden;
         }
 
-        .sidebar-circle {
-          width:  60px;
-          height: 60px;
-          background: #d0d0d0;
-          border-radius: 50%;
-          position: absolute;
-          bottom: 80px;
-          left: 10px;
+        /* Vertical blue stripe */
+        .sidebar-stripe {
+          position:   absolute;
+          top:        0;
+          left:       25%;
+          width:      50%;
+          height:     100%;
+          background: #2D84C4;
+          z-index:    0;
         }
 
-        /* Main content */
-        .main {
-          flex: 1;
-          display: flex;
+        /* Logo sits on top of stripe */
+        .sidebar-logo {
+          position:    absolute;
+          top:         0;
+          left:        0;
+          z-index:     10;
+          width:       99%;
+          background:  #ffffff;
+          object-fit:  contain;
+        }
+
+        /* Medal circle at bottom */
+        .sidebar-medal-wrapper {
+          position:         absolute;
+          bottom:           3.5%;
+          left:             50%;
+          transform:        translateX(-50%);
+          z-index:          10;
+          width:            115px;
+          height:           115px;
+          border-radius:    50%;
+          background:       #ffffff;
+          display:          flex;
+          align-items:      center;
+          justify-content:  center;
+          overflow:         hidden;
+        }
+
+        .sidebar-medal-wrapper img {
+          width:  100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        /* Blue bottom bar (overlaps inner) */
+        .sidebar-bottom-bar {
+          position:   absolute;
+          bottom:     0;
+          left:       0;
+          width:      100%;
+          height:     60px;
+          background: #2D84C4;
+          z-index:    5;
+        }
+
+        /* ── Main ── */
+        main {
+          flex:         1;
+          display:      flex;
           flex-direction: column;
+          gap:          0;
         }
 
-        /* Top section */
-        .top {
-          display: flex;
-          padding: 30px 40px 20px;
-          align-items: flex-start;
-          gap: 20px;
+        /* Top header */
+        .header {
+          display:       flex;
+          align-items:   flex-start;
+          gap:           20px;
+          padding:       32px 40px 20px;
           border-bottom: 1px solid #eee;
         }
 
-        .logo {
-          width:  80px;
-          height: 80px;
-          object-fit: contain;
-        }
-
-        .org-info {
-          flex: 1;
-        }
-
         .org-presents {
-          font-size:   13px;
-          color:       #555;
+          font-size:     13px;
+          color:         #555;
           margin-bottom: 6px;
         }
 
+        .org-presents span {
+          font-weight: 500;
+        }
+
         .cert-title {
+          font-family:    'Playfair Display', serif;
           font-size:      28px;
           font-weight:    700;
           color:          #1a6eb5;
           letter-spacing: 1px;
-          font-family:    'Playfair Display', serif;
         }
 
-        /* Body section */
+        /* Body */
         .body {
-          padding:    30px 40px;
           flex:       1;
+          padding:    20px 40px 0;
+          max-height: 360px;
+          overflow:   hidden;
         }
 
         .to-text {
@@ -160,59 +229,76 @@ const generateHTML = async (data: CertificateData): Promise<string> => {
         }
 
         .teacher-name {
-          font-size:      42px;
-          font-weight:    700;
-          color:          #2c2c2c;
-          font-family:    'Playfair Display', serif;
-          margin-bottom:  12px;
+          font-family:   'Playfair Display', serif;
+          font-size:     42px;
+          font-weight:   700;
+          color:         #2c2c2c;
+          margin-bottom: 12px;
         }
 
         .program-title {
-          font-size:      14px;
-          color:          #555;
-          font-style:     italic;
-          margin-bottom:  16px;
+          font-size:     14px;
+          font-style:    italic;
+          color:         #555;
+          margin-bottom: 16px;
         }
 
-        .bullets {
-          list-style: none;
-          margin-bottom: 20px;
+        /* Topic grid: 4 rows, 3 cols, column-first flow */
+        .topics {
+          display:               grid;
+          grid-template-rows:    repeat(4, 1fr);
+          grid-template-columns: repeat(3, 1fr);
+          grid-auto-flow:        column;
+          height:                120px;
+          max-height:            120px;
+          overflow:              hidden;
+          list-style:            none;
+          gap:                   6px 0;
+          margin-bottom:         20px;
         }
 
-        .bullets li {
-          font-size:     13px;
-          color:         #444;
-          margin-bottom: 6px;
-          display:       flex;
-          align-items:   center;
-          gap:           8px;
+        .topic-item {
+          display:     flex;
+          align-items: center;
+          gap:         8px;
+          font-size:   13px;
+          color:       #444;
         }
 
-        .bullets li::before {
-          content:          "•";
-          color:            #1a6eb5;
-          font-size:        16px;
-          font-weight:      bold;
+        .bullet {
+          font-size:   16px;
+          font-weight: bold;
+          color:       #1a6eb5;
         }
 
-        /* Footer section */
+        /* Footer */
         .footer {
-          padding:        20px 40px;
-          display:        flex;
-          align-items:    flex-end;
+          display:         flex;
+          align-items:     flex-end;
           justify-content: space-between;
+          padding:         0 40px 32px;
         }
 
         .signer {
-          text-align: center;
           min-width:  140px;
+          text-align: center;
         }
 
-        .signature-line {
-          width:         120px;
+        .signature-box {
+          width:         160px;
           height:        50px;
           border-bottom: 1.5px solid #1a6eb5;
           margin-bottom: 6px;
+          display:       flex;
+          align-items:   center;
+          justify-content: center;
+          overflow:      hidden;
+        }
+
+        .signature-box img {
+          max-width:  100%;
+          max-height: 100%;
+          object-fit: contain;
         }
 
         .signer-name {
@@ -226,6 +312,7 @@ const generateHTML = async (data: CertificateData): Promise<string> => {
           color:     #777;
         }
 
+        /* QR section */
         .qr-section {
           text-align: center;
         }
@@ -242,85 +329,103 @@ const generateHTML = async (data: CertificateData): Promise<string> => {
         }
 
         .cert-issued {
-          font-size:  11px;
-          color:      #555;
-          margin-top: 6px;
+          font-size:   11px;
+          color:       #797979;
+          font-weight: 600;
+          margin-top:  6px;
         }
 
         .cert-issued strong {
-          color:       #1a6eb5;
-          font-weight: 600;
+          font-weight: 700;
+          color:       #535353;
         }
 
-        /* Bottom teal bar */
-        .bottom-bar {
-          height:     18px;
-          background: #1a9b8a;
+        /* Blue bottom bar */
+        .main-bottom-bar {
+          height:     60px;
           flex-shrink: 0;
+          background: #2D84C4;
         }
       </style>
     </head>
     <body>
 
-      <!-- Left sidebar -->
-      <div class="sidebar">
-        <div class="sidebar-circle"></div>
-      </div>
-
-      <!-- Main content -->
-      <div class="main">
-
-        <!-- Top -->
-        <div class="top">
+      <!-- Sidebar -->
+      <aside>
+        <div class="sidebar-inner">
+          <div class="sidebar-stripe"></div>
           <img
-            class="logo"
-            src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Navodaya_Vidyalaya_Samiti_logo.png/120px-Navodaya_Vidyalaya_Samiti_logo.png"
+            class="sidebar-logo"
+            src="${logoDataUrl}"
             alt="Logo"
           />
-          <div class="org-info">
-            <div class="org-presents">Navodaya Innovation Center presents this</div>
-            <div class="cert-title">CERTIFICATE OF COMPLETION</div>
+          <div class="sidebar-medal-wrapper">
+            <img
+              src="${medalDataUrl}"
+              alt="Medal"
+            />
+          </div>
+        </div>
+        <div class="sidebar-bottom-bar"></div>
+      </aside>
+
+      <!-- Main -->
+      <main>
+
+        <!-- Header -->
+        <div class="header">
+          <div>
+            <p class="org-presents">
+              <span>Navodaya Education Innovation Center</span> presents this
+            </p>
+            <h1 class="cert-title">CERTIFICATE OF COMPLETION</h1>
           </div>
         </div>
 
         <!-- Body -->
         <div class="body">
-          <div class="to-text">to</div>
-          <div class="teacher-name">${data.teacherName}</div>
-          <div class="program-title">${title}</div>
-          <ul class="bullets">
-            ${bullets.map((b) => `<li>${b}</li>`).join("")}
+          <p class="to-text">to</p>
+          <h2 class="teacher-name">${data.teacherName}</h2>
+          <p class="program-title">for completing ${title}</p>
+          <ul class="topics">
+            ${topicItems}
           </ul>
         </div>
 
         <!-- Footer -->
         <div class="footer">
+
           <div class="signer">
-            <div class="signature-line"></div>
-            <div class="signer-name">Abyekta Khanal</div>
-            <div class="signer-title">Chief Executive Officer</div>
+            <div class="signature-box">
+              ${ceoSignatureUrl ? `<img src="${ceoSignatureUrl}" alt="Signature"/>` : ""}
+            </div>
+            <p class="signer-name">${ceoName}</p>
+            <p class="signer-title">Chief Executive Officer</p>
           </div>
 
           <div class="signer">
-            <div class="signature-line"></div>
-            <div class="signer-name">${coordinator.name}</div>
-            <div class="signer-title">${coordinator.title}</div>
+            <div class="signature-box">
+              ${cooSignatureUrl ? `<img src="${cooSignatureUrl}" alt="Signature"/>` : ""}
+            </div>
+            <p class="signer-name">${coordinator.name}</p>
+            <p class="signer-title">${coordinator.title}</p>
           </div>
 
           <div class="qr-section">
-            <div class="qr-id">ID: ${data.certificateNumber}</div>
+            <p class="qr-id">ID: ${data.certificateNumber}</p>
             <img class="qr-image" src="${qrCodeDataUrl}" alt="QR Code"/>
-            <div class="cert-issued">
+            <p class="cert-issued">
               Certificate Issued<br/>
               <strong>${issuedDate}</strong>
-            </div>
+            </p>
           </div>
+
         </div>
 
         <!-- Bottom bar -->
-        <div class="bottom-bar"></div>
+        <div class="main-bottom-bar"></div>
 
-      </div>
+      </main>
     </body>
     </html>
   `;
@@ -338,7 +443,7 @@ export const generateCertificatePDF = async (
   await page.setContent(await generateHTML(data), { waitUntil: "networkidle0" });
 
   const pdf = await page.pdf({
-    width:           "1000px",
+    width:           "991px",
     height:          "700px",
     printBackground: true,
   });
