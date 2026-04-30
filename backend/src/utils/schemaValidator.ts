@@ -268,9 +268,48 @@ export type LogoutRequest = z.infer<typeof logoutSchema>
 // Skills
 export const createSkillSchema = z.object({
   name:    z.string().min(2, "Skill name is required"),
-  program: z.enum(["Activity-based Mathematics", "Reading & Language", "Pre-School Transformation",]),
+  program: z.enum(["Activity-based Mathematics", "Reading & Language", "Pre-School Transformation"]),
   module:  z.string().min(2, "Module is required"),
   unit:    z.string().optional(),
+}).superRefine((data, ctx) => {
+  const rule = programModuleMap[data.program];
+
+  if (!rule.modules.includes(data.module)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["module"],
+      message: `Invalid module for ${data.program}. Must be one of: ${rule.modules.join(", ")}`
+    });
+    return;
+  }
+
+  if (rule.requiresUnit) {
+    if (!data.unit) {
+      ctx.addIssue({
+        code:    z.ZodIssueCode.custom,
+        path:    ["unit"],
+        message: `Unit is required for ${data.program}`,
+      });
+      return;
+    }
+  }
+
+  const moduleUnits = rule.units?.[data.module];
+  if (moduleUnits) {
+    if (data.unit && !moduleUnits.includes(data.unit)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["unit"],
+        message: `Invalid unit for ${data.module}. Must be one of: ${moduleUnits.join(", ")}`
+      });
+    }
+  } else if (data.unit) {
+    ctx.addIssue({
+      code:    z.ZodIssueCode.custom,
+      path:    ["unit"],
+      message: `Unit is not applicable for ${data.module}`,
+    });
+  }
 });
 
 export const createTeacherSkillSchema = z.object({
