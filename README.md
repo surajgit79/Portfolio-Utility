@@ -320,6 +320,7 @@ Content-Type: multipart/form-data
 
 | Method | Endpoint | Description | Auth |
 |--------|----------|-------------|------|
+| GET | `/training-records` | Get record by ID with details | Protected |
 | GET | `/training-records/teacher/:teacherId` | Records by teacher | Protected |
 | GET | `/training-records/event/:eventId` | Records by event | Protected |
 | POST | `/training-records` | Create record | Admin |
@@ -346,6 +347,48 @@ Content-Type: multipart/form-data
   "rating": 5,
   "feedback": "Great learning experience",
   "skills": ["Math", "Teaching"]
+}
+```
+
+**Get Record by ID Response:**
+```json
+{
+  "success": true,
+  "message": "Training record fetched successfully",
+  "data": {
+    "id": "REC-2026-0001",
+    "rating": 5,
+    "feedback": "Excellent participation",
+    "trainingDate": "2026-05-01",
+    "refPhotos": ["photo1.jpg", "photo2.jpg"],
+    "certificateNumber": "ABM-B1P1-2026-0001",
+    "createdAt": "2026-05-01T10:00:00.000Z",
+    "updatedAt": "2026-05-01T10:00:00.000Z",
+    "training": {
+      "name": "Training on Basic Math Concepts",
+      "program": "Activity-based Mathematics",
+      "module": "Book 1",
+      "unit": "Phase 1",
+      "venue": "Conference Hall A",
+      "description": "Introduction to activity-based mathematics",
+      "startDate": "2026-05-01",
+      "mentorsName": "John Doe"
+    },
+    "teacher": {
+      "id": "TCH-2026-0001",
+      "name": "Ram Bahadur",
+      "email": "ram.bahadur@school.com"
+    },
+    "skills": [
+      {
+        "id": "SKL-2026-0001",
+        "name": "ABM Class 4 Book 1",
+        "program": "Activity-based Mathematics",
+        "module": "Class 4",
+        "unit": "Book 1"
+      }
+    ]
+  }
 }
 ```
 
@@ -473,7 +516,6 @@ Content-Type: multipart/form-data
 | certificate_number | TEXT | UNIQUE, NOT NULL |
 | ref_photos | TEXT | |
 | feedback | TEXT | |
-| skills | TEXT[] | DEFAULT '{}' |
 | created_at | TIMESTAMP | NOT NULL |
 | updated_at | TIMESTAMP | NOT NULL |
 
