@@ -120,6 +120,13 @@
       "when": 1777456424816,
       "tag": "0016_blushing_moira_mactaggert",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1777601570155,
+      "tag": "0017_tan_shiver_man",
+      "breakpoints": true
     }
   ]
 }

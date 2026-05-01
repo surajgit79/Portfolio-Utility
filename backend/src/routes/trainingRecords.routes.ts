@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { createTrainingRecord, bulkCreateTrainingRecords, getTrainingRecordsByTeacher, getTrainingRecordsByEvent, updateTrainingRecord, deleteTrainingRecord, } from "../controllers/trainingRecords.controller";
+import { createTrainingRecord, bulkCreateTrainingRecords, getTrainingRecordsByTeacher, getTrainingRecordsByEvent, updateTrainingRecord, deleteTrainingRecord, getTrainingRecordsById, } from "../controllers/trainingRecords.controller";
 import { requireAuth } from "../middlewares/requireAuth";
 import { requireRole } from "../middlewares/requireRole";
 
@@ -13,6 +13,11 @@ export async function trainingRecordRoutes(app: FastifyInstance) {
     app.get("/event/:eventId", {
         preHandler: [requireAuth],
         handler: getTrainingRecordsByEvent,
+    });
+
+    app.get("/:id",{
+       preHandler: [requireAuth],
+       handler: getTrainingRecordsById, 
     });
 
     // Admin only

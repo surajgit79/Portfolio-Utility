@@ -66,7 +66,6 @@ export const trainingRecords = pgTable("training_records", {
     refPhotos: text("ref_photos"),
     feedback: text("feedback"),
     trainingDate: date("training_date"),
-    skills: text("skills").array().default([]),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (table) => ({

@@ -28,7 +28,7 @@ export const createTrainingRecord = async (
 export const bulkCreateTrainingRecords = async (
     request: FastifyRequest,
     reply: FastifyReply
-    ) => {
+) => {
     const body = bulkCreateTrainingRecordSchema.safeParse(request.body);
 
     if (!body.success) {
@@ -45,6 +45,20 @@ export const bulkCreateTrainingRecords = async (
         success: true,
         message: `${result.created.length} records created, ${result.skipped.length} skipped`,
         data:    result,
+    });
+};
+
+export const getTrainingRecordsById = async(
+    request: FastifyRequest,
+    reply: FastifyReply
+) =>{
+    const { id } = request.params as { id: string};
+    const record = await trainingRecordService.getById(id);
+    
+    return reply.send({
+        success: true,
+        message: "Training record fetched successfully",
+        data: record,
     });
 };
 

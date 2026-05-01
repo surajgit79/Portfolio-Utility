@@ -129,6 +129,14 @@ export const trainingRecordService = {
         return { data, total};
     },
 
+    getById: async(id: string)=>{
+        const record = await trainingRecordRepository.findByIdWithDetails(id);
+        if(!record){
+            throw new AppError(404, ErrorCode.NOT_FOUND, "Trainnig record not found");
+        }
+        return record;
+    },
+
     update: async (id: string, data: {
         rating?:    number;
         refPhotos?: string;
@@ -137,7 +145,7 @@ export const trainingRecordService = {
     }) => {
         const existing = await trainingRecordRepository.findById(id);
         if (!existing) {
-        throw new AppError(404, ErrorCode.NOT_FOUND, "Training record not found");
+            throw new AppError(404, ErrorCode.NOT_FOUND, "Training record not found");
         }
 
         return trainingRecordRepository.update(id, {
