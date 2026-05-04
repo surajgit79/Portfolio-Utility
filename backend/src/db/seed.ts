@@ -222,7 +222,6 @@ const seed = async () => {
       trainingEventId:   record.trainingEventId,
       rating:            record.rating,
       certificateNumber,
-      skills:            allSkills[record.id.slice(-1) as unknown as number % allSkills.length],
     });
   }
 
