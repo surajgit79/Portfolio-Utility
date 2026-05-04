@@ -11,6 +11,7 @@ export const certificateService = {
 
         const event = await certificateRepository.findTrainingEvent(record.trainingEventId);
         const teacher = await certificateRepository.findTeacher(record.teacherId);
+        const skills = await certificateRepository.findSkillsByTrainingRecord(record.teacherId, record.trainingEventId);
 
         return {
             certificateNumber: record.certificateNumber,
@@ -25,6 +26,7 @@ export const certificateService = {
             description: event.description,
             mentorName: event.mentorsName,
             issuedAt: record.createdAt,
+            skills,
         };
     },
 
@@ -36,6 +38,7 @@ export const certificateService = {
 
         const event = await certificateRepository.findTrainingEvent(record.trainingEventId);
         const teacher = await certificateRepository.findTeacher(record.teacherId);
+        const skills = await certificateRepository.findSkillsByTrainingRecord(record.teacherId, record.trainingEventId);
 
         return generateCertificatePDF({
             teacherName: teacher.name,
@@ -51,6 +54,7 @@ export const certificateService = {
             mentorName: event.mentorsName,
             certificateNumber: record.certificateNumber,
             issuedAt: record.createdAt,
+            skills,
         });
     },
 
@@ -67,8 +71,9 @@ export const certificateService = {
 
       // Generate individual PDFs
       const pdfs = await Promise.all(
-        records.map(({ teacherName, teacherId, certificateNumber, createdAt }) =>
-          generateCertificatePDF({
+        records.map(async ({ teacherName, teacherId, certificateNumber, createdAt }) => {
+          const skills = await certificateRepository.findSkillsByTrainingRecord(teacherId, eventId);
+          return generateCertificatePDF({
             teacherName,
             teacherId,
             trainingName: event.name,
@@ -82,8 +87,9 @@ export const certificateService = {
             mentorName: event.mentorsName  ?? null,
             certificateNumber,
             issuedAt: createdAt,
-          })
-        )
+            skills,
+          });
+        })
       );
 
       return mergePDFs(pdfs);

@@ -18,6 +18,7 @@ interface CertificateData {
   mentorName:        string | null;
   certificateNumber: string;
   issuedAt:          Date;
+  skills:            Array<{ name: string; module: string; unit: string | null }>;
 }
 
 // Signature URLs hardcoded per person
@@ -43,10 +44,9 @@ const getCoordinator = (program: string): { name: string; title: string } => {
 
 const getProgramDescription = (
   program: string,
-  module:  string,
-  unit:    string | null
+  skills:  Array<{ name: string; module: string; unit: string | null }>
 ): { title: string; bullets: string[] } => {
-  const bullets = unit ? [`${module} - ${unit}`] : [module];
+  const bullets = skills.map(s => s.unit ? `${s.module} - ${s.unit}: ${s.name}` : `${s.module}: ${s.name}`);
   return {
     title: `${program} Program`,
     bullets,
@@ -55,7 +55,7 @@ const getProgramDescription = (
 
 const generateHTML = async (data: CertificateData): Promise<string> => {
   const coordinator = getCoordinator(data.program);
-  const { title, bullets } = getProgramDescription(data.program, data.module, data.unit);
+  const { title, bullets } = getProgramDescription(data.program, data.skills);
 
   const issuedDate = new Date(data.issuedAt).toLocaleDateString("en-US", {
     day:   "numeric",
@@ -84,7 +84,13 @@ const generateHTML = async (data: CertificateData): Promise<string> => {
   const logoPath = path.join(__dirname, "../assets/logo.svg");
   const medalPath = path.join(__dirname, "../assets/certificateMedalPlaceholder.png");
   const logoBase64 = fs.readFileSync(logoPath).toString("base64");
-  const medalBase64 = fs.readFileSync(medalPath).toString("base64");
+  let medalBase64: string;
+  try {
+    medalBase64 = fs.readFileSync(medalPath).toString("base64");
+  } catch {
+    // Use a minimal 1x1 transparent PNG if medal image is missing
+    medalBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";
+  }
   const logoDataUrl = `data:image/svg+xml;base64,${logoBase64}`;
   const medalDataUrl = `data:image/png;base64,${medalBase64}`;
 

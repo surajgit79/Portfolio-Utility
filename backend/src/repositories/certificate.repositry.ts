@@ -1,6 +1,6 @@
 import { db } from "../db/client"
-import { teachers, trainingEvents, trainingRecords } from "../db/schema"
-import { eq } from "drizzle-orm";
+import { teachers, trainingEvents, trainingRecords, teacherSkills, skills } from "../db/schema"
+import { eq, and } from "drizzle-orm";
 
 
 export const certificateRepository = {
@@ -17,6 +17,23 @@ export const certificateRepository = {
     findTeacher: async(teacherId: string)=>{
         const [teacher] = await db.select().from(teachers).where(eq(teachers.id, teacherId));
         return teacher;
+    },
+
+    findSkillsByTrainingRecord: async (teacherId: string, trainingEventId: string) => {
+      return db.select({
+        name: skills.name,
+        module: skills.module,
+        unit: skills.unit,
+      })
+      .from(teacherSkills)
+      .innerJoin(skills, eq(teacherSkills.skillId, skills.id))
+      .innerJoin(trainingRecords, eq(teacherSkills.trainingRecordId, trainingRecords.id))
+      .where(
+        and(
+          eq(teacherSkills.teacherId, teacherId),
+          eq(trainingRecords.trainingEventId, trainingEventId)
+        )
+      );
     },
 
     findByEventId: async (eventId: string) => {
