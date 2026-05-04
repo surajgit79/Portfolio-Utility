@@ -1,0 +1,1 @@
+ALTER TABLE "training_records" ADD COLUMN "training_date" date;
