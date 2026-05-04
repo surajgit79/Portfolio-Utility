@@ -381,6 +381,61 @@ export async function getTrainings(id: string): Promise<TrainingAttended[]> {
     }
 }
 
+export type TrainingRecordByIdResponse = {
+    success: boolean,
+    message: string,
+    data: TrainingRecordById
+}
+
+export type TrainingRecordById = {
+    id?: string,
+    rating?: number,
+    feedback?: string,
+    trainingDate?: string,
+    refPhotos?: string,
+    certificateNumber?: string,
+    createdAt?: string,
+    updatedAt?: string,
+    training?: {
+        name?: string,
+        program?: string,
+        module?: string,
+        unit?: string,
+        venue?: string,
+        description?: string,
+        startDate?: string,
+        mentorsName?: string
+    },
+    teacher?: {
+        id?: string,
+        name?: string,
+        email?: string
+    },
+    skills?: string[]
+}
+
+export async function getTrainingById(id: string): Promise<TrainingRecordById | null> {
+    try {
+        const res = await fetch(`/api/training-records/${id}`, {
+            method: 'GET',
+            credentials: 'include',
+            cache: 'no-store',
+        })
+
+        const json: TrainingRecordByIdResponse = await res.json()
+
+        if (!res.ok || !json.success) {
+            console.warn('Training fetch failed:', json?.message)
+            return null
+        }
+
+        return json.data
+    } catch (error) {
+        console.error(`Failed to fetch training with id: ${id}.`, error)
+        return null
+    }
+}
+
 export async function uploadTrainingRecordsCSV(file: File) {
     const formData = new FormData()
     formData.append('file', file)
@@ -398,6 +453,53 @@ export async function uploadTrainingRecordsCSV(file: File) {
     }
 
     return json
+}
+
+export async function downloadCertificate(certificateNumber: string) {
+    const res = await fetch(`/api/certificates/${certificateNumber}/download`, {
+        method: 'GET',
+        credentials: 'include',
+    })
+
+    if (!res.ok) {
+        const text = await res.text()
+        throw new Error(text || 'Certificate download failed')
+    }
+
+    const blob = await res.blob()
+    const url = window.URL.createObjectURL(blob)
+
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${certificateNumber}.pdf`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+
+    window.URL.revokeObjectURL(url)
+}
+
+export async function viewCertificate(certificateNumber: string) {
+    const res = await fetch(`/api/certificates/${certificateNumber}/view`, {
+        method: 'GET',
+        credentials: 'include',
+    })
+
+    if (!res.ok) {
+        const text = await res.text()
+        throw new Error(text || 'Certificate view failed')
+    }
+
+    const blob = await res.blob()
+    const url = window.URL.createObjectURL(blob)
+
+    // 🔥 open in new tab instead of download
+    window.open(url, '_blank')
+
+    // optional cleanup delay
+    setTimeout(() => {
+        window.URL.revokeObjectURL(url)
+    }, 5000)
 }
 
 export type EventRecordsResponse = {
