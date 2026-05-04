@@ -5,46 +5,68 @@ import fs from "fs";
 import path from "path";
 
 interface CertificateData {
-  teacherName:       string;
-  teacherId:         string;
-  trainingName:      string;
-  program:           string;
-  module:            string;
-  unit:              string | null;
-  venue:             string | null;
-  startDate:         Date;
-  duration:          string;
-  description:       string | null;
-  mentorName:        string | null;
+  teacherName: string;
+  teacherId: string;
+  trainingName: string;
+  program: string;
+  module: string;
+  unit: string | null;
+  venue: string | null;
+  startDate: Date;
+  duration: string;
+  description: string | null;
+  mentorName: string | null;
   certificateNumber: string;
-  issuedAt:          Date;
-  skills:            Array<{ name: string; module: string; unit: string | null }>;
+  issuedAt: Date;
+  skills: Array<{ name: string; module: string; unit: string | null }>;
 }
 
+// Convert local assets to base64 data URLs for Puppeteer
+const logoPath = path.join(__dirname, "../assets/logoTransparantBG.svg");
+const medalPath = path.join(__dirname, "../assets/certificateMedalPlaceholder.png");
+const logoBase64 = fs.readFileSync(logoPath).toString("base64");
+
+let medalBase64: string;
+try {
+  medalBase64 = fs.readFileSync(medalPath).toString("base64");
+} catch {
+  // Use a minimal 1x1 transparent PNG if medal image is missing
+  medalBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";
+}
+const logoDataUrl = `data:image/svg+xml;base64,${logoBase64}`;
+const medalDataUrl = `data:image/png;base64,${medalBase64}`;
+
 // Signature URLs hardcoded per person
-const SIGNATURES: Record<string, string> = {
-  "Abyekta Khanal": "https://your-cdn.com/signatures/abyekta-khanal.png",   // replace with real URL
-  "Nikita Bhattarai": "https://your-cdn.com/signatures/nikita-bhattarai.png",
-  "Sita Thing":      "https://your-cdn.com/signatures/sita-thing.png",
-  "Hari Acharya":    "https://your-cdn.com/signatures/hari-acharya.png",
+const SIGNATURESBASE64: Record<string, string> = {
+  "Abyekta Khanal": fs.readFileSync(path.join(__dirname, "../assets/signatures/abyekta_svg_black.svg")).toString("base64"),
+  "Nikita Bhattarai": fs.readFileSync(path.join(__dirname, "../assets/signatures/nikita_svg_black.svg")).toString("base64"),
+  "Sita Thing": fs.readFileSync(path.join(__dirname, "../assets/signatures/abyekta_svg_black.svg")).toString("base64"),
+  "Hari Acharya": fs.readFileSync(path.join(__dirname, "../assets/signatures/abyekta_svg_black.svg")).toString("base64"),
 };
+
+const SIGNATURES: Record<string, string> = {
+  "Abyekta Khanal": `data:image/svg+xml;base64,${SIGNATURESBASE64['Abyekta Khanal']}`,
+  "Nikita Bhattarai": `data:image/svg+xml;base64,${SIGNATURESBASE64['Nikita Bhattarai']}`,
+  "Sita Thing": `data:image/svg+xml;base64,${SIGNATURESBASE64['Abyekta Khanal']}`,
+  "Hari Acharya": `data:image/svg+xml;base64,${SIGNATURESBASE64['Abyekta Khanal']}`,
+}
 
 const getCoordinator = (program: string): { name: string; title: string } => {
   switch (program) {
     case "Activity-based Mathematics":
-      return { name: "Nikita Bhattarai", title: "ABM Co-ordinator"  };
+      return { name: "Nikita Bhattarai", title: "ABM Co-ordinator" };
     case "Reading & Language":
-      return { name: "Sita Thing",       title: "R&L Co-ordinator"  };
+      return { name: "Sita Thing", title: "R&L Co-ordinator" };
     case "Pre-School Transformation":
-      return { name: "Hari Acharya",     title: "PST Co-ordinator"  };
+      return { name: "Hari Acharya", title: "PST Co-ordinator" };
     default:
-      return { name: "Co-ordinator",     title: "Program Co-ordinator" };
+      return { name: "Co-ordinator", title: "Program Co-ordinator" };
   }
 };
 
 const getProgramDescription = (
   program: string,
-  skills:  Array<{ name: string; module: string; unit: string | null }>
+  skills: Array<{ name: string; module: string; unit: string | null }>
 ): { title: string; bullets: string[] } => {
   const bullets = skills.map(s => s.unit ? `${s.module} - ${s.unit}: ${s.name}` : `${s.module}: ${s.name}`);
   return {
@@ -58,20 +80,20 @@ const generateHTML = async (data: CertificateData): Promise<string> => {
   const { title, bullets } = getProgramDescription(data.program, data.skills);
 
   const issuedDate = new Date(data.issuedAt).toLocaleDateString("en-US", {
-    day:   "numeric",
+    day: "numeric",
     month: "long",
-    year:  "numeric",
+    year: "numeric",
   });
 
-  const profileUrl  = `${process.env.FRONTEND_URL}/teachers/${data.teacherId}`;
+  const profileUrl = `${process.env.FRONTEND_URL}/teachers/${data.teacherId}`;
   const qrCodeDataUrl = await QRCode.toDataURL(profileUrl, {
-    width:  100,
+    width: 100,
     margin: 1,
     color: { dark: "#1a1a4e", light: "#ffffff" },
   });
 
-  const ceoName         = "Abyekta Khanal";
-  const ceoSignatureUrl = SIGNATURES[ceoName]         ?? "";
+  const ceoName = "Abyekta Khanal";
+  const ceoSignatureUrl = SIGNATURES[ceoName] ?? "";
   const cooSignatureUrl = SIGNATURES[coordinator.name] ?? "";
 
   // Build topic grid: max 12 items (4 rows × 3 cols), flow column-first
@@ -80,19 +102,7 @@ const generateHTML = async (data: CertificateData): Promise<string> => {
     .map((b) => `<li class="topic-item"><span class="bullet">•</span>${b}</li>`)
     .join("");
 
-  // Convert local assets to base64 data URLs for Puppeteer
-  const logoPath = path.join(__dirname, "../assets/logo.svg");
-  const medalPath = path.join(__dirname, "../assets/certificateMedalPlaceholder.png");
-  const logoBase64 = fs.readFileSync(logoPath).toString("base64");
-  let medalBase64: string;
-  try {
-    medalBase64 = fs.readFileSync(medalPath).toString("base64");
-  } catch {
-    // Use a minimal 1x1 transparent PNG if medal image is missing
-    medalBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";
-  }
-  const logoDataUrl = `data:image/svg+xml;base64,${logoBase64}`;
-  const medalDataUrl = `data:image/png;base64,${medalBase64}`;
+
 
   return `
     <!DOCTYPE html>
@@ -442,15 +452,15 @@ export const generateCertificatePDF = async (
 ): Promise<Buffer> => {
   const browser = await puppeteer.launch({
     headless: true,
-    args:     ["--no-sandbox", "--disable-setuid-sandbox"],
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
   });
 
   const page = await browser.newPage();
   await page.setContent(await generateHTML(data), { waitUntil: "networkidle0" });
 
   const pdf = await page.pdf({
-    width:           "991px",
-    height:          "700px",
+    width: "991px",
+    height: "700px",
     printBackground: true,
   });
 
@@ -462,7 +472,7 @@ export const mergePDFs = async (pdfs: Buffer[]): Promise<Buffer> => {
   const mergedPdf = await PDFDocument.create();
 
   for (const pdfBuffer of pdfs) {
-    const pdf   = await PDFDocument.load(pdfBuffer);
+    const pdf = await PDFDocument.load(pdfBuffer);
     const pages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
     pages.forEach((page) => mergedPdf.addPage(page));
   }

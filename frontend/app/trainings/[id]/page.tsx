@@ -67,7 +67,7 @@ export default function Training() {
         const program = `${data.training?.program || 'N/A'} (${data.training?.module || 'N/A'}  | ${data.training?.unit || 'N/A'} )`
 
         return (
-            <div className="mt-6 bg-white p-10 rounded-md">
+            <div className="mt-6 bg-white p-10 rounded-md shadow-sm border">
                 <div className="flex justify-between items-start">
                     <H1
                         text="Training Details"
@@ -75,7 +75,7 @@ export default function Training() {
                     />
 
                     <div className="flex gap-3 items-center">
-                        <ViewIcon
+                        {/* <ViewIcon
                             className="text-[#2D84C4] cursor-pointer h-7 w-7"
                             onClick={async () => {
                                 if (!data.certificateNumber) {
@@ -89,9 +89,9 @@ export default function Training() {
                                     alert(err instanceof Error ? err.message : 'View failed')
                                 }
                             }}
-                        />
+                        /> */}
                         <DownloadIcon
-                            className="text-[#2D84C4] cursor-pointer h-7 w-7"
+                            className="text-[#2D84C4] cursor-pointer h-6 w-6"
                             onClick={async () => {
                                 if (!data.certificateNumber) {
                                     alert('Certificate number not found')
@@ -114,7 +114,7 @@ export default function Training() {
                     </div>
                 </div>
 
-                <H3
+                <H2
                     text={data.training?.name || 'DUMMY TITLE'}
                     classNames="font-medium"
                 />
@@ -123,13 +123,13 @@ export default function Training() {
                     <div className="col-span-10">
                         <img
                             src={image}
-                            className="object-cover w-full max-h-[420px] rounded-md"
+                            className="object-cover w-full max-h-105 shadow-sm"
                             alt={data.training?.name || 'Training image'}
                         />
                     </div>
 
                     <div className="col-span-10">
-                        <div className="grid grid-cols-2 gap-x-2 gap-y-3 bg-[#F0F9FF] p-5 mb-5 rounded-md">
+                        <div className="grid grid-cols-2 gap-x-2 gap-y-3 bg-[#F0F9FF] p-5 mb-5 rounded-md shadow-md border">
                             <div className="flex flex-col">
                                 <span className="text-[#AAAAAA] font-medium">
                                     Completed By:
@@ -197,9 +197,10 @@ export default function Training() {
                         </div>
 
                         <div className="mt-2">
-                            <span className="text-[#2D84C4] font-bold">
-                                Description
-                            </span>
+                            <H3
+                                text="Description"
+                                classNames="font-bold mt-5"
+                            />
                             <p className="mt-2 border p-5 rounded-lg shadow-sm bg-[#F0F9FF]">
                                 {data.training?.description || 'N/A'}
                             </p>
@@ -210,7 +211,7 @@ export default function Training() {
                 <div>
                     <H3
                         text="Skills"
-                        classNames="font-bold mt-5"
+                        classNames="font-bold mt-5 !mb-2"
                     />
 
                     <div className="grid grid-cols-2 lg:grid-cols-5 gap-x-2.5">
@@ -218,15 +219,18 @@ export default function Training() {
                             data.skills.map((skill) => (
                                 <span
                                     key={skill}
-                                    className="bg-[#F0F9FF] rounded-lg h-fit p-1 px-3 mr-1 my-2 text-black shadow-sm"
+                                    className="bg-[#F0F9FF] rounded-lg h-fit p-1 px-3 mr-1 my-2 text-black shadow-sm border"
                                 >
                                     {skill}
                                 </span>
                             ))
                         ) : (
-                            <span className="bg-[#F0F9FF] rounded-lg h-fit p-1 px-3 mr-1 my-2 text-black shadow-sm">
-                                N/A
-                            </span>
+                            <>
+                                <span className="bg-[#F0F9FF] rounded-lg h-fit p-1 px-3 mr-1 my-2 text-black shadow-sm border">N/A</span>
+                                <span className="bg-[#F0F9FF] rounded-lg h-fit p-1 px-3 mr-1 my-2 text-black shadow-sm border">N/A</span>
+                                <span className="bg-[#F0F9FF] rounded-lg h-fit p-1 px-3 mr-1 my-2 text-black shadow-sm border">N/A</span>
+                                <span className="bg-[#F0F9FF] rounded-lg h-fit p-1 px-3 mr-1 my-2 text-black shadow-sm border">N/A</span>
+                            </>
                         )}
                     </div>
                 </div>
@@ -235,7 +239,7 @@ export default function Training() {
                     <div className="flex justify-between my-5">
                         <H3 text="Feedback" classNames="font-bold !mb-0" />
                         <p className="flex gap-1 justify-center align-center">
-                            <Star fill={`yellow`} className=" cursor-pointer h-5 w-5" strokeWidth={1} stroke={`#303030`} />
+                            <Star fill={`#F5A641`} className=" cursor-pointer h-5 w-5" strokeWidth={1} stroke={`#303030`} />
                             {data.rating || 0}/5
                         </p>
                     </div>
