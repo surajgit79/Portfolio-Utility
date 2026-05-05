@@ -148,12 +148,29 @@ export default function Dashboard() {
                                 </DropdownMenuGroup>
 
                                 <DropdownMenuGroup>
-                                    <DropdownMenuLabel>Add Training</DropdownMenuLabel>
+                                    <DropdownMenuLabel>Training</DropdownMenuLabel>
                                     <DropdownMenuItem 
                                         className="cursor-pointer"
                                         onClick={() => router.push("/trainings/add/bulk")}
                                     >
-                                        Bulk
+                                        List All
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem 
+                                        className="cursor-pointer"
+                                        onClick={() => router.push("/trainings/add/bulk")}
+                                    >
+                                        Bulk Add
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                </DropdownMenuGroup>
+
+                                <DropdownMenuGroup>
+                                    <DropdownMenuLabel>Certificates</DropdownMenuLabel>
+                                    <DropdownMenuItem 
+                                        className="cursor-pointer"
+                                        onClick={() => router.push("/certificate/bulk/")}
+                                    >
+                                        Bulk Download
                                     </DropdownMenuItem>
                                 </DropdownMenuGroup>
                             </DropdownMenuContent>
