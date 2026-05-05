@@ -381,10 +381,12 @@ export async function getTrainings(id: string): Promise<TrainingAttended[]> {
     }
 }
 
-export type TrainingRecordByIdResponse = {
-    success: boolean,
-    message: string,
-    data: TrainingRecordById
+type Skills = {
+    id: string,
+    name: string,
+    program: string,
+    module: string,
+    unit: string
 }
 
 export type TrainingRecordById = {
@@ -411,7 +413,13 @@ export type TrainingRecordById = {
         name?: string,
         email?: string
     },
-    skills?: string[]
+    skills?: Skills[]
+}
+
+export type TrainingRecordByIdResponse = {
+    success: boolean,
+    message: string,
+    data: TrainingRecordById
 }
 
 export async function getTrainingById(id: string): Promise<TrainingRecordById | null> {
@@ -493,13 +501,50 @@ export async function viewCertificate(certificateNumber: string) {
     const blob = await res.blob()
     const url = window.URL.createObjectURL(blob)
 
-    // 🔥 open in new tab instead of download
     window.open(url, '_blank')
 
-    // optional cleanup delay
     setTimeout(() => {
         window.URL.revokeObjectURL(url)
     }, 5000)
+}
+
+export async function getTrainingEvents() {
+    const res = await fetch('/api/training-events', {
+        method: 'GET',
+        credentials: 'include',
+    })
+
+    if (!res.ok) {
+        const text = await res.text()
+        throw new Error(text || 'Failed to fetch training events')
+    }
+
+    const result = await res.json()
+    return result.data
+}
+
+export async function downloadBulkCertificates(trainingId: string) {
+    const res = await fetch(`/api/certificates/download/bulk?trainingId=${trainingId}`, {
+        method: 'GET',
+        credentials: 'include',
+    })
+
+    if (!res.ok) {
+        const text = await res.text()
+        throw new Error(text || 'Bulk certificate download failed')
+    }
+
+    const blob = await res.blob()
+    const url = window.URL.createObjectURL(blob)
+
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${trainingId}-certificates.pdf`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+
+    window.URL.revokeObjectURL(url)
 }
 
 export type EventRecordsResponse = {

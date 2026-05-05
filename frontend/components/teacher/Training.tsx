@@ -1,5 +1,5 @@
 import { HI, H3, PG } from "../defaults/Typography"
-import { ShieldCheckIcon } from "@heroicons/react/24/outline"
+import { ShieldCheckIcon, PlusIcon } from "@heroicons/react/24/outline"
 import { Button } from "../ui/button"
 import { useEffect, useState } from "react"
 import type { TrainingAttended } from "@/types"
@@ -10,11 +10,12 @@ import { useRouter } from "next/navigation"
 type Props = {
     id: string
     classNames: string
+    isAdmin: boolean
 }
 
 const STEP = 2
 
-export const TrainingBlock = ({ id, classNames }: Props) => {
+export const TrainingBlock = ({ id, classNames, isAdmin }: Props) => {
     const [trainings, setTrainings] = useState<TrainingAttended[]>([])
     const [visibleCount, setVisibleCount] = useState(STEP)
 
@@ -40,11 +41,26 @@ export const TrainingBlock = ({ id, classNames }: Props) => {
 
     return (
         <div className={classNames}>
-            <HI
-                text="Training"
-                classNames=""
-                icon={<ShieldCheckIcon className="h-7" />}
-            />
+            <div className="flex justify-between items-start">
+                <HI
+                    text="Training"
+                    classNames=""
+                    icon={<ShieldCheckIcon className="h-7" />}
+                />
+                {
+                    isAdmin && (
+                        <PlusIcon
+                            className="h-8 text-[#2D84C4] cursor-pointer stroke-2"
+                            onClick={() => {
+                                router.push('/trainings/records/add/')
+                                router.refresh()
+                                }
+                            }
+                        />
+                    )
+                }
+            </div>
+
 
             <div className="flex flex-col gap-0">
                 {trainings.length === 0 && (
@@ -90,30 +106,35 @@ export const TrainingBlock = ({ id, classNames }: Props) => {
                 ))}
 
                 {trainings.length > 0 && (
-                    <div className="flex gap-3 mt-3">
-                        {visibleCount < trainings.length && (
-                            <Button
-                                className="bg-[#E9F4FC] text-md text-[#2D84C4] font-bold cursor-pointer"
-                                onClick={() =>
-                                    setVisibleCount((prev) => prev + STEP)
-                                }
-                            >
-                                Show More &#9662;
-                            </Button>
-                        )}
+                    <div className="flex gap-3 mt-3 items-center justify-between">
+                        <div>
+                            {visibleCount < trainings.length && (
+                                <Button
+                                    className="bg-[#E9F4FC] text-md text-[#2D84C4] font-bold cursor-pointer"
+                                    onClick={() =>
+                                        setVisibleCount((prev) => prev + STEP)
+                                    }
+                                >
+                                    Show More &#9662;
+                                </Button>
+                            )}
 
-                        {visibleCount > STEP && (
-                            <Button
-                                className="bg-gray-200 text-md text-gray-700 font-bold cursor-pointer"
-                                onClick={() =>
-                                    setVisibleCount((prev) =>
-                                        Math.max(STEP, prev - STEP)
-                                    )
-                                }
-                            >
-                                Show Less &#9652;
-                            </Button>
-                        )}
+                            {visibleCount > STEP && (
+                                <Button
+                                    className="bg-gray-200 text-md text-gray-700 font-bold cursor-pointer"
+                                    onClick={() =>
+                                        setVisibleCount((prev) =>
+                                            Math.max(STEP, prev - STEP)
+                                        )
+                                    }
+                                >
+                                    Show Less &#9652;
+                                </Button>
+                            )}
+                        </div>
+                        <div>
+                            {trainings.length} Completed
+                        </div>
                     </div>
                 )}
             </div>
