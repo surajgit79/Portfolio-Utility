@@ -13,7 +13,7 @@ type Props = {
     isAdmin: boolean
 }
 
-const STEP = 2
+const STEP = 3
 
 export const TrainingBlock = ({ id, classNames, isAdmin }: Props) => {
     const [trainings, setTrainings] = useState<TrainingAttended[]>([])
@@ -106,7 +106,7 @@ export const TrainingBlock = ({ id, classNames, isAdmin }: Props) => {
                 ))}
 
                 {trainings.length > 0 && (
-                    <div className="flex gap-3 mt-3 items-center justify-between">
+                    <div className={`flex gap-3 mt-3 items-center ${trainings.length <= 3 ? '' : 'justify-between'}`}>
                         <div>
                             {visibleCount < trainings.length && (
                                 <Button

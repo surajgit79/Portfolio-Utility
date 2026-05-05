@@ -595,8 +595,9 @@ export const dummyEventRecords: EventRecords[] = [
     }
 ]
 
-export async function getEventRecords(id: string): Promise<EventRecords[]> {
-    return dummyEventRecords
+export async function getEventRecords(id: string): Promise<EventRecords[] | null> {
+    // return dummyEventRecords
+    return null
 }
 
 export type CareerResponse = {
@@ -640,8 +641,9 @@ export const dummyCareer: Career[] = [
     }
 ]
 
-export async function getCareers(id: string): Promise<Career[]> {
-    return dummyCareer
+export async function getCareers(id: string): Promise<Career[] | null> {
+    return null
+    // return dummyCareer
     // const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL
 
     // if (!BASE_URL) {
