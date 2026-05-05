@@ -35,20 +35,32 @@ try {
 }
 const logoDataUrl = `data:image/svg+xml;base64,${logoBase64}`;
 const medalDataUrl = `data:image/png;base64,${medalBase64}`;
+/*
+  Abyekta Khanal - CEO
+  Nikita Bhattarai - Math Lead | Math
+  Anita Gautam - Pre School Lead | Pre School
+  Ramita Darlami - Teacher's Development Lead | English
+  Anupama Thapa Magar - Reading Program Lead | English
+  Manchan Tiwari - Math Lead | Math
+*/
 
 // Signature URLs hardcoded per person
 const SIGNATURESBASE64: Record<string, string> = {
   "Abyekta Khanal": fs.readFileSync(path.join(__dirname, "../assets/signatures/abyekta_svg_black.svg")).toString("base64"),
   "Nikita Bhattarai": fs.readFileSync(path.join(__dirname, "../assets/signatures/nikita_svg_black.svg")).toString("base64"),
-  "Sita Thing": fs.readFileSync(path.join(__dirname, "../assets/signatures/abyekta_svg_black.svg")).toString("base64"),
-  "Hari Acharya": fs.readFileSync(path.join(__dirname, "../assets/signatures/abyekta_svg_black.svg")).toString("base64"),
+  "Anita Gautam": fs.readFileSync(path.join(__dirname, "../assets/signatures/anita_svg_black.svg")).toString("base64"),
+  "Ramita Darlami": fs.readFileSync(path.join(__dirname, "../assets/signatures/ramita_svg_black.svg")).toString("base64"),
+  "Anupama Thapa Magar": fs.readFileSync(path.join(__dirname, "../assets/signatures/anupama_svg_black.svg")).toString("base64"),
+  "Manchan Tiwari": fs.readFileSync(path.join(__dirname, "../assets/signatures/abyekta_svg_black.svg")).toString("base64"),
 };
 
 const SIGNATURES: Record<string, string> = {
   "Abyekta Khanal": `data:image/svg+xml;base64,${SIGNATURESBASE64['Abyekta Khanal']}`,
   "Nikita Bhattarai": `data:image/svg+xml;base64,${SIGNATURESBASE64['Nikita Bhattarai']}`,
-  "Sita Thing": `data:image/svg+xml;base64,${SIGNATURESBASE64['Abyekta Khanal']}`,
-  "Hari Acharya": `data:image/svg+xml;base64,${SIGNATURESBASE64['Abyekta Khanal']}`,
+  "Anita Gautam": `data:image/svg+xml;base64,${SIGNATURESBASE64['Anita Gautam']}`,
+  "Ramita Darlami": `data:image/svg+xml;base64,${SIGNATURESBASE64['Ramita Darlami']}`,
+  "Anupama Thapa Magar": `data:image/svg+xml;base64,${SIGNATURESBASE64['Anupama Thapa Magar']}`,
+  "Manchan Tiwari": `data:image/svg+xml;base64,${SIGNATURESBASE64['Abyekta Khanal']}`,
 }
 
 const getCoordinator = (program: string): { name: string; title: string } => {
@@ -56,7 +68,7 @@ const getCoordinator = (program: string): { name: string; title: string } => {
     case "Activity-based Mathematics":
       return { name: "Nikita Bhattarai", title: "ABM Co-ordinator" };
     case "Reading & Language":
-      return { name: "Sita Thing", title: "R&L Co-ordinator" };
+      return { name: "Anupama Thapa Magar", title: "Reading Program Lead" };
     case "Pre-School Transformation":
       return { name: "Hari Acharya", title: "PST Co-ordinator" };
     default:
@@ -101,8 +113,6 @@ const generateHTML = async (data: CertificateData): Promise<string> => {
     .slice(0, 12)
     .map((b) => `<li class="topic-item"><span class="bullet">•</span>${b}</li>`)
     .join("");
-
-
 
   return `
     <!DOCTYPE html>
@@ -302,7 +312,7 @@ const generateHTML = async (data: CertificateData): Promise<string> => {
 
         .signature-box {
           width:         160px;
-          height:        50px;
+          height:        80px;
           border-bottom: 1.5px solid #1a6eb5;
           margin-bottom: 6px;
           display:       flex;
