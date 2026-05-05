@@ -5,24 +5,19 @@ import fs from "fs";
 import path from "path";
 
 interface CertificateData {
-  teacherName: string;
-  teacherId: string;
-  trainingName: string;
-  program: string;
-  module: string;
-  unit: string | null;
-  venue: string | null;
-  startDate: Date;
-  duration: string;
-  description: string | null;
-  mentorName: string | null;
+  teacherName:       string;
+  teacherId:         string;
+  program:           string;
   certificateNumber: string;
-  issuedAt: Date;
-  skills: Array<{ name: string; module: string; unit: string | null }>;
+  issuedAt:          Date;
+  modules: Array<{
+    module: string;
+    unit:   string | null;
+  }>;
 }
 
-// Convert local assets to base64 data URLs for Puppeteer
-const logoPath = path.join(__dirname, "../assets/logoTransparantBG.svg");
+// Assets
+const logoPath  = path.join(__dirname, "../assets/logoTransparantBG.svg");
 const medalPath = path.join(__dirname, "../assets/certificateMedalPlaceholder.png");
 const logoBase64 = fs.readFileSync(logoPath).toString("base64");
 
@@ -30,10 +25,10 @@ let medalBase64: string;
 try {
   medalBase64 = fs.readFileSync(medalPath).toString("base64");
 } catch {
-  // Use a minimal 1x1 transparent PNG if medal image is missing
   medalBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";
 }
-const logoDataUrl = `data:image/svg+xml;base64,${logoBase64}`;
+
+const logoDataUrl  = `data:image/svg+xml;base64,${logoBase64}`;
 const medalDataUrl = `data:image/png;base64,${medalBase64}`;
 /*
   Abyekta Khanal - CEO
@@ -44,9 +39,8 @@ const medalDataUrl = `data:image/png;base64,${medalBase64}`;
   Manchan Tiwari - Math Lead | Math
 */
 
-// Signature URLs hardcoded per person
 const SIGNATURESBASE64: Record<string, string> = {
-  "Abyekta Khanal": fs.readFileSync(path.join(__dirname, "../assets/signatures/abyekta_svg_black.svg")).toString("base64"),
+  "Abyekta Khanal":   fs.readFileSync(path.join(__dirname, "../assets/signatures/abyekta_svg_black.svg")).toString("base64"),
   "Nikita Bhattarai": fs.readFileSync(path.join(__dirname, "../assets/signatures/nikita_svg_black.svg")).toString("base64"),
   "Anita Gautam": fs.readFileSync(path.join(__dirname, "../assets/signatures/anita_svg_black.svg")).toString("base64"),
   "Ramita Darlami": fs.readFileSync(path.join(__dirname, "../assets/signatures/ramita_svg_black.svg")).toString("base64"),
@@ -70,48 +64,39 @@ const getCoordinator = (program: string): { name: string; title: string } => {
     case "Reading & Language":
       return { name: "Anupama Thapa Magar", title: "Reading Program Lead" };
     case "Pre-School Transformation":
-      return { name: "Hari Acharya", title: "PST Co-ordinator" };
+      return { name: "Hari Acharya",     title: "PST Co-ordinator" };
     default:
-      return { name: "Co-ordinator", title: "Program Co-ordinator" };
+      return { name: "Co-ordinator",     title: "Program Co-ordinator" };
   }
 };
 
-const getProgramDescription = (
-  program: string,
-  skills: Array<{ name: string; module: string; unit: string | null }>
-): { title: string; bullets: string[] } => {
-  const bullets = skills.map(s => s.unit ? `${s.module} - ${s.unit}: ${s.name}` : `${s.module}: ${s.name}`);
-  return {
-    title: `${program} Program`,
-    bullets,
-  };
-};
-
-const generateHTML = async (data: CertificateData): Promise<string> => {
+export const generateHTML = async (data: CertificateData): Promise<string> => {
   const coordinator = getCoordinator(data.program);
-  const { title, bullets } = getProgramDescription(data.program, data.skills);
 
   const issuedDate = new Date(data.issuedAt).toLocaleDateString("en-US", {
-    day: "numeric",
+    day:   "numeric",
     month: "long",
-    year: "numeric",
+    year:  "numeric",
   });
 
-  const profileUrl = `${process.env.FRONTEND_URL}/teachers/${data.teacherId}`;
+  const profileUrl    = `${process.env.FRONTEND_URL}/teachers/${data.teacherId}`;
   const qrCodeDataUrl = await QRCode.toDataURL(profileUrl, {
-    width: 100,
+    width:  100,
     margin: 1,
-    color: { dark: "#1a1a4e", light: "#ffffff" },
+    color:  { dark: "#1a1a4e", light: "#ffffff" },
   });
 
-  const ceoName = "Abyekta Khanal";
-  const ceoSignatureUrl = SIGNATURES[ceoName] ?? "";
-  const cooSignatureUrl = SIGNATURES[coordinator.name] ?? "";
+  const ceoName         = "Abyekta Khanal";
+  const ceoSignatureUrl = SIGNATURES[ceoName]            ?? "";
+  const cooSignatureUrl = SIGNATURES[coordinator.name]   ?? "";
 
-  // Build topic grid: max 12 items (4 rows × 3 cols), flow column-first
-  const topicItems = bullets
+  // Build module bullets
+  const topicItems = data.modules
     .slice(0, 12)
-    .map((b) => `<li class="topic-item"><span class="bullet">•</span>${b}</li>`)
+    .map((m) => {
+      const label = m.unit ? `${m.module} — ${m.unit}` : m.module;
+      return `<li class="topic-item"><span class="bullet">•</span>${label}</li>`;
+    })
     .join("");
 
   return `
@@ -134,22 +119,20 @@ const generateHTML = async (data: CertificateData): Promise<string> => {
           border-top: 20px solid #2D84C4;
         }
 
-        /* ── Sidebar ── */
         aside {
-          position:   relative;
-          width:      200px;
+          position:    relative;
+          width:       200px;
           flex-shrink: 0;
-          background: #ffffff;
+          background:  #ffffff;
         }
 
         .sidebar-inner {
-          height:        100%;
-          border-right:  1px solid #eee;
-          position:      relative;
-          overflow:      hidden;
+          height:       100%;
+          border-right: 1px solid #eee;
+          position:     relative;
+          overflow:     hidden;
         }
 
-        /* Vertical blue stripe */
         .sidebar-stripe {
           position:   absolute;
           top:        0;
@@ -160,7 +143,6 @@ const generateHTML = async (data: CertificateData): Promise<string> => {
           z-index:    0;
         }
 
-        /* Logo sits on top of stripe */
         .sidebar-logo {
           position:    absolute;
           top:         0;
@@ -171,30 +153,28 @@ const generateHTML = async (data: CertificateData): Promise<string> => {
           object-fit:  contain;
         }
 
-        /* Medal circle at bottom */
         .sidebar-medal-wrapper {
-          position:         absolute;
-          bottom:           3.5%;
-          left:             50%;
-          transform:        translateX(-50%);
-          z-index:          10;
-          width:            115px;
-          height:           115px;
-          border-radius:    50%;
-          background:       #ffffff;
-          display:          flex;
-          align-items:      center;
-          justify-content:  center;
-          overflow:         hidden;
+          position:        absolute;
+          bottom:          3.5%;
+          left:            50%;
+          transform:       translateX(-50%);
+          z-index:         10;
+          width:           115px;
+          height:          115px;
+          border-radius:   50%;
+          background:      #ffffff;
+          display:         flex;
+          align-items:     center;
+          justify-content: center;
+          overflow:        hidden;
         }
 
         .sidebar-medal-wrapper img {
-          width:  100%;
-          height: 100%;
+          width:      100%;
+          height:     100%;
           object-fit: cover;
         }
 
-        /* Blue bottom bar (overlaps inner) */
         .sidebar-bottom-bar {
           position:   absolute;
           bottom:     0;
@@ -205,15 +185,12 @@ const generateHTML = async (data: CertificateData): Promise<string> => {
           z-index:    5;
         }
 
-        /* ── Main ── */
         main {
-          flex:         1;
-          display:      flex;
+          flex:           1;
+          display:        flex;
           flex-direction: column;
-          gap:          0;
         }
 
-        /* Top header */
         .header {
           display:       flex;
           align-items:   flex-start;
@@ -228,9 +205,7 @@ const generateHTML = async (data: CertificateData): Promise<string> => {
           margin-bottom: 6px;
         }
 
-        .org-presents span {
-          font-weight: 500;
-        }
+        .org-presents span { font-weight: 500; }
 
         .cert-title {
           font-family:    'Playfair Display', serif;
@@ -240,7 +215,6 @@ const generateHTML = async (data: CertificateData): Promise<string> => {
           letter-spacing: 1px;
         }
 
-        /* Body */
         .body {
           flex:       1;
           padding:    20px 40px 0;
@@ -269,7 +243,6 @@ const generateHTML = async (data: CertificateData): Promise<string> => {
           margin-bottom: 16px;
         }
 
-        /* Topic grid: 4 rows, 3 cols, column-first flow */
         .topics {
           display:               grid;
           grid-template-rows:    repeat(4, 1fr);
@@ -297,7 +270,6 @@ const generateHTML = async (data: CertificateData): Promise<string> => {
           color:       #1a6eb5;
         }
 
-        /* Footer */
         .footer {
           display:         flex;
           align-items:     flex-end;
@@ -318,7 +290,7 @@ const generateHTML = async (data: CertificateData): Promise<string> => {
           display:       flex;
           align-items:   center;
           justify-content: center;
-          overflow:      hidden;
+          overflow:        hidden;
         }
 
         .signature-box img {
@@ -338,10 +310,7 @@ const generateHTML = async (data: CertificateData): Promise<string> => {
           color:     #777;
         }
 
-        /* QR section */
-        .qr-section {
-          text-align: center;
-        }
+        .qr-section { text-align: center; }
 
         .qr-id {
           font-size:     10px;
@@ -366,39 +335,27 @@ const generateHTML = async (data: CertificateData): Promise<string> => {
           color:       #535353;
         }
 
-        /* Blue bottom bar */
         .main-bottom-bar {
-          height:     60px;
+          height:      60px;
           flex-shrink: 0;
-          background: #2D84C4;
+          background:  #2D84C4;
         }
       </style>
     </head>
     <body>
 
-      <!-- Sidebar -->
       <aside>
         <div class="sidebar-inner">
           <div class="sidebar-stripe"></div>
-          <img
-            class="sidebar-logo"
-            src="${logoDataUrl}"
-            alt="Logo"
-          />
+          <img class="sidebar-logo" src="${logoDataUrl}" alt="Logo"/>
           <div class="sidebar-medal-wrapper">
-            <img
-              src="${medalDataUrl}"
-              alt="Medal"
-            />
+            <img src="${medalDataUrl}" alt="Medal"/>
           </div>
         </div>
         <div class="sidebar-bottom-bar"></div>
       </aside>
 
-      <!-- Main -->
       <main>
-
-        <!-- Header -->
         <div class="header">
           <div>
             <p class="org-presents">
@@ -408,19 +365,16 @@ const generateHTML = async (data: CertificateData): Promise<string> => {
           </div>
         </div>
 
-        <!-- Body -->
         <div class="body">
           <p class="to-text">to</p>
           <h2 class="teacher-name">${data.teacherName}</h2>
-          <p class="program-title">for completing ${title}</p>
+          <p class="program-title">for completing ${data.program} Program</p>
           <ul class="topics">
             ${topicItems}
           </ul>
         </div>
 
-        <!-- Footer -->
         <div class="footer">
-
           <div class="signer">
             <div class="signature-box">
               ${ceoSignatureUrl ? `<img src="${ceoSignatureUrl}" alt="Signature"/>` : ""}
@@ -445,12 +399,9 @@ const generateHTML = async (data: CertificateData): Promise<string> => {
               <strong>${issuedDate}</strong>
             </p>
           </div>
-
         </div>
 
-        <!-- Bottom bar -->
         <div class="main-bottom-bar"></div>
-
       </main>
     </body>
     </html>
@@ -462,15 +413,15 @@ export const generateCertificatePDF = async (
 ): Promise<Buffer> => {
   const browser = await puppeteer.launch({
     headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    args:     ["--no-sandbox", "--disable-setuid-sandbox"],
   });
 
   const page = await browser.newPage();
   await page.setContent(await generateHTML(data), { waitUntil: "networkidle0" });
 
   const pdf = await page.pdf({
-    width: "991px",
-    height: "700px",
+    width:           "991px",
+    height:          "700px",
     printBackground: true,
   });
 
@@ -482,7 +433,7 @@ export const mergePDFs = async (pdfs: Buffer[]): Promise<Buffer> => {
   const mergedPdf = await PDFDocument.create();
 
   for (const pdfBuffer of pdfs) {
-    const pdf = await PDFDocument.load(pdfBuffer);
+    const pdf   = await PDFDocument.load(pdfBuffer);
     const pages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
     pages.forEach((page) => mergedPdf.addPage(page));
   }

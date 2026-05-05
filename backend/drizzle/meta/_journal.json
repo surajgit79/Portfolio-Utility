@@ -127,6 +127,20 @@
       "when": 1777601570155,
       "tag": "0017_tan_shiver_man",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1777972643581,
+      "tag": "0018_short_sentinels",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1777973637830,
+      "tag": "0019_wonderful_surge",
+      "breakpoints": true
     }
   ]
 }

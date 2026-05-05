@@ -7,6 +7,7 @@ import { uploadMultipleImages } from "../utils/imageUploader";
 import { generateCertificateNumber, generateId } from "../utils/idGenerator";
 import { db } from "../db/client";
 import { trainingRecords } from "../db/schema";
+import { certificateService } from "./certificate.service";
 
 export const trainingRecordService = {
     create: async(
@@ -43,10 +44,10 @@ export const trainingRecordService = {
         }
 
         const id = await generateId("training_records");
-        const certificateNumber = await generateCertificateNumber(event.program, event.module, event.unit?? null);
+        await certificateService.createOrUpdate(data.teacherId, event.program, event.module,event.unit ?? null, id );
 
         return trainingRecordRepository.create({
-            id, ...data, certificateNumber, refPhotos,
+            id, ...data, refPhotos,
             trainingDate: data.trainingDate || undefined,
         });
     },
@@ -83,14 +84,13 @@ export const trainingRecordService = {
                 }
 
                 const id = await generateId("training_records");
-                const certificateNumber = await generateCertificateNumber(event.program, event.module, event.unit?? null);
+                await certificateService.createOrUpdate(teacherId, event.program, event.module, event.unit ?? null, id);
 
                 const [record] = await tx.insert(trainingRecords).values({
                     id,
                     teacherId,
                     trainingEventId: data.trainingEventId,
                     rating: data.rating,
-                    certificateNumber,
                     feedback: data.feedback,
                     trainingDate: data.trainingDate || undefined,
                 }).returning();
