@@ -62,7 +62,6 @@ export const trainingRecords = pgTable("training_records", {
     teacherId: text("teacher_id").notNull().references(() => teachers.id, { onDelete: "cascade" }),
     trainingEventId: text("training_event_id").notNull().references(() => trainingEvents.id, { onDelete: "cascade" }),
     rating: integer("rating").notNull(),
-    certificateNumber: text("certificate_number").notNull().unique(),
     refPhotos: text("ref_photos"),
     feedback: text("feedback"),
     trainingDate: date("training_date"),
@@ -71,7 +70,6 @@ export const trainingRecords = pgTable("training_records", {
 }, (table) => ({
     teacherIdIdx:       index("training_records_teacher_id_idx").on(table.teacherId),
     trainingEventIdIdx: index("training_records_training_event_id_idx").on(table.trainingEventId),
-    certNumberIdx:      index("training_records_certificate_number_idx").on(table.certificateNumber),
 })); 
 
 export const careerRecords = pgTable("career_records",{
@@ -142,4 +140,29 @@ export const teacherSkills = pgTable("teacher_skills", {
     teacherIdIdx: index("teacher_id_idx").on(table.teacherId),
     skillIdx: index("skill_id_idx").on(table.skillId),
     uniqueTeacherSkill: uniqueIndex("teacher_skills_unique").on(table.teacherId, table.skillId),
+}));
+
+export const certificates = pgTable("certificates", {
+    id: text("id").primaryKey(),
+    teacherId: text("teacher_id").notNull().references(() => teachers.id, { onDelete: "cascade" }),
+    program: programEnum("program").notNull(),
+    certificateNumber: text("certificate_number").notNull().unique(),
+    issuedAt: timestamp("issued_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  teacherIdIdx: index("certificates_teacher_id_idx").on(table.teacherId),
+  programIdx: index("certificates_program_idx").on(table.program),
+  uniqueTeacherProgram: uniqueIndex("certificates_teacher_program_unique").on(table.teacherId, table.program),
+}));
+
+export const certificateModules = pgTable("certificate_modules", {
+  id: text("id").primaryKey(),
+  certificateId: text("certificate_id").notNull().references(() => certificates.id, { onDelete: "cascade" }),
+  trainingRecordId: text("training_record_id").notNull().references(() => trainingRecords.id, { onDelete: "cascade" }),
+  module: text("module").notNull(),
+  unit: text("unit"),
+  completedAt: timestamp("completed_at").defaultNow().notNull(),
+}, (table) => ({
+  certificateIdIdx: index("certificate_modules_certificate_id_idx").on(table.certificateId),
+  uniqueModuleUnit: uniqueIndex("certificate_modules_unique").on(table.certificateId, table.module, table.unit),
 }));
