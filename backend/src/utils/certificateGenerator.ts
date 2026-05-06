@@ -405,7 +405,7 @@ export const generateCertificatePDF = async (
   });
 
   const page = await browser.newPage();
-  await page.setContent(await generateHTML(data), { waitUntil: "networkidle0" });
+  await page.setContent(await generateHTML(data), { waitUntil: "domcontentloaded", timeout: 300000 });
 
   const pdf = await page.pdf({
     width:           "991px",
