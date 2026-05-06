@@ -1,14 +1,16 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  async redirects(){
+  allowedDevOrigins: ['192.168.1.67'],
+
+  async redirects() {
     return [
       {
         source: '/',
         destination: '/dashboard',
         permanent: true,
       }
-    ]
+    ];
   }
 };
 
