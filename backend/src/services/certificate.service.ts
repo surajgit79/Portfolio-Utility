@@ -1,7 +1,9 @@
+import { db }                                   from "../db/client";
 import { certificateRepository }             from "../repositories/certificate.repositry";
-import { generateCertificatePDF, mergePDFs } from "../utils/certificateGenerator";
+import { generateCertificatePDF, mergePDFs, generateHTML } from "../utils/certificateGenerator";
 import { generateId, generateCertificateNumber } from "../utils/idGenerator";
 import { AppError, ErrorCode }               from "../utils/errorHandler";
+import puppeteer from "puppeteer";
 
 export const certificateService = {
   // Called when a training record is created
@@ -95,9 +97,22 @@ export const certificateService = {
       );
     }
 
+    // Get program from the training event
+    const { trainingEvents } = await import("../db/schema");
+    const { eq } = await import("drizzle-orm");
+    const [event] = await db
+      .select({ program: trainingEvents.program })
+      .from(trainingEvents)
+      .where(eq(trainingEvents.id, eventId));
+
+    if (!event) {
+      throw new AppError(404, ErrorCode.NOT_FOUND, "Training event not found");
+    }
+
+    const program = event.program;
+
     // Use single browser instance for all PDFs
-    const puppeteer = await import("puppeteer");
-    const browser   = await puppeteer.default.launch({
+    const browser = await puppeteer.launch({
       headless: true,
       args:     ["--no-sandbox", "--disable-setuid-sandbox"],
     });
@@ -116,8 +131,7 @@ export const certificateService = {
             // Get their program certificate
             const cert = await certificateRepository.findByTeacherAndProgram(
               teacherId,
-              // Get program from first record — all records in event have same program
-              records[0] as any
+              program
             );
 
             if (!cert) return null;
@@ -126,7 +140,6 @@ export const certificateService = {
             if (!data) return null;
 
             const page = await browser.newPage();
-            const { generateHTML } = await import("../utils/certificateGenerator");
 
             await page.setContent(
               await generateHTML({
@@ -137,7 +150,7 @@ export const certificateService = {
                 issuedAt:          data.issuedAt,
                 modules:           data.modules,
               }),
-              { waitUntil: "networkidle0" }
+              { waitUntil: "domcontentloaded", timeout: 60000 }
             );
 
             const pdf = await page.pdf({
