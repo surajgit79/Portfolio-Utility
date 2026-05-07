@@ -47,6 +47,17 @@ jest.mock("../../src/db/client", ()=>({
     },
 }));
 
+jest.mock("../../src/repositories/certificate.repositry", () => ({
+  certificateRepository: {
+    findByTeacherId: jest.fn().mockResolvedValue([]),
+  },
+}));
+
+jest.mock("../../src/utils/s3ImageHandler", () => ({
+  deleteImageByUrl: jest.fn(),
+  uploadImage:      jest.fn(),
+}));
+
 jest.mock("../../src/repositories/teacherSkill.repository", () => ({
   teacherSkillRepository: {
     findByTeacherIdWithSkill:   jest.fn().mockResolvedValue([]),

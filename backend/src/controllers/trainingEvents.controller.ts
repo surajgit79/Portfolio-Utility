@@ -95,4 +95,3 @@ export const deleteTrainingEvent = async(
         message: "Training event deleted successfully"
     });
 };
-

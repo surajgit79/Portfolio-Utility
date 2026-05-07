@@ -2,7 +2,7 @@ import { refreshTokenRepository } from "../repositories/refreshToken.repository"
 import { userRepository } from "../repositories/user.repository";
 import { AppError, ErrorCode } from "../utils/errorHandler";
 import { generateId } from "../utils/idGenerator";
-import { signAccessToken, signRefreshToken, signToken } from "../utils/jwtAuthenticator";
+import { signAccessToken, signRefreshToken } from "../utils/jwtAuthenticator";
 import { comparePassword, hashedPassword } from "../utils/passwordHasherVerifier";
 
 export const authService = {

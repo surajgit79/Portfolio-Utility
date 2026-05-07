@@ -17,29 +17,47 @@ const prefixMap: Record <TableName, string>= {
     bulk_jobs: "BLK",
 };
 
+const hashCode = (str: string): number => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+    }
+    return Math.abs(hash);
+};
+
 export const generateId = async (table: TableName) : Promise<string>=>{
     const year = new Date().getFullYear();
     const prefix = prefixMap[table];
     const pattern = `${prefix}-${year}-%`;
 
-    const result = await db.execute(
-        sql `SELECT id FROM ${sql.identifier(table)}
-            WHERE id LIKE ${pattern}
-            ORDER BY id desc
-            LIMIT 1`
-    );
+    const lockKey = hashCode(`generateId:${table}:${year}`);
 
-    const rows = result.rows as { id: string}[];
+    const result = await db.transaction(async (tx) => {
+        await tx.execute(sql`SELECT pg_advisory_xact_lock(${lockKey})`);
 
-    if(rows.length === 0){
-        return `${prefix}-${year}-0001`;
-    }
+        const res = await tx.execute(
+            sql`SELECT id FROM ${sql.identifier(table)}
+                WHERE id LIKE ${pattern}
+                ORDER BY id DESC
+                LIMIT 1`
+        );
 
-    const lastId = rows[0].id; 
-    const lastNumberId = parseInt(lastId.split("-").pop()!, 10);
-    const nextNumber = String(lastNumberId + 1 ).padStart(4, "0");
+        const rows = res.rows as { id: string}[];
 
-    return `${prefix}-${year}-${nextNumber}`;
+        if(rows.length === 0){
+            return `${prefix}-${year}-0001`;
+        }
+
+        const lastId = rows[0].id;
+        const lastNumberId = parseInt(lastId.split("-").pop()!, 10);
+        const nextNumber = String(lastNumberId + 1).padStart(4, "0");
+
+        return `${prefix}-${year}-${nextNumber}`;
+    });
+
+    return result;
 };
 
 export const generateCertificateNumber = async (
@@ -55,21 +73,29 @@ export const generateCertificateNumber = async (
     const prefix  = `${programCode}-${year}`;
     const pattern = `${prefix}-%`;
 
-    const result = await db.execute(
-        sql`SELECT certificate_number FROM certificates
-            WHERE certificate_number LIKE ${pattern}
-            ORDER BY certificate_number DESC
-            LIMIT 1`
-    );
+    const lockKey = hashCode(`generateCert:${program}:${year}`);
 
-    const rows = result.rows as { certificate_number: string }[];
+    const result = await db.transaction(async (tx) => {
+        await tx.execute(sql`SELECT pg_advisory_xact_lock(${lockKey})`);
 
-    if (rows.length === 0) {
-        return `${prefix}-0001`;
-    }
+        const res = await tx.execute(
+            sql`SELECT certificate_number FROM certificates
+                WHERE certificate_number LIKE ${pattern}
+                ORDER BY certificate_number DESC
+                LIMIT 1`
+        );
 
-    const lastNumber = parseInt(rows[0].certificate_number.split("-").pop()!, 10);
-    const nextNumber = String(lastNumber + 1).padStart(4, "0");
+        const rows = res.rows as { certificate_number: string }[];
 
-    return `${prefix}-${nextNumber}`;
+        if (rows.length === 0) {
+            return `${prefix}-0001`;
+        }
+
+        const lastNumber = parseInt(rows[0].certificate_number.split("-").pop()!, 10);
+        const nextNumber = String(lastNumber + 1).padStart(4, "0");
+
+        return `${prefix}-${nextNumber}`;
+    });
+
+    return result;
 };

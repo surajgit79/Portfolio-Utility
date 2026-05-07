@@ -2,7 +2,8 @@ import { userRepository } from "../repositories/user.repository";
 import { parseCSV, validateCSVHeaders } from "../utils/csvParser"
 import { AppError, ErrorCode } from "../utils/errorHandler";
 import { hashedPassword } from "../utils/passwordHasherVerifier";
-import { generateCertificateNumber, generateId } from "../utils/idGenerator";
+import { generateTempPassword } from "../utils/passwordGenerator";
+import { generateId } from "../utils/idGenerator";
 import { uploadRepository } from "../repositories/upload.repository";
 import { teacherRepository } from "../repositories/teacher.repository";
 import { careerRecordRepository } from "../repositories/careerRecord.repository";
@@ -40,7 +41,7 @@ export const uploadService = {
             continue;
             }
 
-            const hashed    = await hashedPassword("Teacher1234");
+            const hashed    = await hashedPassword(generateTempPassword());
             const userId    = await generateId("users");
             const teacherId = await generateId("teachers");
 
@@ -104,7 +105,7 @@ export const uploadService = {
                     teacherId: teacher.id,
                     role: row.role,
                     organization: row.organization,
-                    grade: row.grade as any ?? null,
+                    grade: row.grade as "Nursery" | "LKG" | "UKG" | "Grade 1" | "Grade 2" | "Grade 3" | "Grade 4" | "Grade 5" | "Grade 6" | "Grade 7" | "Grade 8" | "Grade 9" | "Grade 10" ?? null,
                     startDate: new Date(row.startDate),
                     endDate: row.endDate ? new Date(row.endDate) : null,
                     stillWorking: Number(row.stillWorking),
@@ -201,17 +202,15 @@ export const uploadService = {
                 }
 
                 const id                = await generateId("training_records");
-                const certificateNumber = await generateCertificateNumber(event.program,event.module,event.unit ?? null);
 
                 await db.insert(trainingRecords).values({
                     id,
                     teacherId:       teacher.id,
                     trainingEventId: row.trainingEventId,
                     rating:          Number(row.rating),
-                    certificateNumber,
                 });
 
-                created.push({email:row.email,trainingEventId:row.trainingEventId,certificateNumber});
+                created.push({email:row.email,trainingEventId:row.trainingEventId});
             } catch (error) {
                 errors.push({ email: row.email, reason: "Failed to create training record" });
             }
@@ -233,7 +232,6 @@ export const uploadService = {
 
         for(const row of rows){
             try {
-                // Validate program -> module -> unit hierarchy using Zod schema
                 const validation = createSkillSchema.safeParse({
                     name: row.name,
                     program: row.program,
@@ -257,7 +255,7 @@ export const uploadService = {
                 const skill = await skillRepository.create({
                     id,
                     name: row.name,
-                    program: row.program as any,
+                    program: row.program as "Activity-based Mathematics" | "Reading & Language" | "Pre-School Transformation",
                     module: row.module,
                     unit: row.unit || null,
                 });

@@ -1,9 +1,12 @@
 import { teacherRepository } from "../repositories/teacher.repository";
 import { userRepository } from "../repositories/user.repository";
+import { certificateRepository } from "../repositories/certificate.repositry";
+import { deleteImageByUrl } from "../utils/s3ImageHandler";
 import { generateId } from "../utils/idGenerator";
 import { AppError, ErrorCode } from "../utils/errorHandler";
 import { FastifyRequest } from "fastify";
 import { hashedPassword } from "../utils/passwordHasherVerifier";
+import { generateTempPassword } from "../utils/passwordGenerator";
 import { db } from "../db/client";
 import { users, teachers } from "../db/schema";
 import csv from "csv-parser";
@@ -95,7 +98,7 @@ export const teacherService = {
           continue;
         }
 
-        const hashed = await hashedPassword(validData.temporary_password || 'P@ssword123!');
+        const hashed = await hashedPassword(validData.temporary_password || generateTempPassword());
         const userId = await generateId('users');
         const teacherId = await generateId('teachers');
 
@@ -218,13 +221,28 @@ update: async (
 
     const { dob, teachingSince, ...rest } = data;
 
-    return teacherRepository.update(id, {
+    const updated = await teacherRepository.update(id, {
       ...rest,
       ...(dob && { dob: dob }),
       ...(teachingSince !== undefined && { teachingSince }),
       ...(imageUrl && { imageUrl }),
       updatedAt: new Date(),
     });
+
+    // Invalidate all certificates for this teacher so they get regenerated with updated data
+    const certs = await certificateRepository.findByTeacherId(id);
+    if (certs.length > 0) {
+      await Promise.all(
+        certs.map(async (c) => {
+          if (c.pdfUrl) {
+            try { await deleteImageByUrl(c.pdfUrl); } catch { /* ignore */ }
+          }
+          await certificateRepository.updateStatus(c.id, "pending");
+        })
+      );
+    }
+
+    return updated;
   },
 
   delete: async (id: string) => {

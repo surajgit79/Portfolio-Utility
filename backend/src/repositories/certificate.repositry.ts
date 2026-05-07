@@ -1,14 +1,20 @@
 import { db } from "../db/client";
-import { certificates, certificateModules, teachers, trainingRecords, bulkJobs, trainingEvents }  from "../db/schema";
+import { certificates, certificateModules, teachers, trainingRecords, bulkJobs, trainingEvents, programEnum }  from "../db/schema";
 import { eq, and, inArray } from "drizzle-orm";
 
+type Program = typeof programEnum.enumValues[number];
+
 export const certificateRepository = {
+  findByTeacherId: async (teacherId: string) => {
+    return db.select().from(certificates).where(eq(certificates.teacherId, teacherId));
+  },
+
   findByTeacherAndProgram: async (teacherId: string, program: string) => {
     const [certificate] = await db.select().from(certificates)
       .where(
         and(
           eq(certificates.teacherId, teacherId),
-          eq(certificates.program,   program as any)
+          eq(certificates.program,   program as Program)
         )
       );
     return certificate;
@@ -20,7 +26,9 @@ export const certificateRepository = {
   },
 
   findPending: async () => {
-    return db.select().from(certificates).where(eq(certificates.status, "pending"));
+    return db.select().from(certificates).where(
+      inArray(certificates.status, ["pending", "failed"])
+    );
   },
 
   findModulesByCertificateId: async (certificateId: string) => {
@@ -52,7 +60,7 @@ export const certificateRepository = {
     const [certificate] = await db.insert(certificates).values({
         id:                data.id,
         teacherId:         data.teacherId,
-        program:           data.program as any,
+        program:           data.program as Program,
         certificateNumber: data.certificateNumber,
         status:            "pending",
       }).returning();
@@ -79,20 +87,34 @@ export const certificateRepository = {
   updateStatus: async (
     certificateId: string,
     status: "pending" | "generating" | "ready" | "failed",
-    pdfUrl?: string
+    pdfUrl?: string,
+    errorReason?: string
   ) => {
+    const updates: Record<string, unknown> = {
+      status,
+      updatedAt: new Date(),
+    };
+
+    if (status === "ready") {
+      updates.pdfUrl = pdfUrl ?? null;
+      updates.errorReason = null;
+    } else if (status === "failed") {
+      updates.pdfUrl = null;
+      updates.errorReason = errorReason ?? null;
+    } else {
+      // pending / generating — clear both
+      updates.pdfUrl = null;
+      updates.errorReason = null;
+    }
+
     await db.update(certificates)
-      .set({
-        status,
-        ...(pdfUrl && { pdfUrl }),
-        updatedAt: new Date(),
-      })
+      .set(updates)
       .where(eq(certificates.id, certificateId));
   },
 
   updateTimestamp: async (certificateId: string) => {
     await db.update(certificates)
-      .set({ updatedAt: new Date(), status: "pending" })
+      .set({ updatedAt: new Date(), status: "pending", pdfUrl: null, errorReason: null })
       .where(eq(certificates.id, certificateId));
   },
 
@@ -122,6 +144,8 @@ export const certificateRepository = {
         trainingRecordId: trainingRecords.id,
         teacherName:      teachers.name,
         program:          trainingEvents.program,
+        module:           trainingEvents.module,
+        unit:             trainingEvents.unit,
       })
       .from(trainingRecords)
       .innerJoin(teachers,       eq(trainingRecords.teacherId,        teachers.id))
@@ -151,6 +175,22 @@ export const certificateRepository = {
 
   findPendingBulkJobs: async () => {
     return db.select().from(bulkJobs).where(eq(bulkJobs.status, "pending"));
+  },
+
+  findCompletedBulkJobByEvent: async (eventId: string) => {
+    const [job] = await db.select().from(bulkJobs)
+      .where(and(eq(bulkJobs.eventId, eventId), eq(bulkJobs.status, "completed")))
+      .orderBy(bulkJobs.createdAt)
+      .limit(1);
+    return job;
+  },
+
+  findPendingBulkJobByEvent: async (eventId: string) => {
+    const [job] = await db.select().from(bulkJobs)
+      .where(and(eq(bulkJobs.eventId, eventId), inArray(bulkJobs.status, ["pending", "processing"])))
+      .orderBy(bulkJobs.createdAt)
+      .limit(1);
+    return job;
   },
 
   updateBulkJob: async (

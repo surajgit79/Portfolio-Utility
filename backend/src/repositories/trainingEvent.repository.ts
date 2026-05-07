@@ -1,9 +1,10 @@
 import { and, eq, sql, desc } from "drizzle-orm";
 import { db } from "../db/client";
-import { trainingEvents } from "../db/schema";
+import { trainingEvents, programEnum } from "../db/schema";
 
 type TrainingEvent = typeof trainingEvents.$inferSelect;
 type NewTrainingEvent = typeof trainingEvents.$inferInsert;
+type Program = typeof programEnum.enumValues[number];
 
 export const trainingEventRepository = {
     findAll: async (program?: string, module?: string, unit?: string, page = 1, limit = 10) =>{
@@ -11,7 +12,7 @@ export const trainingEventRepository = {
         let query = db.select().from(trainingEvents).orderBy(desc(trainingEvents.updatedAt)).limit(limit).offset(offset);
 
         const conditions = [];
-        if(program) conditions.push(eq(trainingEvents.program, program as any));
+        if(program) conditions.push(eq(trainingEvents.program, program as Program));
         if(module) conditions.push(eq(trainingEvents.module, module));
         if(unit) conditions.push(eq(trainingEvents.unit, unit));
 
@@ -26,7 +27,7 @@ export const trainingEventRepository = {
         const query = db.select({ count: sql<number>`count(*)`}).from(trainingEvents);
         
         const conditions = [];
-        if (program) conditions.push(eq(trainingEvents.program, program as any));
+        if (program) conditions.push(eq(trainingEvents.program, program as Program));
         if (module)   conditions.push(eq(trainingEvents.module, module));
         if (unit)    conditions.push(eq(trainingEvents.unit, unit));
 
@@ -65,7 +66,7 @@ export const trainingEventRepository = {
         startDate: Date
     ): Promise<TrainingEvent | undefined> =>{
         const conditions = [
-        eq(trainingEvents.program, program as any),
+        eq(trainingEvents.program, program as Program),
         eq(trainingEvents.module, module),
         eq(trainingEvents.startDate, startDate),
         ];

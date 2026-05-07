@@ -1,26 +1,38 @@
 import cron from "node-cron";
 import { certificateService } from "../services/certificate.service";
 
+let isProcessingIndividual = false;
+let isProcessingBulk = false;
+
 export const initCronJobs = () => {
-  // Run at 2:00 PM every day
-  cron.schedule("0 14 * * *", async () => {
-    console.log("Cron: Processing pending certificates...");
+  cron.schedule("* * * * *", async () => {
+    if (isProcessingIndividual) {
+      return;
+    }
+    isProcessingIndividual = true;
     try {
       await certificateService.processPendingCertificates();
-      console.log("Cron: Individual certificates processed");
     } catch (error) {
       console.error("Cron: Certificate processing failed", error);
+    } finally {
+      isProcessingIndividual = false;
     }
   });
 
-  // Run bulk jobs at 2:05 PM (after individual certificates are ready)
-  cron.schedule("5 14 * * *", async () => {
-    console.log("Cron: Processing pending bulk jobs...");
+  cron.schedule("* * * * *", async () => {
+    if (isProcessingBulk) {
+      return;
+    }
+    if (isProcessingIndividual) {
+      return;
+    }
+    isProcessingBulk = true;
     try {
       await certificateService.processPendingBulkJobs();
-      console.log("Cron: Bulk jobs processed");
     } catch (error) {
       console.error("Cron: Bulk job processing failed", error);
+    } finally {
+      isProcessingBulk = false;
     }
   });
 

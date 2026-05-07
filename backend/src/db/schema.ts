@@ -35,7 +35,7 @@ export const teachers = pgTable("teachers",{
     updatedAt: timestamp("updated_at").defaultNow().notNull(),    
 }, (table)=>({
     userIdIdx: index("teachers_user_id_idx").on(table.userId),
-    emailIdx: index("teachers_emai_idx").on(table.email),
+    emailIdx: index("teachers_email_idx").on(table.email),
     nameIdx: index("teachers_name_idx").on(table.name),
 }));
 
@@ -85,7 +85,8 @@ export const careerRecords = pgTable("career_records",{
     stillWorking: integer("still_working").notNull().default(0),
     achievements: text("achievements"),
     refContactDetail: text("ref_contact"),
-    createdAt: timestamp("created_at").defaultNow().notNull()
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (table) => ({
     teacherIdIdx:    index("career_records_teacher_id_idx").on(table.teacherId),
     stillWorkingIdx: index("career_records_still_working_idx").on(table.stillWorking),
@@ -151,6 +152,7 @@ export const certificates = pgTable("certificates", {
     certificateNumber: text("certificate_number").notNull().unique(),
     pdfUrl: text("pdf_url"),
     status: certificateStatusEnum("status").notNull().default("pending"),
+    errorReason: text("error_reason"),
     issuedAt: timestamp("issued_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (table) => ({

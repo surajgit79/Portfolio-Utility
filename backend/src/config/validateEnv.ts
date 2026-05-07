@@ -6,9 +6,13 @@ const envSchema = z.object({
     JWT_SECRET: z.string().min(1, "JWT_SECRET is required"),
     JWT_EXPIRES_IN: z.string().default("15m"),
     FRONTEND_URL: z.string().default("http://localhost:3000"),
-    CLOUDINARY_CLOUD_NAME: z.string().min(1, "CLOUDINARY_CLOUD_NAME is required"),
-    CLOUDINARY_API_KEY: z.string().min(1, "CLOUDINARY_API_KEY is required"),
-    CLOUDINARY_API_SECRET: z.string().min(1, "CLOUDINARY_API_SECRET is required"),
+    S3_ENDPOINT: z.string().min(1, "S#_ENDPOINT is required"),
+    S3_REGION: z.string().default("us-east-1"),
+    S3_ACCESS_KEY: z.string().min(1, "S3_ACCESS_KEY is required"),
+    S3_SECRET_KEY: z.string().min(1, "S3_SECRET_KEY is required"),
+    S3_BUCKET: z.string().min(1, "S3_BUCKET is required"),
+    S3_PUBLIC_URL: z.string().optional(),
+    CHROME_PATH: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

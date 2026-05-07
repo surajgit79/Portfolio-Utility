@@ -15,6 +15,7 @@ import { requestLogger, responseLogger } from "./middlewares/requestLogger";
 import { uploadRoutes } from "./routes/upload.route";
 import { skillRoutes } from "./routes/skill.route";
 import { teacherSkillRoutes } from "./routes/teacherSkill.route";
+import { env } from "./config/env";
 
 const app = Fastify({
     logger: {
@@ -24,7 +25,7 @@ const app = Fastify({
 
 app.register(helmet);
 app.register(cors, {
-    origin: true,
+    origin: env.frontendUrl,
     credentials: true
 });
 app.register(rateLimit, {
