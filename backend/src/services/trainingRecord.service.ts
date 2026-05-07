@@ -44,12 +44,15 @@ export const trainingRecordService = {
         }
 
         const id = await generateId("training_records");
-        await certificateService.createOrUpdate(data.teacherId, event.program, event.module,event.unit ?? null, id );
 
-        return trainingRecordRepository.create({
+        const createdRecord = await trainingRecordRepository.create({
             id, ...data, refPhotos,
             trainingDate: data.trainingDate || undefined,
         });
+
+        await certificateService.createOrUpdate(data.teacherId, event.program, event.module,event.unit ?? null, id );
+
+        return createdRecord;
     },
 
     bulkCreate: async(
@@ -84,7 +87,6 @@ export const trainingRecordService = {
                 }
 
                 const id = await generateId("training_records");
-                await certificateService.createOrUpdate(teacherId, event.program, event.module, event.unit ?? null, id);
 
                 const [record] = await tx.insert(trainingRecords).values({
                     id,
@@ -94,6 +96,8 @@ export const trainingRecordService = {
                     feedback: data.feedback,
                     trainingDate: data.trainingDate || undefined,
                 }).returning();
+
+                await certificateService.createOrUpdate(teacherId, event.program, event.module, event.unit ?? null, id);
 
                 created.push(record);
             }

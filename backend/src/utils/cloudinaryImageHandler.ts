@@ -29,3 +29,25 @@ export const getPublicIdFromUrl = (url:string): string =>{
     const folder = parts[parts.length - 2];
     return `${folder}/${fileName}`;
 };
+
+export const deleteImageByUrl = async (url: string): Promise<void> => {
+    const publicId = getPublicIdFromUrl(url);
+    await cloudinary.uploader.destroy(publicId);
+};
+
+export const uploadBuffer = async (
+    buffer: Buffer,
+    folder: string,
+    filename: string
+): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+        { folder, public_id: filename, resource_type: "raw" },
+        (error, result) => {
+            if (error) reject(error);
+            else resolve(result!.secure_url);
+        }
+        );
+        stream.end(buffer);
+    });
+};

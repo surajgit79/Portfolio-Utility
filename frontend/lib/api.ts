@@ -1,7 +1,7 @@
 import Teacher from "@/app/teachers/[id]/page"
 import type { Teachers, Training, Program, EventRecords, Career, TrainingAttended, Pagination } from "@/types"
 
-const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL
+const BASE_URL = process.env.  
 
 if (!BASE_URL) {
     throw new Error('NEXT_PUBLIC_BACKEND_URL not set.')

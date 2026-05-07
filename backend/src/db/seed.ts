@@ -19,6 +19,10 @@ import { generateCertificateNumber } from "../utils/idGenerator";
 import fs from "fs";
 import path from "path";
 import { parseCSV } from "../utils/csvParser";
+import puppeteer from "puppeteer";
+import { generateHTML } from "../utils/certificateGenerator";
+import { uploadBuffer } from "../utils/cloudinaryImageHandler";
+import { eq } from "drizzle-orm";
 
 const seed = async () => {
   console.log("🧹 Cleaning existing data...");
@@ -144,56 +148,13 @@ const seed = async () => {
 
   console.log("🌱 Seeding training records...");
 
-  const allSkills = [
-    ["Communication", "Leadership", "Curriculum Design"],
-    ["Classroom Management", "Student Engagement"],
-    ["Assessment Techniques", "Data Analysis"],
-    ["Technology Integration", "Digital Literacy"],
-    ["Differentiated Instruction", "Inclusive Education"],
-    ["Project-Based Learning", "Critical Thinking"],
-    ["Parent Communication", "Collaborative Teaching"],
-    ["Behavior Management", "Social-Emotional Learning"],
-    ["Questioning Strategies", "Socratic Method"],
-    ["Formative Assessment", "Feedback Methods"],
-  ];
-
   const trainingRecordData = [
-    {
-      id:      "REC-2026-0001",
-      teacherId: "TCH-2026-0002",
-      trainingEventId: "TRN-2026-0001",
-      rating:  4,
-    },
-    {
-      id:      "REC-2026-0002",
-      teacherId: "TCH-2026-0003",
-      trainingEventId: "TRN-2026-0001",
-      rating:  5,
-    },
-    {
-      id:      "REC-2026-0003",
-      teacherId: "TCH-2026-0004",
-      trainingEventId: "TRN-2026-0001",
-      rating:  3,
-    },
-    {
-      id:      "REC-2026-0004",
-      teacherId: "TCH-2026-0002",
-      trainingEventId: "TRN-2026-0002",
-      rating:  4,
-    },
-    {
-      id:      "REC-2026-0005",
-      teacherId: "TCH-2026-0005",
-      trainingEventId: "TRN-2026-0003",
-      rating:  5,
-    },
-    {
-      id:      "REC-2026-0006",
-      teacherId: "TCH-2026-0006",
-      trainingEventId: "TRN-2026-0003",
-      rating:  4,
-    },
+    { id: "REC-2026-0001", teacherId: "TCH-2026-0002", trainingEventId: "TRN-2026-0001", rating: 4 },
+    { id: "REC-2026-0002", teacherId: "TCH-2026-0003", trainingEventId: "TRN-2026-0001", rating: 5 },
+    { id: "REC-2026-0003", teacherId: "TCH-2026-0004", trainingEventId: "TRN-2026-0001", rating: 3 },
+    { id: "REC-2026-0004", teacherId: "TCH-2026-0002", trainingEventId: "TRN-2026-0002", rating: 4 },
+    { id: "REC-2026-0005", teacherId: "TCH-2026-0005", trainingEventId: "TRN-2026-0003", rating: 5 },
+    { id: "REC-2026-0006", teacherId: "TCH-2026-0006", trainingEventId: "TRN-2026-0003", rating: 4 },
   ];
 
   let recIdx = 7;
@@ -214,10 +175,10 @@ const seed = async () => {
 
   for (const record of trainingRecordData) {
     await db.insert(trainingRecords).values({
-      id:                record.id,
-      teacherId:         record.teacherId,
-      trainingEventId:   record.trainingEventId,
-      rating:            record.rating,
+      id:              record.id,
+      teacherId:       record.teacherId,
+      trainingEventId: record.trainingEventId,
+      rating:          record.rating,
     });
   }
 
@@ -229,7 +190,7 @@ const seed = async () => {
     "Birgunj High School", "Nepalgunj Model School", "Chitwan English School", "Dang Public School",
   ];
 
-  const roles = [
+  const rolesList = [
     "Mathematics Teacher", "Science Teacher", "English Teacher", "Computer Teacher",
     "Physical Education Teacher", "Art Teacher", "Music Teacher", "Social Studies Teacher",
     "Nursery Teacher", "Primary Teacher", "Grade Teacher", "Subject Specialist",
@@ -243,22 +204,22 @@ const seed = async () => {
   for (let tIdx = 0; tIdx < teacherProfiles.length; tIdx++) {
     const numCareers = 1 + (tIdx % 4);
     const numCurrentRoles = tIdx % 3 === 0 ? 2 : 1;
-    
+
     for (let cIdx = 0; cIdx < numCareers; cIdx++) {
       const teacher = teacherProfiles[tIdx];
       const startYear = 2010 + tIdx + cIdx;
       const stillWorking = cIdx >= numCareers - numCurrentRoles ? 1 : 0;
       careerRecordData.push({
-        id: `CAR-2026-${String(carIdx).padStart(4, "0")}`,
-        teacherId: teacher.id,
-        role: roles[(tIdx + cIdx) % roles.length],
-        organization: organizations[(tIdx + cIdx) % organizations.length],
-        grade: grades[(tIdx + cIdx) % grades.length] as any,
-        startDate: new Date(`${startYear}-0${(cIdx % 9) + 1}-15`),
-        endDate: stillWorking === 0 ? new Date(`${startYear + 3}-12-31`) : undefined,
+        id:              `CAR-2026-${String(carIdx).padStart(4, "0")}`,
+        teacherId:       teacher.id,
+        role:            rolesList[(tIdx + cIdx) % rolesList.length],
+        organization:    organizations[(tIdx + cIdx) % organizations.length],
+        grade:           grades[(tIdx + cIdx) % grades.length] as any,
+        startDate:       new Date(`${startYear}-0${(cIdx % 9) + 1}-15`),
+        endDate:         stillWorking === 0 ? new Date(`${startYear + 3}-12-31`) : undefined,
         stillWorking,
-        achievements: `Achievement ${carIdx}: Contributed to school development`,
-        refContactDetail: `hr@org${(tIdx + cIdx) % 10 + 1}.edu.np`,
+        achievements:    `Achievement ${carIdx}: Contributed to school development`,
+        refContactDetail:`hr@org${(tIdx + cIdx) % 10 + 1}.edu.np`,
       });
       carIdx++;
     }
@@ -291,14 +252,14 @@ const seed = async () => {
       const teacher = teacherProfiles[tIdx];
       const month = ((tIdx + eIdx) % 12) + 1;
       eventRecordData.push({
-        id: `EVT-2026-${String(evtIdx).padStart(4, "0")}`,
-        teacherId: teacher.id,
-        eventType: eventTypes[(tIdx + eIdx) % eventTypes.length],
-        name: `${eventNames[(tIdx + eIdx) % eventNames.length]} 2026`,
-        role: eIdx === 0 ? "Participant" : (tIdx % 2 === 0 ? "Speaker" : "Organizer"),
-        organizer: organizers[(tIdx + eIdx) % organizers.length],
-        venue: provinces[(tIdx + eIdx) % provinces.length].split(",")[0],
-        date: new Date(`2026-${String(month).padStart(2, "0")}-${String((tIdx % 28) + 1).padStart(2, "0")}`),
+        id:          `EVT-2026-${String(evtIdx).padStart(4, "0")}`,
+        teacherId:   teacher.id,
+        eventType:   eventTypes[(tIdx + eIdx) % eventTypes.length],
+        name:        `${eventNames[(tIdx + eIdx) % eventNames.length]} 2026`,
+        role:        eIdx === 0 ? "Participant" : (tIdx % 2 === 0 ? "Speaker" : "Organizer"),
+        organizer:   organizers[(tIdx + eIdx) % organizers.length],
+        venue:       provinces[(tIdx + eIdx) % provinces.length].split(",")[0],
+        date:        new Date(`2026-${String(month).padStart(2, "0")}-${String((tIdx % 28) + 1).padStart(2, "0")}`),
         description: `Educational event focused on ${eventNames[(tIdx + eIdx) % eventNames.length].toLowerCase()}`,
       });
       evtIdx++;
@@ -342,9 +303,9 @@ const seed = async () => {
     const numSkills = 2 + (tIdx % 3);
     for (let sIdx = 0; sIdx < numSkills; sIdx++) {
       teacherSkillData.push({
-        id: `TSK-2026-${String(tskIdx).padStart(4, "0")}`,
-        teacherId: teacherProfiles[tIdx].id,
-        skillId: skillData[(tIdx + sIdx) % skillData.length].id,
+        id:             `TSK-2026-${String(tskIdx).padStart(4, "0")}`,
+        teacherId:      teacherProfiles[tIdx].id,
+        skillId:        skillData[(tIdx + sIdx) % skillData.length].id,
         trainingRecordId: null,
       });
       tskIdx++;
@@ -353,29 +314,35 @@ const seed = async () => {
 
   await db.insert(teacherSkills).values(teacherSkillData);
 
-  console.log("🌱 Seeding certificates...");
+  console.log("🌱 Preparing certificate data...");
 
-  const certificateData = [];
+  const certificateData: Array<{
+    id: string;
+    teacherId: string;
+    program: string;
+    certificateNumber: string;
+    issuedAt: Date;
+    status: "pending";
+  }> = [];
   let certIdx = 1;
   const certNumberTracker: Record<string, number> = {};
   const createdCertificates = new Set<string>();
 
   for (let tIdx = 0; tIdx < teacherProfiles.length; tIdx++) {
     const teacher = teacherProfiles[tIdx];
-    
     const teacherPrograms = new Set<string>();
-    
+
     for (const event of trainingEventData) {
       const existingRecord = trainingRecordData.find(
         r => r.teacherId === teacher.id && r.trainingEventId === event.id
       );
       if (existingRecord && !teacherPrograms.has(event.program)) {
         teacherPrograms.add(event.program);
-        
+
         const certKey = `${teacher.id}-${event.program}`;
         if (!createdCertificates.has(certKey)) {
           createdCertificates.add(certKey);
-          
+
           const programCode =
             event.program === "Activity-based Mathematics" ? "ABM" :
             event.program === "Reading & Language" ? "R&L" :
@@ -393,11 +360,12 @@ const seed = async () => {
           const certificateNumber = `${prefix}-${String(certNumberTracker[prefix]).padStart(4, "0")}`;
 
           certificateData.push({
-            id: `CERT-2026-${String(certIdx).padStart(4, "0")}`,
-            teacherId: teacher.id,
-            program: event.program,
+            id:               `CERT-2026-${String(certIdx).padStart(4, "0")}`,
+            teacherId:        teacher.id,
+            program:          event.program,
             certificateNumber,
-            issuedAt: new Date(),
+            issuedAt:         new Date(),
+            status:           "pending",
           });
           certIdx++;
         }
@@ -405,13 +373,16 @@ const seed = async () => {
     }
   }
 
-  for (const cert of certificateData) {
-    await db.insert(certificates).values(cert);
-  }
+  console.log("🌱 Preparing certificate module data...");
 
-  console.log("🌱 Seeding certificate modules...");
-
-  const certificateModuleData = [];
+  const certificateModuleData: Array<{
+    id: string;
+    certificateId: string;
+    trainingRecordId: string;
+    module: string;
+    unit: string | null;
+    completedAt: Date;
+  }> = [];
   let modIdx = 1;
   const addedModules = new Set<string>();
 
@@ -421,17 +392,17 @@ const seed = async () => {
       const event = trainingEventData.find(e => e.id === record.trainingEventId);
       if (event && event.program === cert.program) {
         const moduleKey = `${cert.id}-${event.module}-${event.unit || ''}`;
-        
+
         if (!addedModules.has(moduleKey)) {
           addedModules.add(moduleKey);
-          
+
           certificateModuleData.push({
-            id: `CMOD-2026-${String(modIdx).padStart(4, "0")}`,
-            certificateId: cert.id,
-            trainingRecordId: record.id,
-            module: event.module,
-            unit: event.unit,
-            completedAt: new Date(),
+            id:               `CMOD-2026-${String(modIdx).padStart(4, "0")}`,
+            certificateId:    cert.id,
+            trainingRecordId:  record.id,
+            module:           event.module,
+            unit:             event.unit,
+            completedAt:      new Date(),
           });
           modIdx++;
         }
@@ -439,9 +410,76 @@ const seed = async () => {
     }
   }
 
+  console.log("🌱 Inserting certificates...");
+  for (const cert of certificateData) {
+    await db.insert(certificates).values(cert);
+  }
+
+  console.log("🌱 Inserting certificate modules...");
   for (const mod of certificateModuleData) {
     await db.insert(certificateModules).values(mod);
   }
+
+  console.log("📄 Generating certificate PDFs...");
+
+  const browser = await puppeteer.launch({
+    headless: true,
+    args:    ["--no-sandbox", "--disable-setuid-sandbox"],
+  });
+
+  for (const cert of certificateData) {
+    try {
+      const teacher = teacherProfiles.find(t => t.id === cert.teacherId)!;
+      const modules = certificateModuleData
+        .filter(m => m.certificateId === cert.id)
+        .map(m => ({ module: m.module, unit: m.unit }));
+
+      const page = await browser.newPage();
+      await page.setContent(
+        await generateHTML({
+          teacherName:       teacher.name,
+          teacherId:         teacher.id,
+          program:           cert.program,
+          certificateNumber: cert.certificateNumber,
+          issuedAt:          cert.issuedAt,
+          modules,
+        }),
+        { waitUntil: "domcontentloaded", timeout: 60000 }
+      );
+
+      const pdf = await page.pdf({
+        width:           "991px",
+        height:          "700px",
+        printBackground: true,
+      });
+
+      await page.close();
+
+      const sanitizedNumber = cert.certificateNumber.replace(/&/g, "and");
+      const pdfUrl = await uploadBuffer(
+        Buffer.from(pdf),
+        "portfolio-utility/certificates",
+        sanitizedNumber
+      );
+
+      await db.update(certificates)
+        .set({
+          pdfUrl,
+          status:    "ready",
+          updatedAt: new Date(),
+        })
+        .where(eq(certificates.id, cert.id));
+
+      console.log(`   ✓ Generated ${cert.certificateNumber}`);
+    } catch (error) {
+      console.error(`   ✗ Failed to generate ${cert.certificateNumber}:`, error);
+      await db.update(certificates)
+        .set({ status: "failed", updatedAt: new Date() })
+        .where(eq(certificates.id, cert.id));
+    }
+  }
+
+  await browser.close();
 
   console.log("✅ Seeding complete!");
   console.log(`   - Users: ${1 + teacherProfiles.length}`);

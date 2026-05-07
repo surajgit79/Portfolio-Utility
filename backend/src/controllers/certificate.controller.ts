@@ -1,5 +1,5 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-import { certificateService } from "../services/certificate.service";
+import { certificateService }           from "../services/certificate.service";
 
 export const viewCertificate = async (
   request: FastifyRequest,
@@ -20,29 +20,39 @@ export const downloadCertificate = async (
   reply:   FastifyReply
 ) => {
   const { certificateNumber } = request.params as { certificateNumber: string };
-  const pdf = await certificateService.generatePDF(certificateNumber);
+  const pdfUrl = await certificateService.downloadByNumber(certificateNumber);
 
-  reply.header("Content-Type", "application/pdf");
-  reply.header(
-    "Content-Disposition",
-    `attachment; filename="${certificateNumber}.pdf"`
-  );
-
-  return reply.send(pdf);
+  return reply.redirect(pdfUrl);
 };
 
-export const bulkDownloadCertificates = async (
+export const triggerBulkGeneration = async (
   request: FastifyRequest,
-  reply:   FastifyReply
+  reply: FastifyReply
 ) => {
   const { eventId } = request.params as { eventId: string };
-  const pdf = await certificateService.bulkGeneratePDF(eventId);
+  const job = await certificateService.triggerBulkGeneration(eventId);
 
-  reply.header("Content-Type", "application/pdf");
-  reply.header(
-    "Content-Disposition",
-    `attachment; filename="certificates-${eventId}.pdf"`
-  );
+  return reply.status(202).send({
+    success: true,
+    message: "Bulk certificate generation queued. Certificates will be ready at 2:00 PM.",
+    data:    {
+      jobId: job.id,
+      status: job.status,
+      totalCount: job.totalCount,
+    },
+  });
+};
 
-  return reply.send(pdf);
+export const getBulkJobStatus = async (
+  request: FastifyRequest,
+  reply: FastifyReply
+) => {
+  const { jobId } = request.params as { jobId: string };
+  const job = await certificateService.getBulkJobStatus(jobId);
+
+  return reply.send({
+    success: true,
+    message: "Bulk job status fetched",
+    data: job,
+  });
 };

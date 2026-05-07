@@ -1,15 +1,10 @@
 import { db } from "../db/client";
-import { certificates, certificateModules, teachers, trainingRecords } from "../db/schema";
-import { eq, and } from "drizzle-orm";
+import { certificates, certificateModules, teachers, trainingRecords, bulkJobs, trainingEvents }  from "../db/schema";
+import { eq, and, inArray } from "drizzle-orm";
 
 export const certificateRepository = {
-  findByTeacherAndProgram: async (
-    teacherId: string,
-    program:   string
-  ) => {
-    const [certificate] = await db
-      .select()
-      .from(certificates)
+  findByTeacherAndProgram: async (teacherId: string, program: string) => {
+    const [certificate] = await db.select().from(certificates)
       .where(
         and(
           eq(certificates.teacherId, teacherId),
@@ -20,18 +15,16 @@ export const certificateRepository = {
   },
 
   findByNumber: async (certificateNumber: string) => {
-    const [certificate] = await db
-      .select()
-      .from(certificates)
-      .where(eq(certificates.certificateNumber, certificateNumber));
+    const [certificate] = await db.select().from(certificates).where(eq(certificates.certificateNumber, certificateNumber));
     return certificate;
   },
 
+  findPending: async () => {
+    return db.select().from(certificates).where(eq(certificates.status, "pending"));
+  },
+
   findModulesByCertificateId: async (certificateId: string) => {
-    return db
-      .select()
-      .from(certificateModules)
-      .where(eq(certificateModules.certificateId, certificateId));
+    return db.select().from(certificateModules).where(eq(certificateModules.certificateId, certificateId));
   },
 
   findModuleDuplicate: async (
@@ -46,10 +39,7 @@ export const certificateRepository = {
 
     if (unit) conditions.push(eq(certificateModules.unit, unit));
 
-    const [existing] = await db
-      .select()
-      .from(certificateModules)
-      .where(and(...conditions));
+    const [existing] = await db.select().from(certificateModules).where(and(...conditions));
     return existing;
   },
 
@@ -59,83 +49,122 @@ export const certificateRepository = {
     program:           string;
     certificateNumber: string;
   }) => {
-    const [certificate] = await db
-      .insert(certificates)
-      .values({
+    const [certificate] = await db.insert(certificates).values({
         id:                data.id,
         teacherId:         data.teacherId,
         program:           data.program as any,
         certificateNumber: data.certificateNumber,
-      })
-      .returning();
+        status:            "pending",
+      }).returning();
     return certificate;
   },
 
   addModule: async (data: {
-    id:               string;
-    certificateId:    string;
+    id: string;
+    certificateId: string;
     trainingRecordId: string;
-    module:           string;
-    unit:             string | null;
+    module: string;
+    unit: string | null;
   }) => {
-    const [module] = await db
-      .insert(certificateModules)
-      .values({
+    const [module] = await db.insert(certificateModules).values({
         id:               data.id,
         certificateId:    data.certificateId,
         trainingRecordId: data.trainingRecordId,
         module:           data.module,
         unit:             data.unit ?? null,
-      })
-      .returning();
+      }).returning();
     return module;
   },
 
-  updateTimestamp: async (certificateId: string) => {
-    await db
-      .update(certificates)
-      .set({ updatedAt: new Date() })
+  updateStatus: async (
+    certificateId: string,
+    status: "pending" | "generating" | "ready" | "failed",
+    pdfUrl?: string
+  ) => {
+    await db.update(certificates)
+      .set({
+        status,
+        ...(pdfUrl && { pdfUrl }),
+        updatedAt: new Date(),
+      })
       .where(eq(certificates.id, certificateId));
+  },
+
+  updateTimestamp: async (certificateId: string) => {
+    await db.update(certificates)
+      .set({ updatedAt: new Date(), status: "pending" })
+      .where(eq(certificates.id, certificateId));
+  },
+
+  findWithModules: async (certificateId: string) => {
+    const [certificate] = await db.select().from(certificates).where(eq(certificates.id, certificateId));
+
+    if (!certificate) return null;
+
+    const [teacher] = await db.select({ name: teachers.name, id: teachers.id }).from(teachers).where(eq(teachers.id, certificate.teacherId));
+
+    const modules = await db.select().from(certificateModules).where(eq(certificateModules.certificateId, certificateId));
+
+    return {
+      ...certificate,
+      teacher,
+      modules: modules.map((m) => ({
+        module: m.module,
+        unit:   m.unit,
+      })),
+    };
   },
 
   findByEventIdWithTeachers: async (eventId: string) => {
     return db
       .select({
-        teacherId:         trainingRecords.teacherId,
-        trainingRecordId:  trainingRecords.id,
-        teacherName:       teachers.name,
+        teacherId:        trainingRecords.teacherId,
+        trainingRecordId: trainingRecords.id,
+        teacherName:      teachers.name,
+        program:          trainingEvents.program,
       })
       .from(trainingRecords)
-      .innerJoin(teachers, eq(trainingRecords.teacherId, teachers.id))
+      .innerJoin(teachers,       eq(trainingRecords.teacherId,        teachers.id))
+      .innerJoin(trainingEvents, eq(trainingRecords.trainingEventId,  trainingEvents.id))
       .where(eq(trainingRecords.trainingEventId, eventId))
       .orderBy(teachers.name);
   },
 
-  findWithModules: async (certificateId: string) => {
-    const [certificate] = await db
-      .select()
-      .from(certificates)
-      .where(eq(certificates.id, certificateId));
+  createBulkJob: async (data: {
+    id: string;
+    eventId: string;
+    totalCount: number;
+  }) => {
+    const [job] = await db.insert(bulkJobs).values({
+        id:         data.id,
+        eventId:    data.eventId,
+        status:     "pending",
+        totalCount: data.totalCount,
+      }).returning();
+    return job;
+  },
 
-    if (!certificate) return null;
+  findBulkJob: async (jobId: string) => {
+    const [job] = await db.select().from(bulkJobs).where(eq(bulkJobs.id, jobId));
+    return job;
+  },
 
-    const teacher = await db
-      .select({ name: teachers.name, id: teachers.id })
-      .from(teachers)
-      .where(eq(teachers.id, certificate.teacherId));
+  findPendingBulkJobs: async () => {
+    return db.select().from(bulkJobs).where(eq(bulkJobs.status, "pending"));
+  },
 
-    const modules = await db
-      .select()
-      .from(certificateModules)
-      .where(eq(certificateModules.certificateId, certificateId));
-
-    return {
-      ...certificate,
-      teacher:      teacher[0],
-      modules:      modules.map((m) => ({
-        module: m.module,
-        unit:   m.unit,
-      })),
-    };
+  updateBulkJob: async (
+    jobId: string,
+    status: "pending" | "processing" | "completed" | "failed",
+    data?: { pdfUrl?: string; doneCount?: number }
+  ) => {
+    await db.update(bulkJobs)
+      .set({
+        status,
+        ...(data?.pdfUrl     && { pdfUrl:     data.pdfUrl }),
+        ...(data?.doneCount  !== undefined && { doneCount: data.doneCount }),
+        updatedAt: new Date(),
+      })
+      .where(eq(bulkJobs.id, jobId));
   },
 };
