@@ -8,6 +8,14 @@ import { getTrainingById, downloadCertificate, viewCertificate } from "@/lib/api
 import { DownloadIcon, ViewIcon, Star } from "lucide-react"
 import { getDOB } from "@/utils/GetDate"
 
+type Skills = {
+    id: string,
+    name: string,
+    program: string,
+    module: string,
+    unit: string
+}
+
 type Props = {
     id?: string,
     rating?: number,
@@ -32,7 +40,7 @@ type Props = {
         name?: string,
         email?: string
     },
-    skills?: string[]
+    skills?: Skills[]
 }
 
 export default function Training() {
@@ -73,7 +81,6 @@ export default function Training() {
                         text="Training Details"
                         classNames="font-bold !text-3xl"
                     />
-
                     <div className="flex gap-3 items-center">
                         {/* <ViewIcon
                             className="text-[#2D84C4] cursor-pointer h-7 w-7"
@@ -114,16 +121,21 @@ export default function Training() {
                     </div>
                 </div>
 
-                <H2
-                    text={data.training?.name || 'DUMMY TITLE'}
-                    classNames="font-medium"
-                />
+                <div className="flex justify-between">    
+                    <H2
+                        text={data.training?.name || 'DUMMY TITLE'}
+                        classNames="font-medium"
+                    />
+                    <span>
+                        Edit | Delete
+                    </span>
+                </div>                
 
                 <div className="grid grid-cols-10 gap-5">
                     <div className="col-span-10">
                         <img
                             src={image}
-                            className="object-cover w-full max-h-105 shadow-sm"
+                            className="object-cover w-full max-h-105 shadow-sm border rounded-sm"
                             alt={data.training?.name || 'Training image'}
                         />
                     </div>
@@ -185,15 +197,6 @@ export default function Training() {
                                     {data.certificateNumber || 'N/A'}
                                 </span>
                             </div>
-
-                            {/* <div className="flex flex-col">
-                                <span className="text-[#AAAAAA] font-medium">
-                                    Rating:
-                                </span>
-                                <span className="text-black font-medium">
-                                    {data.rating ?? 'N/A'}
-                                </span>
-                            </div> */}
                         </div>
 
                         <div className="mt-2">
@@ -218,10 +221,10 @@ export default function Training() {
                         {data.skills && data.skills.length > 0 ? (
                             data.skills.map((skill) => (
                                 <span
-                                    key={skill}
+                                    key={skill.id}
                                     className="bg-[#F0F9FF] rounded-lg h-fit p-1 px-3 mr-1 my-2 text-black shadow-sm border"
                                 >
-                                    {skill}
+                                    {skill.name}
                                 </span>
                             ))
                         ) : (

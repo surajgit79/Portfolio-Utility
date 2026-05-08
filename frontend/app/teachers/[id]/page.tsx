@@ -8,12 +8,16 @@ import { BriefBlock } from "@/components/teacher/Brief"
 import { TrainingBlock } from "@/components/teacher/Training"
 import { EventBlock } from "@/components/teacher/Event"
 import { CareerBlock } from "@/components/teacher/Career"
+import { useSession } from "@/lib/useSession"
 
 export default function Teacher() {
     const params = useParams() as { id: string }
 
     const [teacher, setTeacher] = useState<Teachers>()
 
+    const { session, loading } = useSession()
+    const isAdmin = session.isAuthenticated && session.role === "admin"
+    
     useEffect(() => {
         getTeacher(params.id).then(res => setTeacher(res))
     }, [params.id])
@@ -38,7 +42,7 @@ export default function Teacher() {
 
             <div className="grid grid-cols-10 gap-5">
                 <div className="col-span-10 lg:col-span-7 flex flex-col gap-8">
-                    <TrainingBlock id={params.id} classNames="" />
+                    <TrainingBlock id={params.id} isAdmin={isAdmin} classNames="" />
                     <CareerBlock id={params.id} classNames="" tenure={teacher?.tenure || 0}/>
                 </div>
 

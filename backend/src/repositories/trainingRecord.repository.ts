@@ -34,7 +34,6 @@ export const trainingRecordRepository = {
             teacherId: trainingRecords.teacherId,
             trainingEventId: trainingRecords.trainingEventId,
             rating: trainingRecords.rating,
-            certificateNumber: trainingRecords.certificateNumber,
             refPhotos: trainingRecords.refPhotos,
             feedback: trainingRecords.feedback,
             trainingDate: trainingRecords.trainingDate,
@@ -64,7 +63,6 @@ export const trainingRecordRepository = {
             teacherId: trainingRecords.teacherId,
             trainingEventId: trainingRecords.trainingEventId,
             rating: trainingRecords.rating,
-            certificateNumber: trainingRecords.certificateNumber,
             refPhotos: trainingRecords.refPhotos,
             feedback: trainingRecords.feedback,
             trainingDate: trainingRecords.trainingDate,
@@ -88,7 +86,6 @@ export const trainingRecordRepository = {
             feedback: trainingRecords.feedback,
             trainingDate: trainingRecords.trainingDate,
             refPhotos: trainingRecords.refPhotos,
-            certificateNumber: trainingRecords.certificateNumber,
             createdAt: trainingRecords.createdAt,
             updatedAt: trainingRecords.updatedAt,
 
@@ -132,7 +129,6 @@ export const trainingRecordRepository = {
             feedback: record.feedback,
             trainingDate: record.trainingDate,
             refPhotos: record.refPhotos,
-            certificateNumber: record.certificateNumber,
             createdAt: record.createdAt,
             updatedAt: record.updatedAt,
             training: {

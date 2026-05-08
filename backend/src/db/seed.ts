@@ -13,6 +13,9 @@ import {
   teacherSkills,
   certificates,
   certificateModules,
+  bulkJobs,
+  gradeEnum,
+  programEnum,
 } from "./schema";
 import { hashedPassword } from "../utils/passwordHasherVerifier";
 import { generateCertificateNumber } from "../utils/idGenerator";
@@ -23,8 +26,12 @@ import { parseCSV } from "../utils/csvParser";
 const seed = async () => {
   console.log("🧹 Cleaning existing data...");
 
+  // Clean in correct order (respecting foreign keys)
   await db.delete(certificateModules);
   await db.delete(certificates);
+  await db.delete(bulkJobs);
+  await db.delete(teacherSkills);
+  await db.delete(skills);
   await db.delete(eventRecords);
   await db.delete(careerRecords);
   await db.delete(trainingRecords);
@@ -34,324 +41,512 @@ const seed = async () => {
 
   console.log("🌱 Seeding users...");
 
-  const adminPassword   = await hashedPassword("Admin1234");
+  const adminPassword = await hashedPassword("Admin1234");
   const teacherPassword = await hashedPassword("Teacher1234");
 
+  // Admin user
   await db.insert(users).values({
-    id:       "USR-2026-0001",
-    email:    "admin@portfolio.com",
+    id: "USR-2026-0001",
+    email: "admin@portfolio.com",
     password: adminPassword,
-    role:     "admin",
+    role: "admin",
   });
 
-  const teacherNames = [
-    "Ram Bahadur", "Sita Sharma", "Hari Thapa", "Gita Rai", "Bikash Karki",
-    "Nirmala Acharya", "Rajesh Kumar", "Priya Gurung", "Suresh Yadav", "Anita Tamang",
-    "Mohan Singh", "Laxmi Kumari", "Bijay Rana", "Sarita Magar", "Dinesh Khatri",
-    "Kalpana Shrestha", "Ashok Tamang", "Mina Nepali", "Raj Kumar", "Sita Kumari",
-    "Nabin Joshi", "Rita Bhatta", "Sanjay Maharjan", "Usha Ranjit", "Pawan K.C.",
-    "Sunita Tamang", "Rakesh Shrestha", "Nisha Khadka", "Sanjay Basnet", "Asha Rana",
-    "Prakash Oli", "Mina Kumari", "Niraj Shrestha"
+  // Teacher users
+  const teacherUserData = [
+    { id: "USR-2026-0002", email: "bishesh@gmail.com", name: "Bishesh Khatiwada" },
+    { id: "USR-2026-0003", email: "anita.gurung@school.com", name: "Anita Gurung" },
+    { id: "USR-2026-0004", email: "ramesh.adhikari@school.com", name: "Ramesh Adhikari" },
+    { id: "USR-2026-0005", email: "sunita.tamang@school.com", name: "Sunita Tamang" },
+    { id: "USR-2026-0006", email: "dipak.shrestha@school.com", name: "Dipak Shrestha" },
+    { id: "USR-2026-0007", email: "kabita.rai@school.com", name: "Kabita Rai" },
   ];
 
-  const provinces = ["Kathmandu, Bagmati Province", "Lalitpur, Bagmati Province", "Bhaktapur, Bagmati Province", "Pokhara, Gandaki Province", "Hetauda, Bagmati Province", "Biratnagar, Province 1", "Birgunj, Province 2", "Nepalgunj, Lumbini Province", "Dang, Lumbini Province", "Chitwan, Bagmati Province"];
-  const qualifications = ["M.Sc. in Mathematics", "B.Ed. in Science", "M.A. in English Literature", "B.A. in Education", "M.Ed. in Educational Leadership", "Ph.D. in Education", "M.Com in Accounts", "B.Sc. in Physics", "M.A. in Nepali", "Bachelor in Computer Science"];
-  const genders: Array<"Male" | "Female" | "Others"> = ["Male", "Female", "Female", "Male", "Male", "Female", "Male", "Female", "Male", "Female"];
-
-  const teacherUsers = teacherNames.map((name, i) => {
-    const idx = String(i + 2).padStart(4, "0");
-    const email = name.toLowerCase().replace(/ /g, ".") + "@school.com";
-    return { id: `USR-2026-${idx}`, email, name };
-  });
-
-  for (const t of teacherUsers) {
+  for (const user of teacherUserData) {
     await db.insert(users).values({
-      id:       t.id,
-      email:    t.email,
+      id: user.id,
+      email: user.email,
       password: teacherPassword,
-      role:     "teacher",
+      role: "teacher",
     });
   }
 
   console.log("🌱 Seeding teachers...");
 
-  const teacherProfiles = teacherNames.map((name, i) => {
-    const idx = String(i + 2).padStart(4, "0");
-    const email = name.toLowerCase().replace(/ /g, ".") + "@school.com";
-    return {
-      id:            `TCH-2026-${idx}`,
-      userId:        `USR-2026-${idx}`,
-      name,
-      address:       provinces[i % provinces.length],
-      contact:       `9841${String(100000 + i).slice(-6)}`,
-      email,
-      gender:        genders[i % genders.length],
-      imageUrl:      `https://api.dicebear.com/7.x/avataaars/svg?seed=${name.replace(/ /g, "")}`,
-      qualification: qualifications[i % qualifications.length],
-      teachingSince: Math.min(2005 + i, new Date().getFullYear()),
-      dob:           `${1980 + (i % 15)}-${String((i % 12) + 1).padStart(2, "0")}-${String((i % 28) + 1).padStart(2, "0")}`,
-    };
-  });
+  const teacherData = [
+    {
+      id: "TCH-2026-0001",
+      userId: "USR-2026-0002",
+      name: "Bishesh Khatiwada",
+      address: "Huprachaur, Hetauda",
+      contact: "9876543210",
+      email: "bishesh@gmail.com",
+      gender: "Male" as const,
+      imageUrl: null,
+      dob: "1992-01-12",
+      qualification: null,
+      teachingSince: null,
+    },
+    {
+      id: "TCH-2026-0002",
+      userId: "USR-2026-0003",
+      name: "Anita Gurung",
+      address: "Pokhara, Gandaki Province",
+      contact: "9841000007",
+      email: "anita.gurung@school.com",
+      gender: "Female" as const,
+      imageUrl: null,
+      dob: "1988-05-20",
+      qualification: "M.Ed. in Education",
+      teachingSince: 2012,
+    },
+    {
+      id: "TCH-2026-0003",
+      userId: "USR-2026-0004",
+      name: "Ramesh Adhikari",
+      address: "Butwal, Lumbini Province",
+      contact: "9841000008",
+      email: "ramesh.adhikari@school.com",
+      gender: "Male" as const,
+      imageUrl: null,
+      dob: "1982-11-15",
+      qualification: "M.Sc. in Mathematics",
+      teachingSince: 2008,
+    },
+    {
+      id: "TCH-2026-0004",
+      userId: "USR-2026-0005",
+      name: "Sunita Tamang",
+      address: "Biratnagar, Koshi Province",
+      contact: "9841000009",
+      email: "sunita.tamang@school.com",
+      gender: "Female" as const,
+      imageUrl: null,
+      dob: "1995-03-10",
+      qualification: "B.Ed. in Science",
+      teachingSince: 2019,
+    },
+    {
+      id: "TCH-2026-0005",
+      userId: "USR-2026-0006",
+      name: "Dipak Shrestha",
+      address: "Dharan, Koshi Province",
+      contact: "9841000010",
+      email: "dipak.shrestha@school.com",
+      gender: "Male" as const,
+      imageUrl: null,
+      dob: "1979-07-25",
+      qualification: "M.A. in English Literature",
+      teachingSince: 2005,
+    },
+    {
+      id: "TCH-2026-0006",
+      userId: "USR-2026-0007",
+      name: "Kabita Rai",
+      address: "Chitwan, Bagmati Province",
+      contact: "9841000011",
+      email: "kabita.rai@school.com",
+      gender: "Female" as const,
+      imageUrl: null,
+      dob: "1991-09-30",
+      qualification: "B.Ed. in Education",
+      teachingSince: 2016,
+    },
+  ];
 
-  for (const profile of teacherProfiles) {
-    await db.insert(teachers).values(profile);
-  }
+  await db.insert(teachers).values(teacherData);
 
   console.log("🌱 Seeding training events...");
 
   const trainingEventData = [
     {
-      id:          "TRN-2026-0001",
-      program:     "Activity-based Mathematics" as const,
-      module:      "Class 4",
-      unit:        "Book 1",
-      name:        "ABM Class 4 Book 1 Training",
+      id: "TRN-2026-0001",
+      program: "Activity-based Mathematics" as const,
+      module: "Class 4",
+      unit: "Book 1",
+      name: "ABM Class 4 Book 1 Training",
       mentorsName: "John Doe",
-      venue:       "Hetauda, Bagmati Province",
+      venue: "Hetauda",
       description: "Comprehensive training on Activity-based Mathematics Class 4 Book 1",
-      startDate:   new Date("2026-01-15"),
-      duration:    "3 days",
+      startDate: new Date("2026-01-15"),
+      duration: "3 days",
     },
     {
-      id:          "TRN-2026-0002",
-      program:     "Activity-based Mathematics" as const,
-      module:      "Class 4",
-      unit:        "Book 2",
-      name:        "ABM Class 4 Book 2 Training",
+      id: "TRN-2026-0002",
+      program: "Activity-based Mathematics" as const,
+      module: "Class 4",
+      unit: "Book 2",
+      name: "ABM Class 4 Book 2 Training",
       mentorsName: "Jane Doe",
-      venue:       "Kathmandu, Bagmati Province",
+      venue: "Kathmandu",
       description: "Comprehensive training on Activity-based Mathematics Class 4 Book 2",
-      startDate:   new Date("2026-02-10"),
-      duration:    "3 days",
+      startDate: new Date("2026-02-10"),
+      duration: "3 days",
     },
     {
-      id:          "TRN-2026-0003",
-      program:     "Reading & Language" as const,
-      module:      "Phonics",
-      unit:        "Set 1",
-      name:        "R&L Phonics Set 1 Training",
+      id: "TRN-2026-0003",
+      program: "Reading & Language" as const,
+      module: "Phonics",
+      unit: "Set 1",
+      name: "R&L Phonics Set 1 Training",
       mentorsName: "Mary Smith",
-      venue:       "Pokhara, Gandaki Province",
+      venue: "Pokhara",
       description: "Training on Reading & Language Phonics Set 1",
-      startDate:   new Date("2026-03-05"),
-      duration:    "2 days",
+      startDate: new Date("2026-03-05"),
+      duration: "2 days",
+    },
+    {
+      id: "TRN-2026-0004",
+      program: "Reading & Language" as const,
+      module: "Phonics",
+      unit: "Set 2",
+      name: "R&L Phonics Set 2 Training",
+      mentorsName: "Sarah Johnson",
+      venue: "Lalitpur",
+      description: "Training on Reading & Language Phonics Set 2",
+      startDate: new Date("2026-04-10"),
+      duration: "2 days",
+    },
+    {
+      id: "TRN-2026-0005",
+      program: "Pre-School Transformation" as const,
+      module: "Circle Time",
+      unit: null,
+      name: "PST Circle Time Training",
+      mentorsName: "Hari Acharya",
+      venue: "Bhaktapur",
+      description: "Training on Pre-School Circle Time activities",
+      startDate: new Date("2026-05-15"),
+      duration: "2 days",
     },
   ];
 
-  for (const event of trainingEventData) {
-    await db.insert(trainingEvents).values(event);
-  }
+  await db.insert(trainingEvents).values(trainingEventData);
 
   console.log("🌱 Seeding training records...");
 
-  const allSkills = [
-    ["Communication", "Leadership", "Curriculum Design"],
-    ["Classroom Management", "Student Engagement"],
-    ["Assessment Techniques", "Data Analysis"],
-    ["Technology Integration", "Digital Literacy"],
-    ["Differentiated Instruction", "Inclusive Education"],
-    ["Project-Based Learning", "Critical Thinking"],
-    ["Parent Communication", "Collaborative Teaching"],
-    ["Behavior Management", "Social-Emotional Learning"],
-    ["Questioning Strategies", "Socratic Method"],
-    ["Formative Assessment", "Feedback Methods"],
-  ];
-
   const trainingRecordData = [
-    {
-      id:      "REC-2026-0001",
-      teacherId: "TCH-2026-0002",
-      trainingEventId: "TRN-2026-0001",
-      rating:  4,
-    },
-    {
-      id:      "REC-2026-0002",
-      teacherId: "TCH-2026-0003",
-      trainingEventId: "TRN-2026-0001",
-      rating:  5,
-    },
-    {
-      id:      "REC-2026-0003",
-      teacherId: "TCH-2026-0004",
-      trainingEventId: "TRN-2026-0001",
-      rating:  3,
-    },
-    {
-      id:      "REC-2026-0004",
-      teacherId: "TCH-2026-0002",
-      trainingEventId: "TRN-2026-0002",
-      rating:  4,
-    },
-    {
-      id:      "REC-2026-0005",
-      teacherId: "TCH-2026-0005",
-      trainingEventId: "TRN-2026-0003",
-      rating:  5,
-    },
-    {
-      id:      "REC-2026-0006",
-      teacherId: "TCH-2026-0006",
-      trainingEventId: "TRN-2026-0003",
-      rating:  4,
-    },
+    // Bishesh Khatiwada
+    { id: "TRC-2026-0001", teacherId: "TCH-2026-0001", trainingEventId: "TRN-2026-0001", rating: 4 },
+    { id: "TRC-2026-0002", teacherId: "TCH-2026-0001", trainingEventId: "TRN-2026-0002", rating: 5 },
+    
+    // Anita Gurung
+    { id: "TRC-2026-0003", teacherId: "TCH-2026-0002", trainingEventId: "TRN-2026-0001", rating: 5 },
+    { id: "TRC-2026-0004", teacherId: "TCH-2026-0002", trainingEventId: "TRN-2026-0003", rating: 4 },
+    
+    // Ramesh Adhikari
+    { id: "TRC-2026-0005", teacherId: "TCH-2026-0003", trainingEventId: "TRN-2026-0002", rating: 4 },
+    { id: "TRC-2026-0006", teacherId: "TCH-2026-0003", trainingEventId: "TRN-2026-0004", rating: 5 },
+    
+    // Sunita Tamang
+    { id: "TRC-2026-0007", teacherId: "TCH-2026-0004", trainingEventId: "TRN-2026-0003", rating: 5 },
+    { id: "TRC-2026-0008", teacherId: "TCH-2026-0004", trainingEventId: "TRN-2026-0004", rating: 4 },
+    
+    // Dipak Shrestha
+    { id: "TRC-2026-0009", teacherId: "TCH-2026-0005", trainingEventId: "TRN-2026-0001", rating: 3 },
+    { id: "TRC-2026-0010", teacherId: "TCH-2026-0005", trainingEventId: "TRN-2026-0005", rating: 5 },
+    
+    // Kabita Rai
+    { id: "TRC-2026-0011", teacherId: "TCH-2026-0006", trainingEventId: "TRN-2026-0003", rating: 4 },
+    { id: "TRC-2026-0012", teacherId: "TCH-2026-0006", trainingEventId: "TRN-2026-0005", rating: 5 },
   ];
 
-  let recIdx = 7;
-
-  for (let tIdx = 0; tIdx < teacherProfiles.length; tIdx++) {
-    for (let eIdx = 0; eIdx < Math.min(3, trainingEventData.length); eIdx++) {
-      const teacher = teacherProfiles[tIdx];
-      const event = trainingEventData[(tIdx + eIdx) % trainingEventData.length];
-      trainingRecordData.push({
-        id: `REC-2026-${String(recIdx).padStart(4, "0")}`,
-        teacherId: teacher.id,
-        trainingEventId: event.id,
-        rating: ((tIdx + eIdx) % 5) + 1,
-      });
-      recIdx++;
-    }
-  }
-
-  for (const record of trainingRecordData) {
-    await db.insert(trainingRecords).values({
-      id:                record.id,
-      teacherId:         record.teacherId,
-      trainingEventId:   record.trainingEventId,
-      rating:            record.rating,
-    });
-  }
+  await db.insert(trainingRecords).values(trainingRecordData);
 
   console.log("🌱 Seeding career records...");
-
-  const organizations = [
-    "Hetauda School of Management", "Lalitpur Public School", "Bhaktapur Secondary School",
-    "Pokhara International College", "Kathmandu Valley Academy", "Biratnagar Central School",
-    "Birgunj High School", "Nepalgunj Model School", "Chitwan English School", "Dang Public School",
-  ];
-
-  const roles = [
-    "Mathematics Teacher", "Science Teacher", "English Teacher", "Computer Teacher",
-    "Physical Education Teacher", "Art Teacher", "Music Teacher", "Social Studies Teacher",
-    "Nursery Teacher", "Primary Teacher", "Grade Teacher", "Subject Specialist",
-  ];
-
-  const grades = ["Nursery", "LKG", "UKG", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6", "Grade 7", "Grade 8", "Grade 9", "Grade 10"];
-
-  const careerRecordData = [];
-  let carIdx = 1;
-
-  for (let tIdx = 0; tIdx < teacherProfiles.length; tIdx++) {
-    const numCareers = 1 + (tIdx % 4);
-    const numCurrentRoles = tIdx % 3 === 0 ? 2 : 1;
-    
-    for (let cIdx = 0; cIdx < numCareers; cIdx++) {
-      const teacher = teacherProfiles[tIdx];
-      const startYear = 2010 + tIdx + cIdx;
-      const stillWorking = cIdx >= numCareers - numCurrentRoles ? 1 : 0;
-      careerRecordData.push({
-        id: `CAR-2026-${String(carIdx).padStart(4, "0")}`,
-        teacherId: teacher.id,
-        role: roles[(tIdx + cIdx) % roles.length],
-        organization: organizations[(tIdx + cIdx) % organizations.length],
-        grade: grades[(tIdx + cIdx) % grades.length] as any,
-        startDate: new Date(`${startYear}-0${(cIdx % 9) + 1}-15`),
-        endDate: stillWorking === 0 ? new Date(`${startYear + 3}-12-31`) : undefined,
-        stillWorking,
-        achievements: `Achievement ${carIdx}: Contributed to school development`,
-        refContactDetail: `hr@org${(tIdx + cIdx) % 10 + 1}.edu.np`,
-      });
-      carIdx++;
-    }
-  }
-
-  for (const record of careerRecordData) {
-    await db.insert(careerRecords).values(record);
-  }
+  // No career records currently
 
   console.log("🌱 Seeding event records...");
-
-  const eventTypes = ["Seminar", "Conference", "Panel Discussion", "Podcast"] as const;
-  const eventNames = [
-    "Mathematics Education Seminar", "Science Teaching Workshop", "English Language Conference",
-    "Technology in Education Summit", "Child Psychology Workshop", "Assessment Innovation Seminar",
-    "Leadership in Education Conference", "Inclusive Education Workshop", "Digital Tools for Teachers",
-    "Curriculum Development Seminar", "Teacher Training Conference", "Educational Psychology Workshop",
-  ];
-  const organizers = [
-    "Nepal Mathematics Society", "Science Teachers Association", "English Language Institute",
-    "Ministry of Education Nepal", "UNESCO Nepal", "EduNepal", "Teacher's Union",
-    "School Administrators Forum", "EdTech Nepal", "Curriculum Development Center",
-  ];
-
-  const eventRecordData = [];
-  let evtIdx = 1;
-
-  for (let tIdx = 0; tIdx < teacherProfiles.length; tIdx++) {
-    for (let eIdx = 0; eIdx < 2; eIdx++) {
-      const teacher = teacherProfiles[tIdx];
-      const month = ((tIdx + eIdx) % 12) + 1;
-      eventRecordData.push({
-        id: `EVT-2026-${String(evtIdx).padStart(4, "0")}`,
-        teacherId: teacher.id,
-        eventType: eventTypes[(tIdx + eIdx) % eventTypes.length],
-        name: `${eventNames[(tIdx + eIdx) % eventNames.length]} 2026`,
-        role: eIdx === 0 ? "Participant" : (tIdx % 2 === 0 ? "Speaker" : "Organizer"),
-        organizer: organizers[(tIdx + eIdx) % organizers.length],
-        venue: provinces[(tIdx + eIdx) % provinces.length].split(",")[0],
-        date: new Date(`2026-${String(month).padStart(2, "0")}-${String((tIdx % 28) + 1).padStart(2, "0")}`),
-        description: `Educational event focused on ${eventNames[(tIdx + eIdx) % eventNames.length].toLowerCase()}`,
-      });
-      evtIdx++;
-    }
-  }
-
-  for (const record of eventRecordData) {
-    await db.insert(eventRecords).values(record);
-  }
+  // No event records currently
 
   console.log("🌱 Seeding skills from CSV...");
   const csvPath = path.join(__dirname, "../../skills_test.csv");
-  const csvBuffer = fs.readFileSync(csvPath);
-  const rows = parseCSV(csvBuffer);
+  
+  if (fs.existsSync(csvPath)) {
+    const csvBuffer = fs.readFileSync(csvPath);
+    const rows = parseCSV(csvBuffer);
 
-  const skillData = [];
-  let skillIdx = 1;
+    const skillData = [];
+    let skillIdx = 1;
 
-  for (const row of rows) {
-    const id = `SKL-2026-${String(skillIdx).padStart(4, "0")}`;
-    skillData.push({
-      id,
-      name:    row.name,
-      program: row.program as "Activity-based Mathematics" | "Reading & Language" | "Pre-School Transformation",
-      module:  row.module,
-      unit:    row.unit || null,
-    });
-    skillIdx++;
+    for (const row of rows) {
+      const id = `SKL-2026-${String(skillIdx).padStart(4, "0")}`;
+      skillData.push({
+        id,
+        name: row.name,
+        program: row.program as "Activity-based Mathematics" | "Reading & Language" | "Pre-School Transformation",
+        module: row.module,
+        unit: row.unit || null,
+      });
+      skillIdx++;
+    }
+
+    await db.insert(skills).values(skillData).onConflictDoNothing();
+    console.log(`   - Loaded ${skillData.length} skills from CSV`);
+  } else {
+    console.log("   - skills_test.csv not found, skipping skills import");
   }
-
-  await db.insert(skills).values(skillData).onConflictDoNothing();
-
-  console.log(`   - Loaded ${skillData.length} skills from CSV`);
 
   console.log("🌱 Seeding teacher skills...");
 
-  const teacherSkillData = [];
-  let tskIdx = 1;
-
-  for (let tIdx = 0; tIdx < teacherProfiles.length; tIdx++) {
-    const numSkills = 2 + (tIdx % 3);
-    for (let sIdx = 0; sIdx < numSkills; sIdx++) {
-      teacherSkillData.push({
-        id: `TSK-2026-${String(tskIdx).padStart(4, "0")}`,
-        teacherId: teacherProfiles[tIdx].id,
-        skillId: skillData[(tIdx + sIdx) % skillData.length].id,
-        trainingRecordId: null,
-      });
-      tskIdx++;
-    }
-  }
+  // Assign skills based on teacher training programs
+  const teacherSkillData = [
+    // Bishesh Khatiwada - ABM Class 4 Books 1 & 2
+    { id: "TSK-2026-0001", teacherId: "TCH-2026-0001", skillId: "SKL-2026-0001", trainingRecordId: "TRC-2026-0001" },
+    { id: "TSK-2026-0002", teacherId: "TCH-2026-0001", skillId: "SKL-2026-0002", trainingRecordId: "TRC-2026-0002" },
+    
+    // Anita Gurung - ABM Class 4 Book 1 & R&L Phonics Set 1
+    { id: "TSK-2026-0003", teacherId: "TCH-2026-0002", skillId: "SKL-2026-0001", trainingRecordId: "TRC-2026-0003" },
+    { id: "TSK-2026-0004", teacherId: "TCH-2026-0002", skillId: "SKL-2026-0119", trainingRecordId: "TRC-2026-0004" },
+    
+    // Ramesh Adhikari - ABM Class 4 Book 2 & R&L Phonics Set 2
+    { id: "TSK-2026-0005", teacherId: "TCH-2026-0003", skillId: "SKL-2026-0032", trainingRecordId: "TRC-2026-0005" },
+    { id: "TSK-2026-0006", teacherId: "TCH-2026-0003", skillId: "SKL-2026-0125", trainingRecordId: "TRC-2026-0006" },
+    
+    // Sunita Tamang - R&L Phonics Set 1 & Set 2
+    { id: "TSK-2026-0007", teacherId: "TCH-2026-0004", skillId: "SKL-2026-0119", trainingRecordId: "TRC-2026-0007" },
+    { id: "TSK-2026-0008", teacherId: "TCH-2026-0004", skillId: "SKL-2026-0125", trainingRecordId: "TRC-2026-0008" },
+    
+    // Dipak Shrestha - ABM Class 4 Book 1 & PST Circle Time
+    { id: "TSK-2026-0009", teacherId: "TCH-2026-0005", skillId: "SKL-2026-0001", trainingRecordId: "TRC-2026-0009" },
+    { id: "TSK-2026-0010", teacherId: "TCH-2026-0005", skillId: "SKL-2026-0186", trainingRecordId: "TRC-2026-0010" },
+    
+    // Kabita Rai - R&L Phonics Set 1 & PST Circle Time
+    { id: "TSK-2026-0011", teacherId: "TCH-2026-0006", skillId: "SKL-2026-0119", trainingRecordId: "TRC-2026-0011" },
+    { id: "TSK-2026-0012", teacherId: "TCH-2026-0006", skillId: "SKL-2026-0186", trainingRecordId: "TRC-2026-0012" },
+  ];
 
   await db.insert(teacherSkills).values(teacherSkillData);
+
+  console.log("🌱 Seeding certificates...");
+
+  const certificateData = [
+    // Bishesh Khatiwada - ABM Class 4 Books 1 & 2 (2 certificates)
+    {
+      id: "CRT-2026-0001",
+      teacherId: "TCH-2026-0001",
+      program: "Activity-based Mathematics" as const,
+      certificateNumber: "ABM-2026-0001",
+      pdfUrl: null,
+      status: "pending" as const,
+      errorReason: null,
+      issuedAt: new Date(),
+    },
+    // Anita Gurung - ABM Class 4 Book 1 & R&L Phonics Set 1 (2 certificates)
+    {
+      id: "CRT-2026-0002",
+      teacherId: "TCH-2026-0002",
+      program: "Activity-based Mathematics" as const,
+      certificateNumber: "ABM-2026-0002",
+      pdfUrl: null,
+      status: "pending" as const,
+      errorReason: null,
+      issuedAt: new Date(),
+    },
+    {
+      id: "CRT-2026-0003",
+      teacherId: "TCH-2026-0002",
+      program: "Reading & Language" as const,
+      certificateNumber: "R&L-2026-0001",
+      pdfUrl: null,
+      status: "pending" as const,
+      errorReason: null,
+      issuedAt: new Date(),
+    },
+    // Ramesh Adhikari - ABM Class 4 Book 2 & R&L Phonics Set 2
+    {
+      id: "CRT-2026-0004",
+      teacherId: "TCH-2026-0003",
+      program: "Activity-based Mathematics" as const,
+      certificateNumber: "ABM-2026-0003",
+      pdfUrl: null,
+      status: "pending" as const,
+      errorReason: null,
+      issuedAt: new Date(),
+    },
+    {
+      id: "CRT-2026-0005",
+      teacherId: "TCH-2026-0003",
+      program: "Reading & Language" as const,
+      certificateNumber: "R&L-2026-0002",
+      pdfUrl: null,
+      status: "pending" as const,
+      errorReason: null,
+      issuedAt: new Date(),
+    },
+    // Sunita Tamang - R&L Phonics Set 1 & Set 2
+    {
+      id: "CRT-2026-0006",
+      teacherId: "TCH-2026-0004",
+      program: "Reading & Language" as const,
+      certificateNumber: "R&L-2026-0003",
+      pdfUrl: null,
+      status: "pending" as const,
+      errorReason: null,
+      issuedAt: new Date(),
+    },
+    // Dipak Shrestha - ABM Class 4 Book 1 & PST Circle Time
+    {
+      id: "CRT-2026-0007",
+      teacherId: "TCH-2026-0005",
+      program: "Activity-based Mathematics" as const,
+      certificateNumber: "ABM-2026-0004",
+      pdfUrl: null,
+      status: "pending" as const,
+      errorReason: null,
+      issuedAt: new Date(),
+    },
+    {
+      id: "CRT-2026-0008",
+      teacherId: "TCH-2026-0005",
+      program: "Pre-School Transformation" as const,
+      certificateNumber: "PST-2026-0001",
+      pdfUrl: null,
+      status: "pending" as const,
+      errorReason: null,
+      issuedAt: new Date(),
+    },
+    // Kabita Rai - R&L Phonics Set 1 & PST Circle Time
+    {
+      id: "CRT-2026-0009",
+      teacherId: "TCH-2026-0006",
+      program: "Reading & Language" as const,
+      certificateNumber: "R&L-2026-0004",
+      pdfUrl: null,
+      status: "pending" as const,
+      errorReason: null,
+      issuedAt: new Date(),
+    },
+    {
+      id: "CRT-2026-0010",
+      teacherId: "TCH-2026-0006",
+      program: "Pre-School Transformation" as const,
+      certificateNumber: "PST-2026-0002",
+      pdfUrl: null,
+      status: "pending" as const,
+      errorReason: null,
+      issuedAt: new Date(),
+    },
+  ];
+
+  await db.insert(certificates).values(certificateData);
+
+  console.log("🌱 Seeding certificate modules...");
+
+  const certificateModuleData = [
+    // Bishesh Khatiwada - ABM Certificate
+    {
+      id: "CMO-2026-0001",
+      certificateId: "CRT-2026-0001",
+      trainingRecordId: "TRC-2026-0001",
+      module: "Class 4",
+      unit: "Book 1",
+      completedAt: new Date("2026-05-06T08:31:47.034Z"),
+    },
+    {
+      id: "CMO-2026-0002",
+      certificateId: "CRT-2026-0001",
+      trainingRecordId: "TRC-2026-0002",
+      module: "Class 4",
+      unit: "Book 2",
+      completedAt: new Date(),
+    },
+    // Anita Gurung - ABM Certificate
+    {
+      id: "CMO-2026-0003",
+      certificateId: "CRT-2026-0002",
+      trainingRecordId: "TRC-2026-0003",
+      module: "Class 4",
+      unit: "Book 1",
+      completedAt: new Date(),
+    },
+    // Anita Gurung - R&L Certificate
+    {
+      id: "CMO-2026-0004",
+      certificateId: "CRT-2026-0003",
+      trainingRecordId: "TRC-2026-0004",
+      module: "Phonics",
+      unit: "Set 1",
+      completedAt: new Date(),
+    },
+    // Ramesh Adhikari - ABM Certificate
+    {
+      id: "CMO-2026-0005",
+      certificateId: "CRT-2026-0004",
+      trainingRecordId: "TRC-2026-0005",
+      module: "Class 4",
+      unit: "Book 2",
+      completedAt: new Date(),
+    },
+    // Ramesh Adhikari - R&L Certificate
+    {
+      id: "CMO-2026-0006",
+      certificateId: "CRT-2026-0005",
+      trainingRecordId: "TRC-2026-0006",
+      module: "Phonics",
+      unit: "Set 2",
+      completedAt: new Date(),
+    },
+    // Sunita Tamang - R&L Certificate
+    {
+      id: "CMO-2026-0007",
+      certificateId: "CRT-2026-0006",
+      trainingRecordId: "TRC-2026-0007",
+      module: "Phonics",
+      unit: "Set 1",
+      completedAt: new Date(),
+    },
+    // Sunita Tamang - R&L Certificate (Set 2)
+    {
+      id: "CMO-2026-0008",
+      certificateId: "CRT-2026-0006",
+      trainingRecordId: "TRC-2026-0008",
+      module: "Phonics",
+      unit: "Set 2",
+      completedAt: new Date(),
+    },
+    // Dipak Shrestha - ABM Certificate
+    {
+      id: "CMO-2026-0009",
+      certificateId: "CRT-2026-0007",
+      trainingRecordId: "TRC-2026-0009",
+      module: "Class 4",
+      unit: "Book 1",
+      completedAt: new Date(),
+    },
+    // Dipak Shrestha - PST Certificate
+    {
+      id: "CMO-2026-0010",
+      certificateId: "CRT-2026-0008",
+      trainingRecordId: "TRC-2026-0010",
+      module: "Circle Time",
+      unit: null,
+      completedAt: new Date(),
+    },
+    // Kabita Rai - R&L Certificate
+    {
+      id: "CMO-2026-0011",
+      certificateId: "CRT-2026-0009",
+      trainingRecordId: "TRC-2026-0011",
+      module: "Phonics",
+      unit: "Set 1",
+      completedAt: new Date(),
+    },
+    // Kabita Rai - PST Certificate
+    {
+      id: "CMO-2026-0012",
+      certificateId: "CRT-2026-0010",
+      trainingRecordId: "TRC-2026-0012",
+      module: "Circle Time",
+      unit: null,
+      completedAt: new Date(),
+    },
+  ];
+
+  await db.insert(certificateModules).values(certificateModuleData);
+
+  console.log("🌱 Seeding bulk jobs...");
+  // Bulk jobs are created dynamically, not seeded
 
   console.log("🌱 Seeding certificates...");
 
@@ -444,13 +639,12 @@ const seed = async () => {
   }
 
   console.log("✅ Seeding complete!");
-  console.log(`   - Users: ${1 + teacherProfiles.length}`);
-  console.log(`   - Teachers: ${teacherProfiles.length}`);
+  console.log(`   - Users: ${teacherUserData.length + 1}`);
+  console.log(`   - Teachers: ${teacherData.length}`);
   console.log(`   - Training Events: ${trainingEventData.length}`);
   console.log(`   - Training Records: ${trainingRecordData.length}`);
-  console.log(`   - Career Records: ${careerRecordData.length}`);
-  console.log(`   - Event Records: ${eventRecordData.length}`);
-  console.log(`   - Skills: ${skillData.length}`);
+  console.log(`   - Certificates: ${certificateData.length}`);
+  console.log(`   - Certificate Modules: ${certificateModuleData.length}`);
   console.log(`   - Teacher Skills: ${teacherSkillData.length}`);
   console.log(`   - Certificates: ${certificateData.length}`);
   console.log(`   - Certificate Modules: ${certificateModuleData.length}`);

@@ -6,7 +6,7 @@ export const register = async(
     request: FastifyRequest,
     reply: FastifyReply
  )=>{
-    const body = registerSchema.safeParse(request.body);
+    const body = registerSchema.safeParse(request.body)
     console.log("Validation result:", body);
     if (!body.success) {
         return reply.status(400).send({

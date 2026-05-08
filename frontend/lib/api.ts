@@ -1,7 +1,7 @@
 import Teacher from "@/app/teachers/[id]/page"
 import type { Teachers, Training, Program, EventRecords, Career, TrainingAttended, Pagination } from "@/types"
 
-const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL
+const BASE_URL = process.env.  
 
 if (!BASE_URL) {
     throw new Error('NEXT_PUBLIC_BACKEND_URL not set.')
@@ -381,10 +381,12 @@ export async function getTrainings(id: string): Promise<TrainingAttended[]> {
     }
 }
 
-export type TrainingRecordByIdResponse = {
-    success: boolean,
-    message: string,
-    data: TrainingRecordById
+type Skills = {
+    id: string,
+    name: string,
+    program: string,
+    module: string,
+    unit: string
 }
 
 export type TrainingRecordById = {
@@ -411,7 +413,13 @@ export type TrainingRecordById = {
         name?: string,
         email?: string
     },
-    skills?: string[]
+    skills?: Skills[]
+}
+
+export type TrainingRecordByIdResponse = {
+    success: boolean,
+    message: string,
+    data: TrainingRecordById
 }
 
 export async function getTrainingById(id: string): Promise<TrainingRecordById | null> {
@@ -493,13 +501,50 @@ export async function viewCertificate(certificateNumber: string) {
     const blob = await res.blob()
     const url = window.URL.createObjectURL(blob)
 
-    // 🔥 open in new tab instead of download
     window.open(url, '_blank')
 
-    // optional cleanup delay
     setTimeout(() => {
         window.URL.revokeObjectURL(url)
     }, 5000)
+}
+
+export async function getTrainingEvents() {
+    const res = await fetch('/api/training-events', {
+        method: 'GET',
+        credentials: 'include',
+    })
+
+    if (!res.ok) {
+        const text = await res.text()
+        throw new Error(text || 'Failed to fetch training events')
+    }
+
+    const result = await res.json()
+    return result.data
+}
+
+export async function downloadBulkCertificates(trainingId: string) {
+    const res = await fetch(`/api/certificates/download/bulk?trainingId=${trainingId}`, {
+        method: 'GET',
+        credentials: 'include',
+    })
+
+    if (!res.ok) {
+        const text = await res.text()
+        throw new Error(text || 'Bulk certificate download failed')
+    }
+
+    const blob = await res.blob()
+    const url = window.URL.createObjectURL(blob)
+
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${trainingId}-certificates.pdf`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+
+    window.URL.revokeObjectURL(url)
 }
 
 export type EventRecordsResponse = {
@@ -550,8 +595,9 @@ export const dummyEventRecords: EventRecords[] = [
     }
 ]
 
-export async function getEventRecords(id: string): Promise<EventRecords[]> {
-    return dummyEventRecords
+export async function getEventRecords(id: string): Promise<EventRecords[] | null> {
+    // return dummyEventRecords
+    return null
 }
 
 export type CareerResponse = {
@@ -595,8 +641,9 @@ export const dummyCareer: Career[] = [
     }
 ]
 
-export async function getCareers(id: string): Promise<Career[]> {
-    return dummyCareer
+export async function getCareers(id: string): Promise<Career[] | null> {
+    return null
+    // return dummyCareer
     // const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL
 
     // if (!BASE_URL) {

@@ -1,5 +1,5 @@
 import { FastifyRequest } from "fastify";
-import { uploadImage } from "./cloudinaryImageHandler";
+import { uploadImage } from "./s3ImageHandler";
 import path from "path";
 import fs, { unlinkSync } from "fs";
 import os from "os";

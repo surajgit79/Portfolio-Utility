@@ -1,9 +1,10 @@
 import { and, eq, sql, desc } from "drizzle-orm";
 import { db } from "../db/client";
-import { skills } from "../db/schema";
+import { skills, programEnum } from "../db/schema";
 
 type Skill = typeof skills.$inferSelect;
 type NewSkill = typeof skills.$inferInsert;
+type Program = typeof programEnum.enumValues[number];
 
 export const skillRepository = {
     findAll: async ( program?: string, module?: string, unit?: string, page = 1, limit = 10)=>{
@@ -11,7 +12,7 @@ export const skillRepository = {
         let query = db.select().from(skills).orderBy(desc(skills.createdAt)).limit(limit).offset(offset);
 
         const conditions = [];
-        if(program) conditions.push(eq(skills.program, program as any));
+        if(program) conditions.push(eq(skills.program, program as Program));
         if(module) conditions.push(eq(skills.module, module));
         if(unit) conditions.push(eq(skills.unit, unit));
 
@@ -26,7 +27,7 @@ export const skillRepository = {
         const query = db.select({count: sql<number>`count(*)`}).from(skills);
 
         const conditions = [];
-        if(program) conditions.push(eq(skills.program, program as any));
+        if(program) conditions.push(eq(skills.program, program as Program));
         if(module) conditions.push(eq(skills.module, module));
         if(unit) conditions.push(eq(skills.unit, unit));
 
@@ -47,7 +48,7 @@ export const skillRepository = {
     findDuplicate: async(name: string, program: string, module: string, unit?: string ): Promise<Skill | undefined> =>{
         const conditions = [
             eq(skills.name, name),
-            eq(skills.program, program as any),
+            eq(skills.program, program as Program),
             eq(skills.module, module),
         ];
 

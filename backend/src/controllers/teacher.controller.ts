@@ -3,6 +3,11 @@ import { teacherService } from "../services/teacher.service";
 import { registerTeacherSchema, updateTeacherSchema } from "../utils/schemaValidator";
 import { calculatePagination, getPaginationParams } from "../utils/paginationHandler";
 import { AppError, ErrorCode } from "../utils/errorHandler";
+import os from "os";
+import path from "path";
+import fs from "fs";
+import { pipeline } from "stream/promises";
+import { uploadImage } from "../utils/s3ImageHandler";
 
 export const registerTeacher = async (
   request: FastifyRequest,
@@ -16,12 +21,6 @@ export const registerTeacher = async (
 
     for await (const part of parts) {
       if (part.type === "file" && part.filename) {
-        const os      = await import("os");
-        const path    = await import("path");
-        const fs      = await import("fs");
-        const { pipeline } = await import("stream/promises");
-        const { uploadImage } = await import("../utils/cloudinaryImageHandler");
-
         const tempPath = path.join(
           os.tmpdir(),
           `${Date.now()}-${part.filename}`
@@ -133,12 +132,6 @@ export const updateTeacher = async (
 
     for await (const part of parts) {
       if (part.type === "file" && part.filename) {
-        const os       = await import("os");
-        const path     = await import("path");
-        const fs       = await import("fs");
-        const { pipeline } = await import("stream/promises");
-        const { uploadImage } = await import("../utils/cloudinaryImageHandler");
-
         const tempPath = path.join(
           os.tmpdir(),
           `${Date.now()}-${part.filename}`

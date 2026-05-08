@@ -1,4 +1,4 @@
-import { date, z } from "zod";
+import { z } from "zod";
 
 // Auth
 export const registerSchema = z.object({
@@ -126,17 +126,7 @@ export const baseTrainingEventSchema = z.object({
   duration: z.string().min(1, "Duration is required"),
 });
 
-export const createTrainingEventSchema = z.object({
-  program: z.enum(["Activity-based Mathematics", "Reading & Language", "Pre-School Transformation"]),
-  module: z.string().min(2, "Module is required"),
-  unit: z.string().optional(),
-  name: z.string().min(2, "Name must be atleast 2 characters"),
-  mentorsName: z.string().optional(),
-  venue: z.string().optional(),
-  description: z.string().optional(),
-  startDate: z.string().refine((date) => !isNaN(Date.parse(date)), "Invalid date format"),
-  duration: z.string().min(1, "Duration is required"),
-}).superRefine((data, ctx) =>{
+export const createTrainingEventSchema = baseTrainingEventSchema.superRefine((data, ctx) =>{
   const rule = programModuleMap[data.program];
 
   if(!rule.modules.includes(data.module)){
@@ -144,15 +134,6 @@ export const createTrainingEventSchema = z.object({
       code: z.ZodIssueCode.custom,
       path: ["module"],
       message: `Invalid module for ${data.program}. Must be one of: ${rule.modules.join(", ")}`
-    });
-    return;
-  }
-
-  if (rule.requiresUnit && !data.unit) {
-    ctx.addIssue({
-      code:    z.ZodIssueCode.custom,
-      path:    ["unit"],
-      message: `Unit is required for ${data.program}`,
     });
     return;
   }

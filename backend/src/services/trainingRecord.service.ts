@@ -50,6 +50,10 @@ export const trainingRecordService = {
             id, ...data, refPhotos,
             trainingDate: data.trainingDate || undefined,
         });
+
+        await certificateService.createOrUpdate(data.teacherId, event.program, event.module,event.unit ?? null, id );
+
+        return createdRecord;
     },
 
     bulkCreate: async(
@@ -94,6 +98,8 @@ export const trainingRecordService = {
                     feedback: data.feedback,
                     trainingDate: data.trainingDate || undefined,
                 }).returning();
+
+                await certificateService.createOrUpdate(teacherId, event.program, event.module, event.unit ?? null, id);
 
                 created.push(record);
             }

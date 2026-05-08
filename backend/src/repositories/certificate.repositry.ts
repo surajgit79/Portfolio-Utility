@@ -1,37 +1,38 @@
 import { db } from "../db/client";
-import { certificates, certificateModules, teachers, trainingRecords } from "../db/schema";
-import { eq, and } from "drizzle-orm";
+import { certificates, certificateModules, teachers, trainingRecords, bulkJobs, trainingEvents, programEnum }  from "../db/schema";
+import { eq, and, inArray } from "drizzle-orm";
+
+type Program = typeof programEnum.enumValues[number];
 
 export const certificateRepository = {
-  findByTeacherAndProgram: async (
-    teacherId: string,
-    program:   string
-  ) => {
-    const [certificate] = await db
-      .select()
-      .from(certificates)
+  findByTeacherId: async (teacherId: string) => {
+    return db.select().from(certificates).where(eq(certificates.teacherId, teacherId));
+  },
+
+  findByTeacherAndProgram: async (teacherId: string, program: string) => {
+    const [certificate] = await db.select().from(certificates)
       .where(
         and(
           eq(certificates.teacherId, teacherId),
-          eq(certificates.program,   program as any)
+          eq(certificates.program,   program as Program)
         )
       );
     return certificate;
   },
 
   findByNumber: async (certificateNumber: string) => {
-    const [certificate] = await db
-      .select()
-      .from(certificates)
-      .where(eq(certificates.certificateNumber, certificateNumber));
+    const [certificate] = await db.select().from(certificates).where(eq(certificates.certificateNumber, certificateNumber));
     return certificate;
   },
 
+  findPending: async () => {
+    return db.select().from(certificates).where(
+      inArray(certificates.status, ["pending", "failed"])
+    );
+  },
+
   findModulesByCertificateId: async (certificateId: string) => {
-    return db
-      .select()
-      .from(certificateModules)
-      .where(eq(certificateModules.certificateId, certificateId));
+    return db.select().from(certificateModules).where(eq(certificateModules.certificateId, certificateId));
   },
 
   findModuleDuplicate: async (
