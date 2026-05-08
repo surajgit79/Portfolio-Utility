@@ -548,6 +548,96 @@ const seed = async () => {
   console.log("🌱 Seeding bulk jobs...");
   // Bulk jobs are created dynamically, not seeded
 
+  console.log("🌱 Seeding certificates...");
+
+  const certificateData = [];
+  let certIdx = 1;
+  const certNumberTracker: Record<string, number> = {};
+  const createdCertificates = new Set<string>();
+
+  for (let tIdx = 0; tIdx < teacherProfiles.length; tIdx++) {
+    const teacher = teacherProfiles[tIdx];
+    
+    const teacherPrograms = new Set<string>();
+    
+    for (const event of trainingEventData) {
+      const existingRecord = trainingRecordData.find(
+        r => r.teacherId === teacher.id && r.trainingEventId === event.id
+      );
+      if (existingRecord && !teacherPrograms.has(event.program)) {
+        teacherPrograms.add(event.program);
+        
+        const certKey = `${teacher.id}-${event.program}`;
+        if (!createdCertificates.has(certKey)) {
+          createdCertificates.add(certKey);
+          
+          const programCode =
+            event.program === "Activity-based Mathematics" ? "ABM" :
+            event.program === "Reading & Language" ? "R&L" :
+            event.program === "Pre-School Transformation" ? "PST" : "UNK";
+
+          const year = new Date().getFullYear();
+          const prefix = `${programCode}-${year}`;
+
+          if (!certNumberTracker[prefix]) {
+            certNumberTracker[prefix] = 1;
+          } else {
+            certNumberTracker[prefix]++;
+          }
+
+          const certificateNumber = `${prefix}-${String(certNumberTracker[prefix]).padStart(4, "0")}`;
+
+          certificateData.push({
+            id: `CERT-2026-${String(certIdx).padStart(4, "0")}`,
+            teacherId: teacher.id,
+            program: event.program,
+            certificateNumber,
+            issuedAt: new Date(),
+          });
+          certIdx++;
+        }
+      }
+    }
+  }
+
+  for (const cert of certificateData) {
+    await db.insert(certificates).values(cert);
+  }
+
+  console.log("🌱 Seeding certificate modules...");
+
+  const certificateModuleData = [];
+  let modIdx = 1;
+  const addedModules = new Set<string>();
+
+  for (const cert of certificateData) {
+    const teacherRecords = trainingRecordData.filter(r => r.teacherId === cert.teacherId);
+    for (const record of teacherRecords) {
+      const event = trainingEventData.find(e => e.id === record.trainingEventId);
+      if (event && event.program === cert.program) {
+        const moduleKey = `${cert.id}-${event.module}-${event.unit || ''}`;
+        
+        if (!addedModules.has(moduleKey)) {
+          addedModules.add(moduleKey);
+          
+          certificateModuleData.push({
+            id: `CMOD-2026-${String(modIdx).padStart(4, "0")}`,
+            certificateId: cert.id,
+            trainingRecordId: record.id,
+            module: event.module,
+            unit: event.unit,
+            completedAt: new Date(),
+          });
+          modIdx++;
+        }
+      }
+    }
+  }
+
+  for (const mod of certificateModuleData) {
+    await db.insert(certificateModules).values(mod);
+  }
+
   console.log("✅ Seeding complete!");
   console.log(`   - Users: ${teacherUserData.length + 1}`);
   console.log(`   - Teachers: ${teacherData.length}`);
@@ -556,6 +646,8 @@ const seed = async () => {
   console.log(`   - Certificates: ${certificateData.length}`);
   console.log(`   - Certificate Modules: ${certificateModuleData.length}`);
   console.log(`   - Teacher Skills: ${teacherSkillData.length}`);
+  console.log(`   - Certificates: ${certificateData.length}`);
+  console.log(`   - Certificate Modules: ${certificateModuleData.length}`);
 
   await pool.end();
   process.exit(0);

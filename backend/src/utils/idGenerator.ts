@@ -1,7 +1,7 @@
 import { db } from "../db/client";
 import { sql } from "drizzle-orm";
 
-type TableName = | "users" | "teachers" | "training_events" | "training_records" | "career_records" | "event_records" | "skills" | "teacher_skills" | "certificates" | "certificate_modules" | "bulk_jobs";
+type TableName = | "users" | "teachers" | "training_events" | "training_records" | "career_records" | "event_records" | "skills" | "teacher_skills" | "certificates" | "certificate_modules";
 
 const prefixMap: Record <TableName, string>= {
     users: "USR",

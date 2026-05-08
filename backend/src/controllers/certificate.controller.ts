@@ -102,7 +102,7 @@ export const triggerBulkGeneration = async (
 
 export const getBulkJobStatus = async (
   request: FastifyRequest,
-  reply: FastifyReply
+  reply:   FastifyReply
 ) => {
   const { jobId } = request.params as { jobId: string };
   const job = await certificateService.getBulkJobStatus(jobId);
